@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Network Hub</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:#00e5ff2e;--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#ffffff;--bg2:#f8fafc;--bg3:#f1f5f9;--card:rgba(255,255,255,.95);--card-border:#00e5ff40;--text:#0f172a;--text2:#475569;--text3:#94a3b8}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center}
+.app{width:100%;max-width:480px;min-height:100vh;padding:20px 16px 40px;position:relative;z-index:2}
+@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* BACK */
+.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.back-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:all .3s}
+.back-btn:hover{color:var(--cyan);border-color:var(--cyan)}
+.back-title{font:800 16px 'Orbitron',sans-serif;letter-spacing:1px;text-transform:uppercase}
+
+/* CARD */
+.card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:14px;animation:fadeIn .3s ease}
+.card::before{content:'';position:absolute;top:-2px;left:0;right:0;height:2px}
+.card.cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+
+/* STATS GRID */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px}
+.stat-box{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:12px 8px;text-align:center;position:relative;overflow:hidden;animation:fadeIn .3s ease}
+.stat-box::before{content:'';position:absolute;top:-2px;left:0;right:0;height:2px}
+.stat-box:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.stat-box:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-box:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.stat-box .sb-label{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-weight:600}
+.stat-box .sb-value{font:800 18px 'Orbitron',sans-serif}
+.stat-box:nth-child(1) .sb-value{color:var(--cyan)}
+.stat-box:nth-child(2) .sb-value{color:var(--green)}
+.stat-box:nth-child(3) .sb-value{color:var(--purple)}
+.stat-box .sb-sub{font-size:11px;color:var(--text3);margin-top:2px;font-weight:600}
+.stat-box .sb-sub b{color:var(--green);font-weight:700}
+
+/* FILTER */
+.filter-wrap{margin-bottom:14px}
+.filter-wrap label{font:700 10px 'Orbitron',sans-serif;color:var(--text3);letter-spacing:2px;text-transform:uppercase;display:block;margin-bottom:6px;padding-left:4px}
+.filter-wrap select{width:100%;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--rs);color:var(--text);font:700 14px 'Rajdhani',sans-serif;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'%3E%3Cpath fill='%2300e5ff' d='M7 10L2 4h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;transition:border .3s}
+.filter-wrap select:focus{border-color:var(--cyan)}
+.filter-wrap select option{background:var(--bg2);color:var(--text)}
+
+/* SECTION HEADER */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.sec-header h3{font:700 11px 'Orbitron',sans-serif;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+.sec-header span{font-size:11px;color:var(--text3)}
+
+/* REFERRAL LIST */
+.ref-list{display:flex;flex-direction:column;gap:8px}
+.ref-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--rs);transition:all .3s;animation:fadeIn .3s ease}
+.ref-item:hover{border-color:rgba(0,229,255,.2)}
+.ref-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:grid;place-items:center;font:800 15px 'Orbitron',sans-serif;color:#fff;flex-shrink:0}
+.ref-info{flex:1;min-width:0}
+.ref-name{font:700 15px 'Rajdhani',sans-serif;margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.ref-level{font:700 10px 'JetBrains Mono',monospace;color:var(--purple);background:rgba(168,85,247,.1);padding:2px 7px;border-radius:4px}
+.ref-meta{display:flex;gap:14px;font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.ref-meta span b{color:var(--cyan);font-weight:700}
+.ref-status{flex-shrink:0;font:700 9px 'JetBrains Mono',monospace;padding:5px 12px;border-radius:999px;text-transform:uppercase;letter-spacing:.5px}
+.ref-status.active{background:rgba(0,255,136,.12);color:var(--green);border:1px solid rgba(0,255,136,.2)}
+.ref-status.inactive{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid rgba(255,255,255,.08)}
+
+/* VIEW MORE */
+.view-more-btn{display:block;width:100%;padding:12px;margin-top:6px;background:rgba(0,229,255,.06);border:2px solid var(--card-border);border-radius:var(--rs);color:var(--cyan);font:700 12px 'Rajdhani',sans-serif;cursor:pointer;text-align:center;letter-spacing:1px;text-transform:uppercase;transition:all .3s}
+.view-more-btn:hover{background:rgba(0,229,255,.12)}
+.view-more-btn:disabled{opacity:.3;cursor:default}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:30px 20px;color:var(--text3)}
+.empty-state i{font-size:36px;margin-bottom:12px;opacity:.3}
+.empty-state p{font-size:13px;font-weight:600}
+
+/* TOAST */
+.toast{position:fixed;bottom:40px;left:50%;z-index:200;background:rgba(0,0,0,.97);border:1px solid rgba(0,229,255,.15);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;color:var(--text);animation:toast-up .35s ease forwards;pointer-events:none;white-space:nowrap}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* LOADER */
+.loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;background:var(--bg)}
+.loader.hide{display:none}
+.loader .sp{width:40px;height:40px;border:3px solid rgba(0,229,255,.1);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+.loader p{font-size:12px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><div class="sp"></div><p data-lang="loadingNetwork">Loading network...</p></div>
+
+<div class="app" id="app" style="display:none">
+
+  <div class="back-bar">
+    <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="back-title" data-lang="networkHub">Network Hub</div>
+    <div style="width:38px"></div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-box">
+      <div class="sb-label" data-lang="totalTeamLabel">Total Team</div>
+      <div class="sb-value" id="totalTeam">0</div>
+    </div>
+    <div class="stat-box">
+      <div class="sb-label" data-lang="activeDirectsLabel">Direct Active</div>
+      <div class="sb-value" id="activeDirects">0 <span class="sb-sub" style="display:inline;font-size:12px">/ <b id="totalDirects">0</b></span></div>
+    </div>
+    <div class="stat-box">
+      <div class="sb-label" data-lang="teamVolumeLabel">Team Volume</div>
+      <div class="sb-value" id="totalBusiness">$0</div>
+    </div>
+  </div>
+
+  <div class="filter-wrap">
+    <label data-lang="filterByLevel">Filter By Level</label>
+    <select id="levelSelect" onchange="filterLevel(this.value)">
+      <option value="1">Sort by: Level 1 (L1)</option>
+      <option value="2">Sort by: Level 2 (L2)</option>
+      <option value="3">Sort by: Level 3 (L3)</option>
+      <option value="4">Sort by: Level 4 (L4)</option>
+      <option value="5">Sort by: Level 5 (L5)</option>
+    </select>
+  </div>
+
+  <div class="sec-header">
+    <h3 id="historyTitle">Level 1 Team History</h3>
+    <span id="levelCount">0 members</span>
+  </div>
+
+  <div class="ref-list" id="levelMembers"></div>
+
+  <div style="margin-top:20px;text-align:center">
+    <p style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-weight:600" data-lang="powered">Power — Play — Evolve</p>
+  </div>
+
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getFirestore,doc,getDoc,getDocs,collection,query,where,limit}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
+const app=initializeApp(fbCfg);
+const db=getFirestore(app);
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand()}
+
+const LANGS={
+  en:{name:"English",native:"English",flag:"🇬🇧",t:{networkHub:"Network Hub",totalTeamLabel:"Total Team",activeDirectsLabel:"Direct Active",teamVolumeLabel:"Team Volume",totalEarningsLabel:"Total Earnings",filterByLevel:"Filter By Level",loadingNetwork:"Loading network...",noID:"No user ID",fbError:"Firebase error",viewMore:"View More",shareRef:"Share your referral link to build your team!",noDirects:"No direct referrals yet",noTeam:"No team members found",active:"Active",inactive:"Inactive",powered:"Power — Play — Evolve",directReferrals:"Direct Referrals",members:"members",history:"Team History"}},
+  hi:{name:"Hindi",native:"हिन्दी",flag:"🇮🇳",t:{networkHub:"नेटवर्क हब",totalTeamLabel:"कुल टीम",activeDirectsLabel:"सक्रिय डायरेक्ट",teamVolumeLabel:"टीम बिज़नेस",totalEarningsLabel:"कुल कमाई",filterByLevel:"स्तर के अनुसार फ़िल्टर",loadingNetwork:"नेटवर्क लोड हो रहा है...",noID:"कोई यूज़र आईडी नहीं",fbError:"फायरबेस त्रुटि",viewMore:"और देखें",shareRef:"अपनी टीम बनाने के लिए रेफरल लिंक शेयर करें!",noDirects:"अभी तक कोई डायरेक्ट रेफरल नहीं",noTeam:"कोई टीम मेंबर नहीं मिला",active:"सक्रिय",inactive:"निष्क्रिय",powered:"पावर — प्ले — इवॉल्व",directReferrals:"डायरेक्ट रेफरल्स",members:"सदस्य",history:"टीम हिस्ट्री"}},
+  es:{name:"Spanish",native:"Español",flag:"🇪🇸",t:{networkHub:"Centro de Red",totalTeamLabel:"Equipo Total",activeDirectsLabel:"Directos Activos",teamVolumeLabel:"Negocio del Equipo",totalEarningsLabel:"Ganancias Totales",filterByLevel:"Filtrar por Nivel",loadingNetwork:"Cargando red...",noID:"Sin ID de usuario",fbError:"Error de Firebase",viewMore:"Ver Más",shareRef:"¡Comparte tu enlace de referido!",noDirects:"Aún no hay referidos",noTeam:"Sin miembros",active:"Activo",inactive:"Inactivo",powered:"Poder — Jugar — Evolucionar",directReferrals:"Referidos Directos",members:"miembros",history:"Historial del Equipo"}},
+  fr:{name:"French",native:"Français",flag:"🇫🇷",t:{networkHub:"Hub Réseau",totalTeamLabel:"Équipe Totale",activeDirectsLabel:"Directs Actifs",teamVolumeLabel:"Affaires d'Équipe",totalEarningsLabel:"Gains Totaux",filterByLevel:"Filtrer par Niveau",loadingNetwork:"Chargement du réseau...",noID:"Aucun ID",fbError:"Erreur Firebase",viewMore:"Voir Plus",shareRef:"Partagez votre lien de parrainage!",noDirects:"Aucun parrainage direct",noTeam:"Aucun membre",active:"Actif",inactive:"Inactif",powered:"Puissance — Jouer — Évoluer",directReferrals:"Parrainages Directs",members:"membres",history:"Historique d'Équipe"}},
+  pt:{name:"Portuguese",native:"Português",flag:"🇵🇹",t:{networkHub:"Hub de Rede",totalTeamLabel:"Equipe Total",activeDirectsLabel:"Diretos Ativos",teamVolumeLabel:"Negócio da Equipe",totalEarningsLabel:"Ganhos Totais",filterByLevel:"Filtrar por Nível",loadingNetwork:"Carregando rede...",noID:"Sem ID",fbError:"Erro do Firebase",viewMore:"Ver Mais",shareRef:"Compartilhe seu link de indicação!",noDirects:"Nenhuma indicação direta",noTeam:"Nenhum membro",active:"Ativo",inactive:"Inativo",powered:"Poder — Jogar — Evoluir",directReferrals:"Indicações Diretas",members:"membros",history:"Histórico da Equipe"}},
+  ru:{name:"Russian",native:"Русский",flag:"🇷🇺",t:{networkHub:"Центр сети",totalTeamLabel:"Вся команда",activeDirectsLabel:"Активных прямых",teamVolumeLabel:"Бизнес команды",totalEarningsLabel:"Общий заработок",filterByLevel:"Фильтр по уровню",loadingNetwork:"Загрузка сети...",noID:"Нет ID",fbError:"Ошибка Firebase",viewMore:"Показать еще",shareRef:"Поделитесь реферальной ссылкой!",noDirects:"Пока нет прямых",noTeam:"Нет участников",active:"Активен",inactive:"Неактивен",powered:"Сила — Игра — Развитие",directReferrals:"Прямые рефералы",members:"участников",history:"История команды"}},
+  zh:{name:"Chinese",native:"中文",flag:"🇨🇳",t:{networkHub:"网络中心",totalTeamLabel:"团队总数",activeDirectsLabel:"活跃直属",teamVolumeLabel:"团队业绩",totalEarningsLabel:"总收益",filterByLevel:"按级别筛选",loadingNetwork:"网络加载中...",noID:"无用户ID",fbError:"Firebase错误",viewMore:"查看更多",shareRef:"分享推荐链接！",noDirects:"暂无直属",noTeam:"无团队成员",active:"活跃",inactive:"不活跃",powered:"力量 — 游戏 — 进化",directReferrals:"直属推荐",members:"成员",history:"团队历史"}},
+  ar:{name:"Arabic",native:"العربية",flag:"🇸🇦",t:{networkHub:"مركز الشبكة",totalTeamLabel:"الفريق الكلي",activeDirectsLabel:"النشطاء المباشرون",teamVolumeLabel:"أعمال الفريق",totalEarningsLabel:"إجمالي الأرباح",filterByLevel:"تصفية حسب المستوى",loadingNetwork:"جاري تحميل الشبكة...",noID:"لا يوجد معرّف",fbError:"خطأ Firebase",viewMore:"عرض المزيد",shareRef:"شارك رابط الإحالة!",noDirects:"لا توجد إحالات مباشرة",noTeam:"لا يوجد أعضاء",active:"نشط",inactive:"غير نشط",powered:"القوة — اللعب — التطور",directReferrals:"الإحالات المباشرة",members:"أعضاء",history:"تاريخ الفريق"}},
+  ja:{name:"Japanese",native:"日本語",flag:"🇯🇵",t:{networkHub:"ネットワークハブ",totalTeamLabel:"総チーム数",activeDirectsLabel:"アクティブなダイレクト",teamVolumeLabel:"チームビジネス",totalEarningsLabel:"総収益",filterByLevel:"レベルでフィルター",loadingNetwork:"ネットワーク読み込み中...",noID:"ユーザーIDがありません",fbError:"Firebaseエラー",viewMore:"もっと見る",shareRef:"紹介リンクを共有！",noDirects:"まだダイレクト紹介なし",noTeam:"メンバーがいません",active:"アクティブ",inactive:"非アクティブ",powered:"パワー — プレイ — エボルブ",directReferrals:"ダイレクト紹介",members:"メンバー",history:"チーム履歴"}},
+  de:{name:"German",native:"Deutsch",flag:"🇩🇪",t:{networkHub:"Netzwerk-Hub",totalTeamLabel:"Gesamtes Team",activeDirectsLabel:"Aktive Direkte",teamVolumeLabel:"Team-Umsatz",totalEarningsLabel:"Gesamteinnahmen",filterByLevel:"Nach Level filtern",loadingNetwork:"Netzwerk wird geladen...",noID:"Keine Benutzer-ID",fbError:"Firebase-Fehler",viewMore:"Mehr anzeigen",shareRef:"Teilen Sie Ihren Empfehlungslink!",noDirects:"Keine direkten Empfehlungen",noTeam:"Keine Mitglieder",active:"Aktiv",inactive:"Inaktiv",powered:"Kraft — Spielen — Entwickeln",directReferrals:"Direkte Empfehlungen",members:"Mitglieder",history:"Team-Verlauf"}}
+};
+let __=key=>{const l=localStorage.getItem("pb_lang")||"en";return LANGS[l]?.t?.[key]||LANGS.en.t[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const key=el.getAttribute("data-lang");if(key)el.textContent=__(key)})}
+const saved=localStorage.getItem("pb_theme");if(saved==="light")document.body.classList.add("light");
+(function(){const p=document.querySelector(".loader p");if(p)p.textContent=__("loadingNetwork")})();
+
+let S={uid:null,user:null,allUsers:null,levelsCache:null};
+
+function $(id){return document.getElementById(id)}
+function t(m){const e=document.createElement("div");e.className="toast";e.innerHTML=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function goBack(){const p=new URLSearchParams();p.set("uid",S.uid);window.location.href="dashboard.html?"+p.toString()}
+window.goBack=goBack;
+
+function getStoredId(){
+  try{const v=localStorage.getItem("pb_uid");if(v)return v}catch(e){}
+  try{const v=sessionStorage.getItem("pb_uid");if(v)return v}catch(e){}
+  try{const m=document.cookie.match(/(?:^|;\s*)pb_uid=([^;]+)/);if(m)return m[1]}catch(e){}
+  return null
+}
+
+function isUserActive(u){
+  return (u.activationUSDT&&u.activationUSDT>=10)||u.isActivated10===true
+}
+
+function calcTeamForUser(uid,allUsersMap,maxDepth=4){
+  let count=0,business=0;
+  function traverse(refId,depth){
+    if(depth>maxDepth)return;
+    allUsersMap.forEach((u,id)=>{
+      if(u.referredBy===refId){
+        count++;
+        business+=u.activationUSDT||0;
+        traverse(id,depth+1)
+      }
+    })
+  }
+  traverse(uid,1);
+  return{count,business}
+}
+
+function getTeamTree(rootUid,maxDepth=5){
+  if(S.levelsCache)return S.levelsCache;
+  const levels=[];for(let d=1;d<=maxDepth;d++)levels.push([]);
+  function walk(refId,depth){
+    if(depth>maxDepth)return;
+    S.allUsers.forEach((u,id)=>{if(u.referredBy===refId){const team=calcTeamForUser(id,S.allUsers,4);levels[depth-1].push({id,...u,teamCount:team.count,teamBusiness:team.business});walk(id,depth+1)}})
+  }
+  walk(rootUid,1);
+  S.levelsCache=levels;
+  return levels
+}
+
+let treeFilterLvl=1;
+
+function buildLevelHtml(lvl){
+  const levels=getTeamTree(S.uid,5);
+  const idx=lvl-1;
+  const users=levels[idx];
+  const ht=$("historyTitle");
+  const lc=$("levelCount");
+  ht.textContent="Level "+lvl+" "+__("history");
+  if(!users||users.length===0){
+    lc.textContent="0 "+__("members");
+    return "<div class='empty-state'><i class='fa-solid fa-user-group'></i><p>"+__("noTeam")+"</p></div>"
+  }
+  lc.textContent=users.length+" "+__("members");
+  const totalBiz=users.reduce((s,u)=>s+(u.teamBusiness||0),0);
+  return `<div style="font:700 11px 'JetBrains Mono',monospace;color:var(--text3);margin-bottom:8px">Total Volume: $${Math.floor(totalBiz).toLocaleString()}</div>`+users.map(u=>{
+    const active=isUserActive(u);
+    const initial=(u.firstName||"U").slice(0,2).toUpperCase();
+    const bizTotal=u.teamBusiness||0;
+    return `<div class="ref-item"><div class="ref-avatar">${initial}</div><div class="ref-info"><div class="ref-name">${u.firstName||"User"} <span class="ref-level">L${lvl}</span></div><div class="ref-meta"><span><i class="fa-solid fa-users"></i> Team: <b>${u.teamCount}</b></span><span><i class="fa-solid fa-coins"></i> Vol: <b>$${Math.floor(bizTotal).toLocaleString()}</b></span></div></div><span class="ref-status ${active?'active':'inactive'}">${active?__("active"):__("inactive")}</span></div>`
+  }).join("")
+}
+
+window.filterLevel=function(lvl){
+  treeFilterLvl=parseInt(lvl);
+  $("levelMembers").innerHTML=buildLevelHtml(treeFilterLvl)
+};
+
+async function loadNetwork(){
+  const p=new URLSearchParams(location.search);
+  S.uid=p.get("uid")||getStoredId();
+  if(!S.uid){$("app").style.display="none";t(__("noID"));return}
+  try{
+    const userSnap=await getDoc(doc(db,"users",S.uid));
+    if(userSnap.exists())S.user=userSnap.data();
+
+    const cacheKey="pb_net_allusers_"+S.uid;
+    const cached=sessionStorage.getItem(cacheKey);
+    if(cached){const cp=JSON.parse(cached);S.allUsers=new Map(Object.entries(cp.data));if(Date.now()-cp.ts<120000){applyNetwork();return}}
+    S.allUsers=new Map();
+    const loadLevel=async(parentIds,depth)=>{
+      if(depth>5||!parentIds.length)return;
+      const batchSize=30;let all=[];
+      for(let i=0;i<parentIds.length;i+=batchSize){
+        const batch=parentIds.slice(i,i+batchSize);
+        const q=query(collection(db,"users"), where("referredBy", "in", batch), limit(200));
+        const s=await getDocs(q);
+        s.forEach(d=>{S.allUsers.set(d.id,d.data());all.push(d.id)});
+      }
+      if(all.length)await loadLevel(all,depth+1)
+    };
+    const l1=await getDocs(query(collection(db,"users"), where("referredBy", "==", S.uid), limit(200)));
+    const l1ids=[];
+    l1.forEach(d=>{S.allUsers.set(d.id,d.data());l1ids.push(d.id)});
+    await loadLevel(l1ids,2);
+    try{sessionStorage.setItem(cacheKey,JSON.stringify({data:Object.fromEntries(S.allUsers),ts:Date.now()}))}catch(e){}
+  }catch(e){t(__("fbError"));console.error(e);return}
+  applyNetwork()
+}
+function applyNetwork(){
+  $("loader").classList.add("hide");$("app").style.display="block";
+  applyLang();
+  const directs=[];S.allUsers.forEach((u,id)=>{if(u.referredBy===S.uid)directs.push({id,...u})});
+  const activeCount=directs.filter(d=>isUserActive(d)).length;
+  let totalTeamCount=0,totalTeamBusiness=0;
+  directs.forEach(d=>{const team=calcTeamForUser(d.id,S.allUsers,4);totalTeamCount+=team.count+1;totalTeamBusiness+=(d.activationUSDT||0)+team.business});
+  $("totalDirects").textContent=directs.length;
+  $("activeDirects").innerHTML=activeCount+' <span class="sb-sub" style="display:inline;font-size:12px">/ <b>'+directs.length+'</b></span>';
+  $("totalTeam").textContent=totalTeamCount;
+  $("totalBusiness").textContent="$"+Math.floor(totalTeamBusiness).toLocaleString();
+  $("levelSelect").value="1";
+  treeFilterLvl=1;
+  $("levelMembers").innerHTML=buildLevelHtml(1)
+}
+
+loadNetwork()
+</script>
+</body>
+</html>

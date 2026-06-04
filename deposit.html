@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Deposit</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--card-glow:rgba(0,150,255,.06);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition);scroll-behavior:smooth}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg);transition:background var(--transition)}
+body.light .app-container{background:var(--bg)}
+.pg-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);transition:background var(--transition)}
+.pg-header .pg-back{width:38px;height:38px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s;flex-shrink:0}
+.pg-header .pg-back:hover{color:var(--cyan);border-color:var(--cyan)}
+.pg-header .pg-title{font:800 16px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;flex:1}
+.dep-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:24px 20px;position:relative;overflow:hidden;transition:all var(--transition);margin-bottom:14px}
+.dep-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.dep-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;justify-content:center}
+.dep-header i{color:var(--cyan)}
+.dep-network{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;padding:8px 16px;border-radius:999px;background:rgba(240,185,11,.06);border:1px solid rgba(240,185,11,.15);color:#F0B90B;font-size:11px;font-weight:700;width:fit-content;margin-left:auto;margin-right:auto}
+.dep-info-text{text-align:center;font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5}
+.dep-qr{width:200px;height:200px;margin:0 auto 18px;display:block;border-radius:var(--rs);background:rgba(255,255,255,.03);border:2px solid var(--card-border);padding:8px}
+.dep-qr img{width:100%;height:100%;display:block;image-rendering:pixelated}
+.dep-addr-box{background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);padding:14px;margin-bottom:16px;text-align:center}
+.dep-addr-box .dep-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.dep-addr-box .dep-addr{font:600 11px 'JetBrains Mono',monospace;color:var(--cyan);word-break:break-all;line-height:1.5;margin-bottom:10px}
+.dep-addr-box .dep-copy{padding:8px 20px;border-radius:6px;background:rgba(0,229,255,.1);border:none;color:var(--cyan);font:600 12px 'Rajdhani',sans-serif;cursor:pointer;transition:all .3s}
+.dep-addr-box .dep-copy:hover{background:rgba(0,229,255,.2)}
+.dep-warning{display:flex;align-items:flex-start;gap:10px;padding:14px;background:rgba(255,45,149,.08);border:1px solid rgba(255,45,149,.2);border-radius:var(--rs)}
+.dep-warning i{color:var(--pink);font-size:18px;flex-shrink:0;margin-top:1px}
+.dep-warning .dep-warn-text{font-size:12px;color:var(--text2);line-height:1.5}
+.dep-warning .dep-warn-text b{color:var(--pink)}
+.dep-refresh{padding:10px 20px;border-radius:var(--rs);background:rgba(0,229,255,.06);border:1px solid var(--card-border);color:var(--cyan);font:600 12px 'Rajdhani',sans-serif;cursor:pointer;transition:all .3s;width:100%;text-align:center}
+.dep-refresh:hover{background:rgba(0,229,255,.12)}
+.dep-success{display:none;align-items:center;gap:10px;padding:14px;margin-bottom:14px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);border-radius:var(--rs);animation:slideUp .4s ease}
+.dep-success.show{display:flex}
+.dep-success i{color:var(--green);font-size:20px;flex-shrink:0}
+.dep-success .dep-succ-text{font-size:13px;color:var(--text2);line-height:1.4}
+.dep-success .dep-succ-text b{color:var(--green)}
+.deposit-modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.72);backdrop-filter:blur(10px)}
+.deposit-modal.show{display:flex;animation:fadeIn .2s ease}
+.deposit-modal-box{width:100%;max-width:360px;background:var(--card);border:2px solid rgba(0,255,136,.35);border-radius:var(--r);padding:26px 22px;text-align:center;box-shadow:0 0 40px rgba(0,255,136,.18);animation:popIn .28s ease}
+.deposit-modal-icon{width:72px;height:72px;margin:0 auto 16px;border-radius:50%;display:grid;place-items:center;background:rgba(0,255,136,.12);border:1px solid rgba(0,255,136,.25);color:var(--green);font-size:34px}
+.deposit-modal-title{font:800 18px 'Orbitron',sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--text);margin-bottom:10px}
+.deposit-modal-amount{font:800 32px 'JetBrains Mono',monospace;color:var(--green);margin-bottom:8px;text-shadow:0 0 18px rgba(0,255,136,.25)}
+.deposit-modal-date{font-size:13px;color:var(--text2);margin-bottom:18px}
+.deposit-modal-btn{width:100%;padding:12px 18px;border:0;border-radius:var(--rs);background:linear-gradient(135deg,var(--green),var(--cyan));color:#00120a;font:800 13px 'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:1px;cursor:pointer}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.92) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes slideUp{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+
+/* History */
+.history-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.history-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.history-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.history-header i{color:var(--green)}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.12);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:6px;font-size:12px;animation:slideUp .3s ease}
+.history-item .hi-left{display:flex;flex-direction:column;gap:2px}
+.history-item .hi-amount{font-weight:700;color:var(--text)}
+.history-item .hi-address{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.history-item .hi-date{font-size:10px;color:var(--text2)}
+.history-item .hi-status{padding:3px 10px;border-radius:999px;font-size:9px;font-weight:700;text-transform:uppercase}
+.history-item .hi-status.pending{background:rgba(255,215,0,.1);color:var(--gold)}
+.history-item .hi-status.confirmed{background:rgba(0,255,136,.1);color:var(--green)}
+.history-empty{text-align:center;padding:20px;font-size:12px;color:var(--text3)}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="pg-header">
+    <a href="dashboard.html" class="pg-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <span class="pg-title"><i class="fa-solid fa-circle-dollar" style="color:var(--cyan)"></i> Deposit</span>
+  </div>
+
+  <div class="dep-success" id="depSuccess">
+    <i class="fa-solid fa-circle-check"></i>
+    <div class="dep-succ-text"><b>Deposit Successful!</b><br> <span id="depSuccessMsg">Your USDT has been credited to your account.</span></div>
+  </div>
+
+  <div class="deposit-modal" id="depositModal">
+    <div class="deposit-modal-box">
+      <div class="deposit-modal-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="deposit-modal-title">Deposit Confirmed</div>
+      <div class="deposit-modal-amount" id="depositModalAmount">0 USDT</div>
+      <div class="deposit-modal-date" id="depositModalDate">Confirmed just now</div>
+      <button class="deposit-modal-btn" onclick="closeDepositModal()">Done</button>
+    </div>
+  </div>
+
+  <div class="dep-card">
+    <div class="dep-header"><i class="fa-solid fa-qrcode"></i> Deposit USDT (BEP20)</div>
+    <div class="dep-network"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="11" stroke="#F0B90B" stroke-width="1.5"/><path d="M8 12l4-4 4 4-4 4z" fill="#F0B90B"/><path d="M12 16l-4-4 4-4 4 4z" fill="#F0B90B" opacity=".6"/></svg> BEP20 Network</div>
+    <div class="dep-info-text">Send USDT (BEP20) to the address below</div>
+    <div class="dep-qr" id="qrContainer">
+      <img id="qrImg" src="" alt="QR Code">
+    </div>
+    <div class="dep-addr-box">
+      <div class="dep-label">Deposit Address</div>
+      <div class="dep-addr" id="depAddr"><span style="font-size:11px;color:var(--text3)"><i class="fa-solid fa-spinner fa-spin"></i> Generating...</span></div>
+      <button class="dep-copy" onclick="copyAddr()"><i class="fa-regular fa-copy"></i> Copy Address</button>
+    </div>
+    <button class="dep-refresh" onclick="refreshAddress()"><i class="fa-solid fa-rotate"></i> New Address</button>
+    <div class="dep-warning" style="margin-top:12px">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div class="dep-warn-text"><b>Warning:</b> Sending less than <b>10 USDT</b> may lead to loss of funds. Only send on BEP20 (Binance Smart Chain) network.</div>
+    </div>
+  </div>
+
+  <div class="history-card">
+    <div class="history-header"><i class="fa-solid fa-clock-rotate-left"></i> Deposit History</div>
+    <div id="historyList"><div class="history-empty">No deposits yet</div></div>
+  </div>
+</div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getFirestore,query,collection,onSnapshot,where,limit}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
+const app=initializeApp(fbCfg);
+const db=getFirestore(app);
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand()}
+
+const savedTheme=localStorage.getItem("pb_theme");
+if(savedTheme==="light")document.body.classList.add("light");
+
+const BACKEND_URL="https://playbits-backend.onrender.com";
+
+function getUserId(){
+  try{return localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}
+  return null
+}
+
+async function fetchAddress(){
+  const addrEl=document.getElementById("depAddr");
+  const qrImg=document.getElementById("qrImg");
+  addrEl.innerHTML='<span style="font-size:11px;color:var(--text3)"><i class="fa-solid fa-spinner fa-spin"></i> Generating...</span>';
+
+  const uid=getUserId();
+  if(!uid){addrEl.textContent="Login required";return}
+
+  try{
+    const res=await fetch(BACKEND_URL+"/api/get-deposit-address",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({userId:uid,network:"bep20",newAddress:true})
+    });
+    if(!res.ok)throw new Error("Backend route error: "+res.status);
+    const data=await res.json();
+    if(!data.success||!data.address)throw new Error(data.error||"Address generation failed");
+    const address=data.address;
+
+    addrEl.textContent=address;
+    qrImg.src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data="+encodeURIComponent(address);
+    qrImg.style.display="block";
+    qrImg.onerror=()=>{qrImg.style.display="none";document.getElementById("qrContainer").innerHTML='<div style="display:grid;place-items:center;height:100%;color:var(--text3);font-size:12px"><i class="fa-solid fa-qrcode" style="font-size:40px;margin-bottom:8px;color:var(--text2)"></i><br>QR Unavailable</div>'};
+
+  }catch(e){
+    console.error("Address generation error:",e);
+    addrEl.textContent="Backend offline or route error";
+  }
+}
+
+window.refreshAddress=function(){fetchAddress()};
+
+window.copyAddr=function(){
+  const el=document.getElementById("depAddr");
+  if(el&&el.textContent&&!el.textContent.includes("Generating")&&!el.textContent.includes("Error")){
+    navigator.clipboard.writeText(el.textContent);
+    const btn=document.querySelector(".dep-copy");
+    btn.innerHTML='<i class="fa-regular fa-check"></i> Copied!';
+    setTimeout(()=>{btn.innerHTML='<i class="fa-regular fa-copy"></i> Copy Address'},2000)
+  }
+};
+
+function dateMs(v){
+  if(!v)return 0;
+  if(typeof v==="number")return v;
+  if(typeof v==="string"){
+    const parsed=Date.parse(v);
+    return Number.isNaN(parsed)?0:parsed
+  }
+  if(v.toDate)return v.toDate().getTime();
+  if(v.seconds)return v.seconds*1000;
+  return 0
+}
+
+function depositDateMs(d){
+  return dateMs(d.confirmedAt)||dateMs(d.creditedAt)||dateMs(d.createdAt)||dateMs(d.updatedAt)
+}
+
+function formatDepositDate(d){
+  const ms=depositDateMs(d);
+  if(!ms)return "Date unavailable";
+  return new Date(ms).toLocaleString(undefined,{
+    day:"2-digit",
+    month:"short",
+    year:"numeric",
+    hour:"2-digit",
+    minute:"2-digit"
+  })
+}
+
+window.closeDepositModal=function(){
+  document.getElementById("depositModal").classList.remove("show")
+};
+
+function showDepositModal(d){
+  const amt=d.amount>0?d.amount+" USDT":"Deposit";
+  document.getElementById("depositModalAmount").textContent=amt;
+  document.getElementById("depositModalDate").textContent="Confirmed on "+formatDepositDate(d);
+  document.getElementById("depositModal").classList.add("show");
+}
+
+function startDepositMonitor(){
+  const uid=getUserId();
+  if(!uid)return;
+
+  const q=query(collection(db,"deposits"),where("userId","==",uid),limit(50));
+  const successEl=document.getElementById("depSuccess");
+  const msgEl=document.getElementById("depSuccessMsg");
+
+  const shownSuccesses=new Set();
+  let initialSnap=true;
+
+  onSnapshot(q,snap=>{
+    const el=document.getElementById("historyList");
+    const items=[];
+    snap.forEach(d=>{items.push({id:d.id,...d.data()})});
+    items.sort((a,b)=>depositDateMs(b)-depositDateMs(a));
+    const top=items.slice(0,20);
+    let html="";
+    top.forEach(d=>{
+      if(d.status!=="confirmed")return;
+      const amt=d.amount>0?d.amount+" USDT":"—";
+      const addrShort=d.address?d.address.slice(0,8)+"...":"";
+      const dateText=formatDepositDate(d);
+      html+='<div class="history-item"><div class="hi-left"><span class="hi-amount">'+amt+'</span><span class="hi-date">'+dateText+'</span><span class="hi-address">'+addrShort+'</span></div><span class="hi-status confirmed">Completed</span></div>';
+      if(initialSnap){
+        shownSuccesses.add(d.id);
+      }else if(!shownSuccesses.has(d.id)){
+        shownSuccesses.add(d.id);
+        msgEl.innerHTML='<b>'+d.amount+' USDT</b> received and credited to your account!';
+        successEl.classList.add("show");
+        showDepositModal(d);
+        setTimeout(()=>successEl.classList.remove("show"),6000)
+      }
+    });
+    el.innerHTML=html||'<div class="history-empty">No deposits yet</div>';
+    initialSnap=false
+  },e=>{
+    document.getElementById("historyList").innerHTML='<div class="history-empty">Could not load history</div>'
+  })
+}
+
+fetchAddress();
+startDepositMonitor();
+</script>
+</body>
+</html>

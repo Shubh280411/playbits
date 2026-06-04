@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Rank Hub & Rewards</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--vt:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 40px;box-sizing:border-box;position:relative;background:var(--bg)}
+#ptc{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.12}
+#gridOverlay{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.012)1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.012)1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+@keyframes rp{0%,100%{opacity:.3}50%{opacity:.6}}
+@keyframes ef{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.98);color:#fff;padding:12px 24px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:99999;pointer-events:none;animation:toast-up .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center;border:1px solid var(--card-border)}
+::-webkit-scrollbar{width:0}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+
+/* PROGRESS CARD */
+.progress-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 24px var(--card-glow)}
+.progress-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.progress-card-title{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.progress-card-title i{color:var(--cyan)}
+.progress-ranks{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.progress-ranks .pr-name{font:800 16px 'Orbitron',sans-serif}
+.progress-ranks .pr-arrow{font-size:14px;color:var(--text3)}
+.progress-stat-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:600}
+.progress-stat-row span b{font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+.progress-remaining{font-size:12px;color:var(--text3);text-align:center;margin-top:10px}
+.progress-remaining b{color:var(--pink);font-family:'JetBrains Mono',monospace}
+.progress-bar-wrap{height:8px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-top:8px;position:relative}
+.progress-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:999px;transition:width .8s;position:relative}
+.progress-bar-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2));animation:ef 2s ease-in-out infinite}
+
+/* AUDIT CARD */
+.audit-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:16px}
+.audit-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.audit-card-title{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.audit-card-title i{color:var(--purple)}
+.audit-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.02);border-radius:var(--rs);margin-bottom:8px;font-size:13px}
+.audit-item .ai-label{color:var(--text2);font-weight:600;display:flex;align-items:center;gap:6px}
+.audit-item .ai-val{font-family:'JetBrains Mono',monospace;font-weight:700}
+.audit-item .ai-val.pass{color:var(--green)}
+.audit-item .ai-val.fail{color:var(--pink)}
+.audit-badge{display:block;text-align:center;padding:12px;border-radius:var(--rs);font:700 13px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:1px;margin-top:12px}
+.audit-badge.completed{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.audit-badge.pending{background:rgba(255,45,149,.06);border:1px solid rgba(255,45,149,.2);color:var(--pink)}
+
+/* REWARD PROGRESS DOCK */
+.reward-dock{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reward-dock-item{background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);padding:10px;text-align:center}
+.reward-dock-item .rd-val{font:700 16px 'JetBrains Mono',monospace;color:var(--cyan)}
+.reward-dock-item .rd-lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.stat::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px}
+.stat:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.stat:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.stat:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--pink),transparent)}
+.stat:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.stat .s-icon{width:36px;height:36px;border-radius:var(--rs);display:grid;place-items:center;font-size:16px;margin-bottom:10px}
+.stat:nth-child(1) .s-icon{background:rgba(0,229,255,.06);color:var(--cyan)}
+.stat:nth-child(2) .s-icon{background:rgba(168,85,247,.06);color:var(--purple)}
+.stat:nth-child(3) .s-icon{background:rgba(255,45,149,.06);color:var(--pink)}
+.stat:nth-child(4) .s-icon{background:rgba(255,215,0,.06);color:var(--gold)}
+.stat .s-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-weight:700}
+.stat .s-value{font:700 20px 'Orbitron',sans-serif}
+.stat:nth-child(1) .s-value{color:var(--cyan)}
+.stat:nth-child(2) .s-value{color:var(--purple)}
+.stat:nth-child(3) .s-value{color:var(--pink)}
+.stat:nth-child(4) .s-value{color:var(--gold)}
+
+.sec-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:16px}
+.sec-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.sec-card-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-card-header i{color:var(--cyan)}
+
+.rank-item{background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:10px;padding:16px;transition:all .3s;position:relative;overflow:hidden}
+.rank-item.active{border-color:var(--gold);background:rgba(255,215,0,.06)}
+.rank-item.active::after{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.rank-item.completed{border-color:rgba(0,255,136,.15);background:rgba(0,255,136,.04)}
+.rank-item.locked{opacity:.5}
+.rank-item .ri-top{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.rank-item .ri-rank{width:24px;font:700 12px 'Orbitron',sans-serif;color:var(--text3);text-align:center;flex-shrink:0}
+.rank-item .ri-icon{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.rank-item .ri-name{font-size:15px;font-weight:700;flex:1}
+.rank-item .ri-status{font-size:16px;width:22px;text-align:center;flex-shrink:0}
+.rank-item .ri-detail{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--text2)}
+.rank-item .ri-detail .rd-l{color:var(--text3);font-weight:600}
+.rank-item .ri-detail .rd-v{font-weight:700;font-family:'JetBrains Mono',monospace;text-align:right}
+.rank-item .ri-detail .rd-v.green{color:var(--green)}
+.rank-item .ri-detail .rd-v.gold{color:var(--gold)}
+.rank-item .ri-detail .rd-v.cyan{color:var(--cyan)}
+.rank-item .ri-detail .rd-v.purple{color:var(--purple)}
+.rank-item .ri-bar{height:4px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-top:10px}
+.rank-item .ri-fill{height:100%;width:0%;border-radius:999px;transition:width .5s}
+
+.daily-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:16px;text-align:center}
+.daily-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.daily-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.daily-header i{color:var(--gold)}
+.daily-amount{font:900 36px 'Orbitron',sans-serif;background:linear-gradient(135deg,var(--gold),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}
+.daily-sub{font-size:13px;color:var(--text2);font-weight:600;margin-bottom:12px}
+.daily-progress{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);font-weight:500;margin-bottom:8px}
+.daily-bar{height:6px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-bottom:12px}
+.daily-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--pink));border-radius:999px;transition:width .5s}
+.daily-timer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.daily-timer-box{background:rgba(0,0,0,.3);border:1px solid var(--card-border);border-radius:var(--rs);padding:10px 6px;text-align:center}
+.daily-timer-box .dtn{display:block;font:700 22px 'JetBrains Mono',monospace;color:var(--gold)}
+.daily-timer-box .dtl{display:block;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;font-weight:600}
+.daily-status{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;border-radius:var(--rs);font-size:12px;font-weight:700;letter-spacing:1px}
+.daily-status.ready{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);color:var(--green)}
+.daily-status.waiting{background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);color:var(--gold)}
+.daily-status.done{background:rgba(255,255,255,.03);border:1px solid var(--card-border);color:var(--text3)}
+</style>
+</head>
+<body>
+
+<canvas id="ptc"></canvas>
+<div id="gridOverlay"></div>
+
+<div class="app-container" id="appWrap">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <a href="profile.html?uid=UID" class="topbar-user">
+        <div class="topbar-avatar" id="avatar">PL</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- QUALIFICATION AUDIT CARD -->
+  <div class="audit-card">
+    <div class="audit-card-title"><i class="fa-solid fa-shield-halved"></i> Qualification Audit Details</div>
+    
+    <div class="audit-item">
+      <span class="ai-label"><i class="fa-solid fa-users"></i> Direct Active Referrals</span>
+      <span class="ai-val" id="audDirects">0 / 2</span>
+    </div>
+    
+    <div class="audit-item">
+      <span class="ai-label"><i class="fa-solid fa-box-archive"></i> Self Package Size</span>
+      <span class="ai-val" id="audSelfPkg">$0 / $10</span>
+    </div>
+    
+    <div class="audit-item">
+      <span class="ai-label"><i class="fa-solid fa-arrow-left"></i> Left Leg Business</span>
+      <span class="ai-val" id="audLeftLeg">$0</span>
+    </div>
+    
+    <div class="audit-item">
+      <span class="ai-label"><i class="fa-solid fa-arrow-right"></i> Right Leg Business</span>
+      <span class="ai-val" id="audRightLeg">$0</span>
+    </div>
+
+    <div class="audit-item">
+      <span class="ai-label"><i class="fa-solid fa-sitemap"></i> Leadership Leg Achiever Check</span>
+      <span class="ai-val" id="audLeadership">L: 0 | R: 0</span>
+    </div>
+    
+    <div class="audit-badge" id="audBadge">Auditing...</div>
+  </div>
+
+  <!-- REWARD PROGRESS DOCK -->
+  <div class="reward-dock">
+    <div class="reward-dock-item">
+      <div class="rd-val" id="dockCurrentEarnings">0</div>
+      <div class="rd-lbl">Rank Earnings</div>
+    </div>
+    <div class="reward-dock-item">
+      <div class="rd-val" id="dockTotalEarned">0</div>
+      <div class="rd-lbl">Total Rewards</div>
+    </div>
+    <div class="reward-dock-item">
+      <div class="rd-val" id="dockRemaining">0</div>
+      <div class="rd-lbl">Remaining Payout</div>
+    </div>
+    <div class="reward-dock-item">
+      <div class="rd-val" id="dockDistributionProgress">0%</div>
+      <div class="rd-lbl">Dist. Progress</div>
+    </div>
+  </div>
+
+  <div class="stats-grid" style="display:none">
+    <div class="stat"><div class="s-icon"><i class="fa-solid fa-chart-line"></i></div><div class="s-label">Total Business</div><div class="s-value" id="statTotal">$0</div></div>
+    <div class="stat"><div class="s-icon"><i class="fa-solid fa-users"></i></div><div class="s-label">Direct Referrals</div><div class="s-value" id="statDirects">0</div></div>
+    <div class="stat"><div class="s-icon"><i class="fa-solid fa-arrow-left"></i></div><div class="s-label">Left Leg</div><div class="s-value" id="statLeft">$0</div></div>
+    <div class="stat"><div class="s-icon"><i class="fa-solid fa-arrow-right"></i></div><div class="s-label">Right Leg</div><div class="s-value" id="statRight">$0</div></div>
+  </div>
+
+  <div class="sec-card">
+    <div class="sec-card-header"><i class="fa-solid fa-ranking-star"></i> Rank Matrix Table</div>
+    <div id="rankList"></div>
+  </div>
+
+  <div class="daily-card" id="dailyCard">
+    <div class="daily-header"><i class="fa-solid fa-calendar-day"></i> Rank Active Daily Payout</div>
+    <div class="daily-amount" id="dailyValue">$0</div>
+    <div class="daily-sub" id="dailySub">Day 0 of 0</div>
+    <div class="daily-progress"><span>Active Payout Progress</span><span id="dailyPct">0%</span></div>
+    <div class="daily-bar"><div class="daily-fill" id="dailyFill"></div></div>
+    <div class="daily-timer">
+      <div class="daily-timer-box"><span class="dtn" id="dd">00</span><span class="dtl">Days</span></div>
+      <div class="daily-timer-box"><span class="dtn" id="dh">00</span><span class="dtl">Hrs</span></div>
+      <div class="daily-timer-box"><span class="dtn" id="dm">00</span><span class="dtl">Min</span></div>
+      <div class="daily-timer-box"><span class="dtn" id="ds">00</span><span class="dtl">Sec</span></div>
+    </div>
+    <div class="daily-status" id="dailyStatus"><span id="dailyStatusText">Loading...</span></div>
+  </div>
+
+</div>
+
+<script>
+const RANK_DATA = [
+  { name: "Bit Rookie",       biz: 1000,    color: "#cd7b37", icon: "fa-seedling",         orbit: 150,    dailyTotal: 50,   dailyDays: 5,   selfPkg: 10,   directs: 2,  leadReq: "50:50 Business Rule" },
+  { name: "Bit Hunter",       biz: 3000,    color: "#c0c0c0", icon: "fa-crosshairs",       orbit: 405,    dailyTotal: 150,  dailyDays: 10,  selfPkg: 50,   directs: 4,  leadReq: "2 Bit Rookie Achievers (1 Left + 1 Right Leg)" },
+  { name: "Squad Commander",  biz: 8000,    color: "#ffd700", icon: "fa-shield-halved",    orbit: 1100,   dailyTotal: 405,  dailyDays: 15,  selfPkg: 100,  directs: 6,  leadReq: "2 Bit Hunter Achievers (1 Left + 1 Right Leg)" },
+  { name: "Cyber Knight",     biz: 20000,   color: "#00e5ff", icon: "fa-helmet-safety",    orbit: 2750,   dailyTotal: 1100, dailyDays: 20,  selfPkg: 200,  directs: 8,  leadReq: "2 Squad Commander Achievers (1 Left + 1 Right Leg)" },
+  { name: "Orbital Lord",     biz: 50000,   color: "#a855f7", icon: "fa-globe",            orbit: 6750,   dailyTotal: 2750, dailyDays: 25,  selfPkg: 500,  directs: 10, leadReq: "2 Cyber Knight Achievers (1 Left + 1 Right Leg)" },
+  { name: "Krypton Master",   biz: 120000,  color: "#ff2d95", icon: "fa-gem",              orbit: 17500,  dailyTotal: 6750, dailyDays: 30,  selfPkg: 1000, directs: 12, leadReq: "2 Orbital Lord Achievers (1 Left + 1 Right Leg)" },
+  { name: "Apex Chrono",      biz: 300000,  color: "#ff6b35", icon: "fa-clock",            orbit: 44000,  dailyTotal: 17500,dailyDays: 35,  selfPkg: 1000, directs: 14, leadReq: "2 Krypton Master Achievers (1 Left + 1 Right Leg)" },
+  { name: "Galactic Overlord",biz: 700000,  color: "#ff0040", icon: "fa-galactic-republic",orbit: 130000, dailyTotal: 44000,dailyDays: 40,  selfPkg: 1000, directs: 16, leadReq: "2 Apex Chrono Achievers (1 Left + 1 Right Leg)" },
+  { name: "Metaverse Titan",  biz: 2000000, color: "#8b00ff", icon: "fa-building-columns", orbit: 350000, dailyTotal: 130000,dailyDays: 50,  selfPkg: 1000, directs: 18, leadReq: "2 Galactic Overlord Achievers (1 Left + 1 Right Leg)" },
+  { name: "PlayBits Emperor", biz: 5000000, color: "#ffd700", icon: "fa-crown",            orbit: 1000000,dailyTotal: 350000,dailyDays: 50,  selfPkg: 1000, directs: 20, leadReq: "2 Metaverse Titan Achievers (1 Left + 1 Right Leg)" }
+];
+
+const savedTheme = localStorage.getItem("pb_theme");
+if (savedTheme === "light") document.body.classList.add("light");
+
+function fmt$(n) { return "$" + Number(n).toLocaleString() }
+
+function meetsCondition(user, bizReq) {
+  const L = user.leftLegBusiness || 0, R = user.rightLegBusiness || 0;
+  const main = Math.max(L, R), other = Math.min(L, R), half = bizReq / 2;
+  return { ok: main >= half && other >= half, main, other, total: L + R, half }
+}
+
+function isUserActive(u) {
+  return (u.activationUSDT && u.activationUSDT >= 10) || u.isActivated10 === true;
+}
+
+function getDirectActiveCount(uid, allUsers) {
+  let count = 0;
+  allUsers.forEach(u => {
+    if (u.referredBy === uid && isUserActive(u)) count++;
+  });
+  return count;
+}
+
+function hasRankAchiever(rootUid, targetRankIdx, allUsers) {
+  let found = false;
+  function traverse(refId) {
+    allUsers.forEach((u, id) => {
+      if (u.referredBy === refId) {
+        if (u.qualifiedRankIdx >= targetRankIdx) {
+          found = true;
+          return;
+        }
+        traverse(id);
+      }
+    });
+  }
+  traverse(rootUid);
+  return found;
+}
+
+function getLegAchievers(uid, targetRankIdx, allUsers) {
+  const directs = [];
+  allUsers.forEach((u, id) => {
+    if (u.referredBy === uid) directs.push(id);
+  });
+  let leftCount = 0;
+  let rightCount = 0;
+  directs.forEach((id, idx) => {
+    const u = allUsers.get(id);
+    const qualified = (u && u.qualifiedRankIdx >= targetRankIdx) || hasRankAchiever(id, targetRankIdx, allUsers);
+    if (qualified) {
+      if (idx % 2 === 0) leftCount++;
+      else rightCount++;
+    }
+  });
+  return { leftCount, rightCount };
+}
+
+function getRank(user, allUsers) {
+  if (!allUsers) return { idx: -1, r: null, next: RANK_DATA[0], remaining: RANK_DATA[0].biz, progress: 0, isMax: false, dailyRate: 0, rankTotal: 0 };
+  
+  // Resolve qualified ranks for all users topologically (level by level)
+  allUsers.forEach((u, id) => {
+    const { left, right } = calcBinaryLegs(id, allUsers);
+    u.leftLegBusiness = left;
+    u.rightLegBusiness = right;
+    u.teamBusiness = left + right;
+    u.qualifiedRankIdx = -1;
+  });
+
+  for (let rankIdx = 0; rankIdx < RANK_DATA.length; rankIdx++) {
+    const r = RANK_DATA[rankIdx];
+    allUsers.forEach((u, uid) => {
+      const bizOk = meetsCondition(u, r.biz).ok;
+      const selfPkg = u.packageAmount || u.activationUSDT || 0;
+      const selfPkgOk = selfPkg >= r.selfPkg;
+      const directActive = getDirectActiveCount(uid, allUsers);
+      const directActiveOk = directActive >= r.directs;
+      
+      let leadershipOk = false;
+      if (rankIdx === 0) {
+        leadershipOk = true; // Bit Rookie only needs 50:50 rule
+      } else {
+        const legs = getLegAchievers(uid, rankIdx - 1, allUsers);
+        leadershipOk = legs.leftCount >= 1 && legs.rightCount >= 1;
+      }
+
+      if (bizOk && selfPkgOk && directActiveOk && leadershipOk) {
+        u.qualifiedRankIdx = rankIdx;
+      }
+    });
+  }
+
+  const currentUser = allUsers.get(user.telegramId || S.uid);
+  const qIdx = currentUser ? currentUser.qualifiedRankIdx : -1;
+  
+  const rankTotal = user.teamBusiness || (user.leftLegBusiness || 0) + (user.rightLegBusiness || 0);
+
+  if (qIdx === -1) {
+    const r0 = RANK_DATA[0];
+    return { idx: -1, r: null, next: r0, remaining: r0.biz, progress: Math.round(Math.min(100, (rankTotal / r0.biz) * 100)), isMax: false, dailyRate: 10, rankTotal };
+  }
+
+  const r = RANK_DATA[qIdx];
+  const next = qIdx < RANK_DATA.length - 1 ? RANK_DATA[qIdx + 1] : null;
+  const remaining = next ? Math.max(0, next.biz - rankTotal) : 0;
+  const between = next ? next.biz - r.biz : 1;
+  const progress = next ? Math.round(Math.max(0, Math.min(100, ((rankTotal - r.biz) / between) * 100))) : 100;
+  const dailyRate = r.dailyDays > 0 ? Math.floor(r.dailyTotal / r.dailyDays) : 0;
+
+  return { idx: qIdx, r, next, remaining, progress, isMax: qIdx === RANK_DATA.length - 1, dailyRate, rankTotal };
+}
+
+async function handleRewardCredits(user, rank, db) {
+  if (rank.idx === -1) return;
+  const claimed = { ...(user.claimedRanks || {}) };
+  let changed = false;
+  const updates = {};
+
+  // One-time Orbit Reward credits
+  for (let i = 0; i <= rank.idx; i++) {
+    if (!claimed[String(i)]) {
+      const rewardBits = RANK_DATA[i].dailyTotal * 100;
+      claimed[String(i)] = true;
+      updates.withdrawableBits = (updates.withdrawableBits || user.withdrawableBits || 0) + rewardBits;
+      updates.bits = (updates.bits || user.bits || 0) + rewardBits;
+      updates.totalEarned = (updates.totalEarned || user.totalEarned || 0) + rewardBits;
+      changed = true;
+      showToast("Rank achieved: Orbit Reward " + fmt$(RANK_DATA[i].dailyTotal) + " credited!");
+    }
+  }
+
+  if (changed) {
+    updates.claimedRanks = claimed;
+  }
+
+  // Active Daily Payout configuration (if tier unlocked is newer)
+  if (user.dailyRewardTier === undefined || rank.idx > (user.dailyRewardTier || 0)) {
+    updates.dailyRewardTier = rank.idx;
+    updates.dailyRewardDay = 0;
+    updates.dailyRewardNextClaim = Date.now() + 86400000;
+    changed = true;
+    showToast("Rank Daily Payout Activated for " + RANK_DATA[rank.idx].name);
+  }
+
+  if (changed) {
+    const { doc, updateDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+    updates.updatedAt = serverTimestamp();
+    await updateDoc(doc(db, "users", user.telegramId || S.uid), updates);
+    Object.assign(user, updates);
+  }
+}
+
+function renderAll(rank, user, allUsers) {
+  const L = user.leftLegBusiness || 0, R = user.rightLegBusiness || 0;
+  const totalBiz = user.teamBusiness || (L + R);
+  const activeCount = getDirectActiveCount(user.telegramId || S.uid, allUsers);
+  const selfPkg = user.packageAmount || user.activationUSDT || 0;
+
+  // Render Qualification Audit Card
+  const nextTarget = rank.isMax ? rank.r : rank.next;
+  const nextIdx = rank.isMax ? rank.idx : rank.idx + 1;
+  const directPass = activeCount >= nextTarget.directs;
+  const selfPass = selfPkg >= nextTarget.selfPkg;
+  const bizCond = meetsCondition(user, nextTarget.biz);
+  const bizPass = bizCond.ok;
+  
+  const leadPass = nextIdx === 0 ? true : (() => { const legs = getLegAchievers(user.telegramId || S.uid, nextIdx - 1, allUsers); return legs.leftCount >= 1 && legs.rightCount >= 1; })();
+
+  document.getElementById("audDirects").textContent = activeCount + " / " + nextTarget.directs;
+  document.getElementById("audDirects").className = "ai-val " + (directPass ? "pass" : "fail");
+  document.getElementById("audSelfPkg").textContent = fmt$(selfPkg) + " / " + fmt$(nextTarget.selfPkg);
+  document.getElementById("audSelfPkg").className = "ai-val " + (selfPass ? "pass" : "fail");
+  document.getElementById("audLeftLeg").textContent = fmt$(L) + " / " + fmt$(nextTarget.biz / 2);
+  document.getElementById("audLeftLeg").className = "ai-val " + (L >= nextTarget.biz / 2 ? "pass" : "fail");
+  document.getElementById("audRightLeg").textContent = fmt$(R) + " / " + fmt$(nextTarget.biz / 2);
+  document.getElementById("audRightLeg").className = "ai-val " + (R >= nextTarget.biz / 2 ? "pass" : "fail");
+  document.getElementById("audLeadership").textContent = nextIdx === 0 ? "No leadership requirement" : (() => { const legs = getLegAchievers(user.telegramId || S.uid, nextIdx - 1, allUsers); return "L: " + legs.leftCount + " | R: " + legs.rightCount; })();
+  document.getElementById("audLeadership").className = "ai-val " + (leadPass ? "pass" : "fail");
+
+  const badge = document.getElementById("audBadge");
+  const overallPass = directPass && selfPass && bizPass && leadPass;
+  if (rank.isMax) {
+    badge.textContent = "PlayBits Emperor Achieved";
+    badge.className = "audit-badge completed";
+  } else {
+    badge.textContent = overallPass ? "Qualifications Met — Next Rank Unlocked!" : "Qualifications Incomplete";
+    badge.className = overallPass ? "audit-badge completed" : "audit-badge pending";
+  }
+
+  // Render Stats & Rewards Dock
+  let totalRankRewards = 0;
+  let earnedSoFar = 0;
+  let remaining = 0;
+  let distProgress = "0%";
+  if (rank.idx >= 0) {
+    const dailyDay = user.dailyRewardDay || 0;
+    const rateBits = rank.dailyRate * 100;
+    totalRankRewards = rank.r.dailyTotal * 2 * 100;
+    earnedSoFar = (rank.r.dailyTotal * 100) + (dailyDay * rateBits);
+    remaining = (rank.r.dailyDays - dailyDay) * rateBits;
+    distProgress = rank.r.dailyDays > 0 ? Math.round((dailyDay / rank.r.dailyDays) * 100) + "%" : "100%";
+  }
+  document.getElementById("dockCurrentEarnings").textContent = (earnedSoFar / 100).toLocaleString();
+  document.getElementById("dockTotalEarned").textContent = (totalRankRewards / 100).toLocaleString();
+  document.getElementById("dockRemaining").textContent = (remaining / 100).toLocaleString();
+  document.getElementById("dockDistributionProgress").textContent = distProgress;
+
+  // Stats grid hidden fallback
+  document.getElementById("statTotal").textContent = fmt$(totalBiz);
+  document.getElementById("statDirects").textContent = (user.totalDirects || 0).toLocaleString();
+  document.getElementById("statLeft").textContent = fmt$(L);
+  document.getElementById("statRight").textContent = fmt$(R);
+
+  // Render Rank Table Matrix
+  const ct = document.getElementById("rankList");
+  let html = "";
+  RANK_DATA.forEach((r, i) => {
+    const c = meetsCondition(user, r.biz);
+    const currentUserResol = allUsers.get(user.telegramId || S.uid);
+    const highestQ = currentUserResol ? currentUserResol.qualifiedRankIdx : -1;
+    const achieved = i <= highestQ;
+    const active = i === highestQ;
+    const locked = i > highestQ;
+    let cls = "rank-item";
+    if (active) cls += " active";
+    else if (achieved) cls += " completed";
+    else cls += " locked";
+    let badge;
+    if (achieved && !active) badge = '<span style="color:var(--green)"><i class="fa-solid fa-circle-check"></i></span>';
+    else if (active) badge = '<span style="color:var(--gold)"><i class="fa-solid fa-chevron-right"></i></span>';
+    else badge = '<span style="color:var(--text3)"><i class="fa-solid fa-lock"></i></span>';
+    
+    const dailyRate = r.dailyDays > 0 ? Math.floor(r.dailyTotal / r.dailyDays) : 0;
+    const pct = achieved ? 100 : (active ? rank.progress : Math.min(100, (totalBiz / r.biz) * 100));
+    const fillColor = achieved ? r.color : (active ? r.color : "var(--text3)");
+    const statusText = active ? (rank.isMax ? "MAX RANK" : rank.progress + "% to " + (rank.next ? rank.next.name : "...")) : (achieved ? "Achieved" : (totalBiz > 0 ? Math.round(pct) + "% to unlock" : "Locked"));
+
+    html += '<div class="' + cls + '">'
+      + '<div class="ri-top">'
+      + '<span class="ri-rank">#' + (i + 1) + '</span>'
+      + '<div class="ri-icon" style="background:' + (achieved || active ? r.color : "var(--text3)") + ';color:#fff"><i class="fa-solid ' + r.icon + '"></i></div>'
+      + '<div class="ri-name" style="color:' + (achieved || active ? r.color : "var(--text3)") + '">' + r.name + '</div>'
+      + '<div class="ri-status">' + badge + '</div></div>'
+      + '<div class="ri-detail">'
+      + '<span class="rd-l">Total Business Req</span><span class="rd-v cyan">' + fmt$(r.biz) + '</span>'
+      + '<span class="rd-l">Self Package Req</span><span class="rd-v gold">' + fmt$(r.selfPkg) + '</span>'
+      + '<span class="rd-l">Direct Active Req</span><span class="rd-v green">' + r.directs + ' active</span>'
+      + '<span class="rd-l">Leadership Leg Requirement</span><span class="rd-v purple" style="font-size:10px;text-align:right">' + r.leadReq + '</span>'
+      + '<span class="rd-l">Orbit Reward (Bits)</span><span class="rd-v cyan">' + fmt$(r.dailyTotal) + ' (' + (r.dailyTotal * 100).toLocaleString() + ' B)</span>'
+      + '<span class="rd-l">Daily Payout</span><span class="rd-v gold">' + fmt$(dailyRate) + '/day &times; ' + r.dailyDays + ' days</span>'
+      + '<span class="rd-l">Status</span><span class="rd-v" style="color:' + (achieved ? "var(--green)" : (active ? "var(--gold)" : "var(--text3)")) + '">' + statusText + '</span>'
+      + '</div>'
+      + '<div class="ri-bar"><div class="ri-fill" style="width:' + pct + '%;background:' + fillColor + '"></div></div>'
+      + '</div>';
+  });
+  ct.innerHTML = html;
+}
+
+const S = { uid: null, user: null, allUsers: null, claimingDaily: false };
+
+function calcTreeBusiness(refId, map, depth, maxDepth) {
+  if (depth > maxDepth) return 0;
+  let total = 0;
+  map.forEach((u, id) => {
+    if (u.referredBy === refId) {
+      total += (u.activationUSDT || 0) + calcTreeBusiness(id, map, depth + 1, maxDepth);
+    }
+  });
+  return total;
+}
+
+function calcBinaryLegs(uid, map) {
+  const directs = [];
+  map.forEach((u, id) => {
+    if (u.referredBy === uid) directs.push(id);
+  });
+  let left = 0, right = 0;
+  directs.forEach((id, idx) => {
+    const biz = (map.get(id)?.activationUSDT || 0) + calcTreeBusiness(id, map, 1, 10);
+    if (idx % 2 === 0) left += biz;
+    else right += biz;
+  });
+  return { left, right };
+}
+
+async function init() {
+  const qp = new URLSearchParams(location.search);
+  const urlUid = qp.get("uid");
+  const stored = localStorage.getItem("pb_uid") || sessionStorage.getItem("pb_uid") || (document.cookie.match(/(?:^|;\s*)pb_uid=([^;]+)/) || [])[1];
+  const uid = urlUid || stored;
+  if (!uid) {
+    document.getElementById("appWrap").innerHTML = '<div style="padding:40px 30px;color:var(--text3);text-align:center"><i class="fa-solid fa-triangle-exclamation" style="font-size:36px;color:var(--gold);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700">Please login first</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none;font-size:13px">Go to Dashboard</a></div>';
+    return;
+  }
+  S.uid = uid;
+  try { localStorage.setItem("pb_uid", uid) } catch(e) {}
+  try { sessionStorage.setItem("pb_uid", uid) } catch(e) {}
+  try { document.cookie = "pb_uid=" + uid + ";path=/;max-age=31536000" } catch(e) {}
+  document.querySelectorAll("[href*='UID']").forEach(el => { el.setAttribute("href", el.getAttribute("href").replace("UID", uid)) });
+  
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
+  const { getFirestore, doc, getDoc, getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+  const app = initializeApp({ apiKey: "AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk", authDomain: "playbits-9e671.firebaseapp.com", projectId: "playbits-9e671", storageBucket: "playbits-9e671.firebasestorage.app", messagingSenderId: "308371821857", appId: "1:308371821857:web:20e0a74b6f5d8097639a60" });
+  const db = getFirestore(app);
+  
+  try {
+    const snap = await getDoc(doc(db, "users", uid));
+    if (!snap.exists()) {
+      document.getElementById("appWrap").innerHTML = '<div style="padding:40px 30px;color:var(--text3);text-align:center"><i class="fa-solid fa-triangle-exclamation" style="font-size:36px;color:var(--gold);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700">User not found</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none;font-size:13px">Go to Dashboard</a></div>';
+      return;
+    }
+    S.user = snap.data();
+    const dn = S.user.firstName || "Player";
+    document.getElementById("avatar").textContent = dn.slice(0, 2).toUpperCase();
+
+    const allSnap = await getDocs(collection(db, "users"));
+    S.allUsers = new Map();
+    allSnap.forEach(d => S.allUsers.set(d.id, d.data()));
+
+    const teamBiz = calcTreeBusiness(uid, S.allUsers, 1, 10);
+    const { left, right } = calcBinaryLegs(uid, S.allUsers);
+    S.user.teamBusiness = teamBiz;
+    S.user.leftLegBusiness = left;
+    S.user.rightLegBusiness = right;
+
+    const rank = getRank(S.user, S.allUsers);
+    await handleRewardCredits(S.user, rank, db);
+
+    renderAll(rank, S.user, S.allUsers);
+    renderDaily(rank, S.user, db);
+    startDailyTimer(rank, S.user, db);
+    autoClaimDaily(S.user, db);
+    drawParticles();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("appWrap").innerHTML = '<div style="padding:40px 30px;color:var(--text3);text-align:center"><i class="fa-solid fa-circle-exclamation" style="font-size:36px;color:var(--pink);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700">Error loading Rank System</div></div>';
+  }
+}
+
+function renderDaily(rank, user, db) {
+  if (rank.idx === -1 || !rank.r) {
+    document.getElementById("dailyValue").textContent = "$0";
+    document.getElementById("dailySub").textContent = "Achieve a rank to unlock daily payouts";
+    document.getElementById("dailyPct").textContent = "0%";
+    document.getElementById("dailyFill").style.width = "0%";
+    document.getElementById("dailyStatus").className = "daily-status done";
+    document.getElementById("dailyStatusText").textContent = "No rank achieved";
+    return;
+  }
+  const day = Math.min(user.dailyRewardDay || 0, rank.r.dailyDays);
+  const rate = rank.dailyRate;
+  const pct = rank.r.dailyDays > 0 ? Math.min(100, (day / rank.r.dailyDays) * 100) : 0;
+  document.getElementById("dailyValue").textContent = fmt$(rate) + " / day";
+  document.getElementById("dailySub").textContent = "Day " + day + " of " + rank.r.dailyDays + " — " + fmt$(rank.r.dailyTotal) + " total";
+  document.getElementById("dailyPct").textContent = Math.round(pct) + "%";
+  document.getElementById("dailyFill").style.width = pct + "%";
+  if (day >= rank.r.dailyDays) {
+    document.getElementById("dailyStatus").className = "daily-status done";
+    document.getElementById("dailyStatusText").textContent = "All payouts received for this rank";
+  }
+}
+
+function startDailyTimer(rank, user, db) {
+  setInterval(async () => {
+    const u = S.user;
+    if (!u) return;
+    const nc = u.dailyRewardNextClaim || 0;
+    const rem = Math.max(0, nc - Date.now());
+    const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v).padStart(2, "0") };
+    s("dd", Math.floor(rem / 86400000));
+    s("dh", Math.floor((rem % 86400000) / 3600000));
+    s("dm", Math.floor((rem % 3600000) / 60000));
+    s("ds", Math.floor((rem % 60000) / 1000));
+    const st = document.getElementById("dailyStatus");
+    const stt = document.getElementById("dailyStatusText");
+    
+    if (u.dailyRewardTier !== undefined && (u.dailyRewardDay || 0) < RANK_DATA[u.dailyRewardTier].dailyDays) {
+      if (rem <= 0) {
+        st.className = "daily-status ready";
+        stt.textContent = "Payout ready — auto-crediting...";
+        await autoClaimDaily(u, db);
+      } else {
+        st.className = "daily-status waiting";
+        stt.textContent = "Next payout in";
+      }
+    }
+  }, 1000);
+}
+
+async function autoClaimDaily(user, db) {
+  if (S.claimingDaily) return;
+  S.claimingDaily = true;
+  try {
+    if (user.dailyRewardTier === undefined) return;
+    const r = RANK_DATA[user.dailyRewardTier];
+    const day = user.dailyRewardDay || 0;
+    if (day >= r.dailyDays) return;
+    if (Date.now() < (user.dailyRewardNextClaim || 0)) return;
+    
+    const bits = r.dailyDays > 0 ? Math.floor(r.dailyTotal / r.dailyDays) * 100 : 0;
+    if (bits <= 0) return;
+
+    const { doc, updateDoc, increment, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+    await updateDoc(doc(db, "users", S.uid), {
+      withdrawableBits: increment(bits), bits: increment(bits),
+      dailyRewardDay: increment(1), dailyRewardNextClaim: Date.now() + 86400000,
+      updatedAt: serverTimestamp()
+    });
+
+    user.dailyRewardDay = (user.dailyRewardDay || 0) + 1;
+    user.dailyRewardNextClaim = Date.now() + 86400000;
+    user.withdrawableBits = (user.withdrawableBits || 0) + bits;
+    user.bits = (user.bits || 0) + bits;
+
+    if (S.allUsers) {
+      const rank = getRank(user, S.allUsers);
+      renderDaily(rank, user, db);
+      renderAll(rank, user, S.allUsers);
+    }
+  } catch(e) { console.error("Auto-daily payout error:", e) }
+  finally { S.claimingDaily = false }
+}
+
+function showToast(m) {
+  const e = document.createElement("div"); e.className = "toast"; e.innerHTML = m;
+  document.body.appendChild(e); setTimeout(() => e.remove(), 2500);
+}
+
+function drawParticles() {
+  const c = document.getElementById("ptc"), x = c.getContext("2d"); let p = [];
+  const init = () => { c.width = innerWidth; c.height = innerHeight; p = Array.from({ length: 30 }, () => ({ x: Math.random() * c.width, y: Math.random() * c.height, s: Math.random() * 2 + 1, vx: (Math.random() - .5) * .2, vy: (Math.random() - .5) * .2, o: Math.random() * .06 + .02, c: Math.random() > .5 ? "#00e5ff" : "#a855f7" })) };
+  const dr = () => { x.clearRect(0, 0, c.width, c.height); p.forEach(e => { e.x += e.vx; e.y += e.vy; if (e.x < 0 || e.x > c.width) e.vx *= -1; if (e.y < 0 || e.y > c.height) e.vy *= -1; x.globalAlpha = e.o; x.fillStyle = e.c; x.fillRect(e.x, e.y, e.s, e.s) }); requestAnimationFrame(dr) };
+  addEventListener("resize", init); init(); dr();
+}
+
+init();
+</script>
+</body>
+</html>

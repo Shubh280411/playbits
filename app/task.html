@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Tasks</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition);scroll-behavior:smooth}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg)}
+.pg-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.pg-header .pg-back{width:38px;height:38px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.pg-header .pg-back:hover{color:var(--cyan);border-color:var(--cyan)}
+.pg-header .pg-title{font:800 16px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase}
+.task-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;transition:all var(--transition)}
+.task-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px}
+.task-card:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.task-card:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.task-card:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.task-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.task-header i{font-size:18px}
+.task-desc{font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.4}
+.task-btn{display:block;width:100%;padding:12px;border-radius:var(--rs);border:none;font:700 13px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .3s;text-align:center;text-decoration:none;box-sizing:border-box;margin-bottom:8px}
+.task-btn.go{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff}
+.task-btn.go:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,229,255,.2)}
+.task-btn.claim{background:linear-gradient(135deg,var(--gold),var(--pink));color:#fff}
+.task-btn.claim:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,215,0,.15)}
+.task-btn.claim:disabled,.task-btn.claimed{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);color:var(--green);cursor:default;opacity:1;transform:none;box-shadow:none}
+.task-status{font-size:11px;color:var(--text3);text-align:center;margin-top:4px}
+.task-reward{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.15);color:var(--gold);font-size:10px;font-weight:700;margin-bottom:10px}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="pg-header">
+    <a href="dashboard.html" class="pg-back"><i class="fa-solid fa-arrow-left"></i></a>
+    <span class="pg-title"><i class="fa-brands fa-twitter" style="color:var(--gold)"></i> Tasks</span>
+  </div>
+  <div id="taskList"></div>
+</div>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import{getFirestore,doc,getDoc,updateDoc,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
+const app=initializeApp(fbCfg);
+const db=getFirestore(app);
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand()}
+const TASKS=[
+  {id:"x_follow",icon:"fa-brands fa-twitter",color:"var(--cyan)",title:"Follow on X",desc:"Follow @playbits on X (Twitter) and come back to claim your reward.",link:"https://x.com/playbits",reward:"+10 Free Bits"},
+  {id:"tg_join",icon:"fa-brands fa-telegram",color:"var(--purple)",title:"Join Telegram",desc:"Join the official PlayBits Telegram channel to stay updated.",link:"https://t.me/playbits",reward:"+10 Free Bits"},
+  {id:"yt_sub",icon:"fa-brands fa-youtube",color:"var(--gold)",title:"Subscribe YouTube",desc:"Subscribe to the PlayBits YouTube channel for tutorials and updates.",link:"https://youtube.com/@playbits",reward:"+10 Free Bits"}
+];
+(async function(){
+  const p=new URLSearchParams(location.search);
+  let uid=p.get("uid");
+  if(!uid){try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}}
+  let user=null;
+  if(uid){
+    try{const snap=await getDoc(doc(db,"users",uid));if(snap.exists())user=snap.data()}catch(e){}
+  }
+  const el=document.getElementById("taskList");
+  let html="";
+  TASKS.forEach(t=>{
+    const claimed=user?.followClaimed;
+    html+='<div class="task-card"><div class="task-header"><i class="'+t.icon+'" style="color:'+t.color+'"></i> '+t.title+'</div><div class="task-reward"><i class="fa-solid fa-gift"></i> '+t.reward+'</div><div class="task-desc">'+t.desc+'</div>'+(claimed?'<button class="task-btn claimed" disabled><i class="fa-regular fa-circle-check"></i> Claimed</button>':'<a href="'+t.link+'" target="_blank" class="task-btn go"><i class="fa-solid fa-arrow-up-right-from-square"></i> Go to '+t.title+'</a><button class="task-btn claim" id="claimBtn_'+t.id+'" onclick="claimReward(\''+t.id+'\',\''+uid+'\')"><i class="fa-solid fa-gift"></i> Claim Reward</button>')+'</div>'
+  });
+  el.innerHTML=html;
+  if(!user?.followClaimed){
+    window.claimReward=async function(taskId,uId){
+      if(!uId||uId==="null"){alert("User not found. Please open from dashboard.");return}
+      const btn=document.getElementById("claimBtn_"+taskId);
+      if(btn)btn.disabled=true;
+      try{
+        const snap=await getDoc(doc(db,"users",uId));
+        if(!snap.exists()){alert("User not found");return}
+        const u=snap.data();
+        if(u.followClaimed){if(btn)btn.innerHTML='<i class="fa-regular fa-circle-check"></i> Claimed';return}
+        const now=Date.now();
+        await updateDoc(doc(db,"users",uId),{followClaimed:true,followBits:10,followClaimedAt:now,bits:(u.bits||0)+10,updatedAt:serverTimestamp()});
+        if(btn){btn.innerHTML='<i class="fa-regular fa-circle-check"></i> Claimed';btn.className='task-btn claimed';btn.disabled=true}
+        document.querySelectorAll(".task-btn.claim").forEach(b=>{b.innerHTML='<i class="fa-regular fa-circle-check"></i> Claimed';b.className='task-btn claimed';b.disabled=true})
+      }catch(e){console.error(e);alert("Error claiming. Try again.");if(btn)btn.disabled=false}
+    }
+  }
+})()
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-const API_BASE = "https://playbits-backend.onrender.com";
+const API_BASE = "https://playbits-backend-132h.onrender.com";
 
 window.API = {
   async get(path) {

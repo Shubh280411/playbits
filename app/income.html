@@ -178,7 +178,7 @@ const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:
 function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
 const savedTheme=localStorage.getItem("pb_theme");
 if(savedTheme==="light")document.body.classList.add("light");
-const BACKEND_URL="https://playbits-backend.onrender.com";
+const BACKEND_URL="https://playbits-backend-132h.onrender.com";
 let uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
 if(!uid||uid==="guest"){const p=new URLSearchParams(location.search);uid=p.get("uid")||""}
 let allEntries=[],displayedEntries=[],pageSize=20,filter="all",page=0,loading=false;

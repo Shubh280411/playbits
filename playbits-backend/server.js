@@ -1194,6 +1194,155 @@ app.post("/api/claim-follow", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 
+// ===== ADMIN ENDPOINTS =====
+
+// Admin dashboard stats
+app.get("/api/admin/stats", async (req, res) => {
+  try {
+    const [users, deposits, withdrawals, income, packages, todayUsers] = await Promise.all([
+      db.query('SELECT COUNT(*) as c FROM users'),
+      db.query('SELECT COUNT(*) as c, COALESCE(SUM(amount),0) as t FROM deposits'),
+      db.query('SELECT COUNT(*) as c, COALESCE(SUM(amount),0) as t FROM withdrawals'),
+      db.query('SELECT COUNT(*) as c, COALESCE(SUM(amount),0) as t FROM income_history'),
+      db.query('SELECT COUNT(*) as c FROM packages'),
+      db.query('SELECT COUNT(*) as c FROM users WHERE "createdAt" > $1', [Date.now() - 86400000])
+    ]);
+    const pendingWd = await db.query("SELECT COUNT(*) as c FROM withdrawals WHERE status='pending'");
+    const pendingDep = await db.query("SELECT COUNT(*) as c FROM deposits WHERE status='pending'");
+    res.json({
+      success: true,
+      stats: {
+        totalUsers: parseInt(users.rows[0].c),
+        todayUsers: parseInt(todayUsers.rows[0].c),
+        totalDeposits: parseInt(deposits.rows[0].c),
+        totalDepositAmount: Number(deposits.rows[0].t),
+        totalWithdrawals: parseInt(withdrawals.rows[0].c),
+        totalWithdrawalAmount: Number(withdrawals.rows[0].t),
+        totalIncome: parseInt(income.rows[0].c),
+        totalIncomeAmount: Number(income.rows[0].t),
+        totalPackages: parseInt(packages.rows[0].c),
+        pendingWithdrawals: parseInt(pendingWd.rows[0].c),
+        pendingDeposits: parseInt(pendingDep.rows[0].c)
+      }
+    });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get all users
+app.get("/api/admin/users", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = (page - 1) * limit;
+    const search = req.query.search || "";
+    let whereClause = "";
+    const params = [];
+    if (search) {
+      whereClause = `WHERE "telegramId"::TEXT LIKE $1 OR "firstName" ILIKE $1 OR "username" ILIKE $1`;
+      params.push(`%${search}%`);
+    }
+    const countResult = await db.query(`SELECT COUNT(*) as total FROM users ${whereClause}`, params);
+    const total = parseInt(countResult.rows[0].total);
+    const rows = await db.query(
+      `SELECT "telegramId", "firstName", "username", "referredBy", "depositBalance", "activationUSDT",
+              "packageStatus", "packageAmount", "bits", "withdrawableBits", "totalEarned", "totalWithdrawn",
+              "isActive", "createdAt", "updatedAt"
+       FROM users ${whereClause} ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
+    );
+    res.json({ success: true, users: rows.rows, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get all deposits
+app.get("/api/admin/deposits", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = (page - 1) * limit;
+    const countResult = await db.query('SELECT COUNT(*) as total FROM deposits');
+    const total = parseInt(countResult.rows[0].total);
+    const rows = await db.query(
+      'SELECT * FROM deposits ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]
+    );
+    res.json({ success: true, deposits: rows.rows, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get all withdrawals with user info
+app.get("/api/admin/withdrawals", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = (page - 1) * limit;
+    const countResult = await db.query('SELECT COUNT(*) as total FROM withdrawals');
+    const total = parseInt(countResult.rows[0].total);
+    const rows = await db.query(
+      `SELECT w.*, u."firstName", u."username"
+       FROM withdrawals w LEFT JOIN users u ON w."telegramId" = u."telegramId"
+       ORDER BY w."createdAt" DESC LIMIT $1 OFFSET $2`, [limit, offset]
+    );
+    res.json({ success: true, withdrawals: rows.rows, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get all income history
+app.get("/api/admin/income", async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = (page - 1) * limit;
+    const typeFilter = req.query.type || "";
+    let whereClause = "";
+    const params = [];
+    if (typeFilter) {
+      whereClause = 'WHERE "type" = $1';
+      params.push(typeFilter);
+    }
+    const countResult = await db.query(`SELECT COUNT(*) as total FROM income_history ${whereClause}`, params);
+    const total = parseInt(countResult.rows[0].total);
+    const rows = await db.query(
+      `SELECT * FROM income_history ${whereClause} ORDER BY "createdAt" DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+      [...params, limit, offset]
+    );
+    res.json({ success: true, entries: rows.rows, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: approve withdrawal
+app.post("/api/admin/withdraw/approve", async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: "id required" });
+    await db.patch("withdrawals", id, { status: "approved", updatedAt: Date.now() });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: reject withdrawal
+app.post("/api/admin/withdraw/reject", async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: "id required" });
+    const wd = await db.get("withdrawals", id, "id");
+    await db.patch("withdrawals", id, { status: "rejected", updatedAt: Date.now() });
+    if (wd) {
+      const user = await db.get("users", wd.telegramId, "telegramId");
+      if (user) {
+        await db.patch("users", wd.telegramId, {
+          withdrawableBits: (Number(user.withdrawableBits) || 0) + Number(wd.amount),
+          bits: (Number(user.bits) || 0) + Number(wd.amount),
+          totalWithdrawn: Math.max(0, (Number(user.totalWithdrawn) || 0) - Number(wd.amount)),
+          updatedAt: Date.now()
+        }, "telegramId");
+      }
+    }
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// ===== WITHDRAW =====
+
 // Withdraw
 app.post("/api/withdraw", async (req, res) => {
   try {

@@ -528,6 +528,18 @@ app.get("/api/check-deposit/:address", async (req, res) => {
 
 // ==== NEW APIs ====
 
+// Recent users for live feed (MUST be before :userId route)
+app.get("/api/users/recent", async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 5, 50);
+    const rows = await db.query(
+      'SELECT "telegramId", "firstName", "username", "createdAt" FROM users ORDER BY "createdAt" DESC LIMIT $1',
+      [limit]
+    );
+    res.json({ success: true, users: rows.rows });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
 // Full user data
 app.get("/api/users/:userId", async (req, res) => {
   try {
@@ -1258,18 +1270,6 @@ app.post("/api/claim-rank-reward", async (req, res) => {
     await db.insert("daily_claims", claimId, { userId: String(userId), date: today, claimedAt: now });
 
     res.json({ success: true });
-  } catch (e) { res.status(500).json({ error: e.message }) }
-});
-
-// Recent users for live feed
-app.get("/api/users/recent", async (req, res) => {
-  try {
-    const limit = Math.min(parseInt(req.query.limit) || 5, 50);
-    const rows = await db.query(
-      'SELECT "telegramId", "firstName", "username", "createdAt" FROM users ORDER BY "createdAt" DESC LIMIT $1',
-      [limit]
-    );
-    res.json({ success: true, users: rows.rows });
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 

@@ -133,7 +133,7 @@ body.light .app-container{background:var(--bg)}
   </div>
 </div>
 <script>const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
-try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")}</script>
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}const _uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";const _pl=document.getElementById("profileLink");if(_pl)_pl.onclick=function(e){e.stopPropagation();if(_uid)window.location.href='profile.html?uid='+_uid;else window.location.href='profile.html'}</script>
 <script src="api.js"></script>
 <script type="module">
 const tg=window.Telegram?.WebApp;

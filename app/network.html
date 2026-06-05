@@ -217,7 +217,7 @@ function t(m){const e=document.createElement("div");e.className="toast";e.innerH
 function goBack(){const p=new URLSearchParams();p.set("uid",S.uid);window.location.href="dashboard.html?"+p.toString()}
 window.goBack=goBack;
 try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}
-document.getElementById("profileLink").onclick=function(){const p=new URLSearchParams();p.set("uid",S.uid);window.location.href="profile.html?"+p.toString()};
+const _pl=document.getElementById("profileLink");if(_pl)_pl.onclick=function(e){e.stopPropagation();const p=new URLSearchParams();p.set("uid",S.uid||"");window.location.href="profile.html?"+p.toString()};
 
 function getStoredId(){
   try{const v=localStorage.getItem("pb_uid");if(v)return v}catch(e){}

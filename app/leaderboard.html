@@ -75,10 +75,11 @@ const savedTheme=localStorage.getItem("pb_theme");
 if(savedTheme==="light")document.body.classList.add("light");
 const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
 function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
-try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")}
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}
 (async function(){
   let uid=null;
   try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}
+  const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}
   const el=document.getElementById("lbList");
   try{
     const res=await API.getLeaderboard(100);

@@ -1089,7 +1089,7 @@ async function doClaim(){
   try{
     const r=await API.claimDaily(S.uid);
     if(r&&r.error){
-      if(r.error==="already_claimed"){checkClaim();return}
+      if(r.error==="already_claimed"||r.error==="Already claimed today"){S.user.lastClaimDateUTC=S.today;S.user.lastClaimAt=Date.now();setUI(S.user);checkClaim();return}
       t(r.error);checkClaim();return
     }
     if(r&&r.user)S.user=r.user;

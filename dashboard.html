@@ -797,7 +797,8 @@ async function loadNetworkStats(){
     let adTotal=0;
 
     for(let depth=1;depth<=5;depth++){
-      const users=await API.getNetwork(S.uid,depth)||[];
+      const netRes=await API.getNetwork(S.uid,depth)||{};
+      const users=netRes.members||[];
       allLevels.push(users);
       const earn=users.reduce((s,u)=>s+(u.totalEarned||0),0);
       earningsByLevel.push(earn);

@@ -81,8 +81,9 @@ try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.
   try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}
   const el=document.getElementById("lbList");
   try{
-    const data=await API.getLeaderboard(100);
-    if(!data||data.length===0){el.innerHTML='<div class="lb-loading">No miners yet</div>';return}
+    const res=await API.getLeaderboard(100);
+    const data=res?.leaderboard||[];
+    if(data.length===0){el.innerHTML='<div class="lb-loading">No miners yet</div>';return}
     let html="";let i=0;
     for(const item of data){
       const docId=item.telegramId||item.id||item.userId||"";

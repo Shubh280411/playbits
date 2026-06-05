@@ -697,9 +697,10 @@ function loadFeed(){
   const update=async()=>{
     try{
       const r=await API.getRecentUsers(5);
-      if(!r||!r.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No activity yet</div>';return}
+      const users=r?.users||[];
+      if(!users.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No activity yet</div>';return}
       let html="";
-      r.forEach(u=>{
+      users.forEach(u=>{
         if(u.id===S.uid||u.telegramId===S.uid)return;
         if(u.totalEarned>0)return;
         const ago=timeAgo(u.createdAt);
@@ -729,9 +730,10 @@ async function loadLeaderboard(){
   const el=document.getElementById("lbList");if(!el)return;
   try{
     const r=await API.getLeaderboard(3);
-    if(!r||!r.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No miners yet</div>';return}
+    const l=r?.leaderboard||[];
+    if(!l.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No miners yet</div>';return}
     let html="";
-    r.forEach((d2,i)=>{const n=d2.firstName||"Player";html+='<div class="lb-item"><span class="lb-rank">#'+(i+1)+'</span><div class="lb-avatar">'+(n.slice(0,2).toUpperCase())+'</div><span class="lb-name">'+n+'</span><span class="lb-bits">'+(d2.totalEarned||0).toLocaleString()+'</span></div>'});
+    l.forEach((d2,i)=>{const n=d2.firstName||"Player";html+='<div class="lb-item"><span class="lb-rank">#'+(i+1)+'</span><div class="lb-avatar">'+(n.slice(0,2).toUpperCase())+'</div><span class="lb-name">'+n+'</span><span class="lb-bits">'+(d2.totalEarned||0).toLocaleString()+'</span></div>'});
     el.innerHTML=html
   }catch(e){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'}
 }

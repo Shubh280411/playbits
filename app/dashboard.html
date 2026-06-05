@@ -669,24 +669,18 @@ function startClaimTimer(){
   setInterval(()=>{
     if(!S.user)return;
     const now=Date.now();
-    const lc=S.user.lastClaimAt||0;
-    const lt=typeof lc==="number"?lc:0;
-    const next=lt>0?lt+86400000:now;
-    const rem=Math.max(0,next-now);
+    const claimed=S.user.lastClaimDateUTC===S.today;
+    // Countdown to midnight UTC
+    const ms=24*60*60*1000;
+    const msDay=now%ms;
+    const rem=Math.max(0,ms-msDay);
     const hh=Math.floor(rem/3600000),mm=Math.floor(rem%3600000/60000),ss=Math.floor(rem%60000/1000);
     ["h","m","s"].forEach((id,i)=>{
       const el=document.getElementById(id);
       if(el)el.textContent=[String(hh).padStart(2,"0"),String(mm).padStart(2,"0"),String(ss).padStart(2,"0")][i]
     });
-    const cb=document.getElementById("claimBtn");
-    if(rem<=0&&cb&&cb.disabled){
-      cb.disabled=false;
-      const p=calcPkg(S.user);
-      if(!p.exhausted)cb.innerHTML='<i class="fa-solid fa-bolt"></i> CLAIM '+p.round+' BITS'
-      else cb.innerHTML='<i class="fa-solid fa-circle-exclamation"></i> PACKAGE EXHAUSTED'
-    }
     const pr=document.getElementById("progressRing");const pg=document.getElementById("progressGlow");
-    if(pr){const pct=Math.max(0,Math.min(1,rem/86400000));const off=553*pct;pr.style.strokeDashoffset=off;if(pg)pg.style.strokeDashoffset=off}
+    if(pr){const pct=claimed?0:Math.max(0,Math.min(1,rem/ms));const off=553*pct;pr.style.strokeDashoffset=off;if(pg)pg.style.strokeDashoffset=off}
     if(ud(new Date(now))!==S.today){S.today=ud(new Date(now));if(S.user){(async()=>{await runUnlock();await checkClaim();setUI(S.user)})()}}
   },1000)
 }

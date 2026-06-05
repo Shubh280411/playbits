@@ -47,6 +47,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .stat-row .sr-l i{width:18px;text-align:center;font-size:13px}
 .stat-row .sr-v{font:700 14px 'JetBrains Mono',monospace;color:var(--cyan)}
 
+.avatar-join{font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:.5px}
+
 /* INPUT */
 .input-group{margin-bottom:10px}
 .input-group label{display:block;font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-weight:600}
@@ -99,6 +101,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="avatar-circle" id="avatarCircle">PW</div>
     <div class="avatar-name" id="dispName">Player</div>
     <div class="avatar-id" id="dispUid">ID: --</div>
+    <div class="avatar-join" id="dispJoined"></div>
   </div>
 
   <!-- PERSONAL INFO -->
@@ -260,6 +263,8 @@ async function loadProfile(){
   $("avatarCircle").textContent=initial;
   $("dispName").textContent=u.firstName||"Player";
   $("dispUid").textContent="ID: "+S.uid;
+  const joinDate=u.createdAt?new Date(typeof u.createdAt==="number"?u.createdAt:Number(u.createdAt||0)):null;
+  $("dispJoined").textContent=joinDate&&!isNaN(joinDate.getTime())?"Joined "+joinDate.toLocaleDateString([],{year:"numeric",month:"short",day:"numeric"}):"";
 
   // Name input
   $("nameInput").value=u.firstName||"";

@@ -250,7 +250,7 @@ try{
   const tu=tg?.initDataUnsafe?.user;
   document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase();
 }catch(e){}
-document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+uid};
+(function(){const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}})();
 </script>
 </body>
 </html>

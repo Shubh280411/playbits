@@ -160,7 +160,7 @@ if (savedTheme === "light") document.body.classList.add("light");
 let uid = null;
 
 try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}
-document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")};
+(function(){const uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}})();
 let modalTier = null;
 
 function closeModal() { document.getElementById("buyModal").classList.remove("open"); modalTier = null }

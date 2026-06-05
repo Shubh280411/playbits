@@ -16,11 +16,19 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* BACK */
-.back-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.back-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:all .3s}
-.back-btn:hover{color:var(--cyan);border-color:var(--cyan)}
-.back-title{font:800 16px 'Orbitron',sans-serif;letter-spacing:1px;text-transform:uppercase}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
 
 /* CARD */
 .card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:14px;animation:fadeIn .3s ease}
@@ -41,6 +49,22 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 .stat-box:nth-child(3) .sb-value{color:var(--purple)}
 .stat-box .sb-sub{font-size:11px;color:var(--text3);margin-top:2px;font-weight:600}
 .stat-box .sb-sub b{color:var(--green);font-weight:700}
+
+/* LEVEL UNLOCK */
+.level-unlock-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:16px;margin-bottom:14px;position:relative;overflow:hidden;animation:fadeIn .3s ease}
+.level-unlock-card::before{content:'';position:absolute;top:-2px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.lu-header{font:800 12px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.lu-header i{color:var(--green);font-size:14px}
+.lu-orbit-header{font:800 12px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--card-border);display:flex;align-items:center;gap:8px}
+.lu-orbit-header i{color:var(--purple);font-size:14px}
+.lu-grid{display:flex;flex-direction:column;gap:5px}
+.lu-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(0,0,0,.12);border:1px solid var(--card-border);border-radius:var(--rs);font-size:12px}
+.lu-item.unlocked{border-color:rgba(0,255,136,.12);background:rgba(0,255,136,.03)}
+.lu-lvl{font:700 11px 'Orbitron',sans-serif;color:var(--green);min-width:26px}
+.lu-cond{flex:1;color:var(--text2);font-weight:600;font-size:11px}
+.lu-reward{font:700 10px 'JetBrains Mono',monospace;color:var(--cyan)}
+.lu-check{font-size:14px;width:18px;text-align:center;color:var(--text3)}
+.lu-item.unlocked .lu-check{color:var(--green)}
 
 /* FILTER */
 .filter-wrap{margin-bottom:14px}
@@ -95,10 +119,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 
 <div class="app" id="app" style="display:none">
 
-  <div class="back-bar">
-    <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
-    <div class="back-title" data-lang="networkHub">Network Hub</div>
-    <div style="width:38px"></div>
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-back" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="profileLink">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
   </div>
 
   <div class="stat-grid">
@@ -113,6 +143,23 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
     <div class="stat-box">
       <div class="sb-label" data-lang="teamVolumeLabel">Team Volume</div>
       <div class="sb-value" id="totalBusiness">$0</div>
+    </div>
+  </div>
+
+  <div class="level-unlock-card">
+    <div class="lu-header"><i class="fa-solid fa-layer-group"></i> Level Unlock Conditions</div>
+    <div class="lu-grid">
+      <div class="lu-item unlocked"><span class="lu-lvl">L1</span><span class="lu-cond">No Condition</span><span class="lu-reward">5 Bits/ref</span><span class="lu-check"><i class="fa-solid fa-circle-check"></i></span></div>
+      <div class="lu-item" id="luL2"><span class="lu-lvl">L2</span><span class="lu-cond">3 Directs</span><span class="lu-reward">3 Bits/ref</span><span class="lu-check" id="luChk2"><i class="fa-regular fa-circle"></i></span></div>
+      <div class="lu-item" id="luL3"><span class="lu-lvl">L3</span><span class="lu-cond">4 Directs</span><span class="lu-reward">2 Bits/ref</span><span class="lu-check" id="luChk3"><i class="fa-regular fa-circle"></i></span></div>
+    </div>
+    <div class="lu-orbit-header"><i class="fa-solid fa-satellite-dish"></i> Orbit Commission Levels</div>
+    <div class="lu-grid">
+      <div class="lu-item unlocked"><span class="lu-lvl">O1</span><span class="lu-cond">No Condition</span><span class="lu-reward">8%</span><span class="lu-check"><i class="fa-solid fa-circle-check"></i></span></div>
+      <div class="lu-item" id="luO2"><span class="lu-lvl">O2</span><span class="lu-cond">3 Directs</span><span class="lu-reward">4%</span><span class="lu-check" id="luChkO2"><i class="fa-regular fa-circle"></i></span></div>
+      <div class="lu-item" id="luO3"><span class="lu-lvl">O3</span><span class="lu-cond">4 Direct + Self $50</span><span class="lu-reward">3%</span><span class="lu-check" id="luChkO3"><i class="fa-regular fa-circle"></i></span></div>
+      <div class="lu-item" id="luO4"><span class="lu-lvl">O4</span><span class="lu-cond">5 Direct + Self $200</span><span class="lu-reward">2%</span><span class="lu-check" id="luChkO4"><i class="fa-regular fa-circle"></i></span></div>
+      <div class="lu-item" id="luO5"><span class="lu-lvl">O5</span><span class="lu-cond">5 Direct + Self $500</span><span class="lu-reward">2%</span><span class="lu-check" id="luChkO5"><i class="fa-regular fa-circle"></i></span></div>
     </div>
   </div>
 
@@ -141,12 +188,7 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 </div>
 
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getFirestore,doc,getDoc,getDocs,collection,query,where,limit}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
-const app=initializeApp(fbCfg);
-const db=getFirestore(app);
+const BACKEND_URL="https://playbits-backend.onrender.com";
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand()}
 
@@ -173,6 +215,8 @@ function $(id){return document.getElementById(id)}
 function t(m){const e=document.createElement("div");e.className="toast";e.innerHTML=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
 function goBack(){const p=new URLSearchParams();p.set("uid",S.uid);window.location.href="dashboard.html?"+p.toString()}
 window.goBack=goBack;
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}
+document.getElementById("profileLink").onclick=function(){const p=new URLSearchParams();p.set("uid",S.uid);window.location.href="profile.html?"+p.toString()};
 
 function getStoredId(){
   try{const v=localStorage.getItem("pb_uid");if(v)return v}catch(e){}
@@ -246,29 +290,16 @@ async function loadNetwork(){
   S.uid=p.get("uid")||getStoredId();
   if(!S.uid){$("app").style.display="none";t(__("noID"));return}
   try{
-    const userSnap=await getDoc(doc(db,"users",S.uid));
-    if(userSnap.exists())S.user=userSnap.data();
+    const userRes=await fetch(BACKEND_URL+"/api/user/"+S.uid);
+    const userData=await userRes.json();
+    if(userData.success)S.user=userData.user;
 
-    const cacheKey="pb_net_allusers_"+S.uid;
-    const cached=sessionStorage.getItem(cacheKey);
-    if(cached){const cp=JSON.parse(cached);S.allUsers=new Map(Object.entries(cp.data));if(Date.now()-cp.ts<120000){applyNetwork();return}}
+    const netRes=await fetch(BACKEND_URL+"/api/network/"+S.uid+"?level=5");
+    const netData=await netRes.json();
     S.allUsers=new Map();
-    const loadLevel=async(parentIds,depth)=>{
-      if(depth>5||!parentIds.length)return;
-      const batchSize=30;let all=[];
-      for(let i=0;i<parentIds.length;i+=batchSize){
-        const batch=parentIds.slice(i,i+batchSize);
-        const q=query(collection(db,"users"), where("referredBy", "in", batch), limit(200));
-        const s=await getDocs(q);
-        s.forEach(d=>{S.allUsers.set(d.id,d.data());all.push(d.id)});
-      }
-      if(all.length)await loadLevel(all,depth+1)
-    };
-    const l1=await getDocs(query(collection(db,"users"), where("referredBy", "==", S.uid), limit(200)));
-    const l1ids=[];
-    l1.forEach(d=>{S.allUsers.set(d.id,d.data());l1ids.push(d.id)});
-    await loadLevel(l1ids,2);
-    try{sessionStorage.setItem(cacheKey,JSON.stringify({data:Object.fromEntries(S.allUsers),ts:Date.now()}))}catch(e){}
+    if(netData.success&&netData.levels){
+      netData.levels.forEach(level=>{level.forEach(u=>{S.allUsers.set(u.id||u.telegramId,u)})})
+    }
   }catch(e){t(__("fbError"));console.error(e);return}
   applyNetwork()
 }
@@ -283,6 +314,24 @@ function applyNetwork(){
   $("activeDirects").innerHTML=activeCount+' <span class="sb-sub" style="display:inline;font-size:12px">/ <b>'+directs.length+'</b></span>';
   $("totalTeam").textContent=totalTeamCount;
   $("totalBusiness").textContent="$"+Math.floor(totalTeamBusiness).toLocaleString();
+
+  // Update level unlock conditions
+  const dc=directs.length, sp=Number(S.user?.packageAmount||S.user?.activationUSDT||0);
+  const lvlUnlocked=(needed)=>dc>=needed;
+  const orbitUnlocked=(dNeed, pkgNeed)=>dc>=dNeed&&sp>=pkgNeed;
+  const setLvl=(id,chkId,unlocked)=>{
+    const el=document.getElementById(id);const ck=document.getElementById(chkId);
+    if(!el||!ck)return;
+    if(unlocked){el.classList.add("unlocked");ck.innerHTML='<i class="fa-solid fa-circle-check"></i>';ck.style.color="var(--green)"}
+    else{el.classList.remove("unlocked");ck.innerHTML='<i class="fa-regular fa-circle"></i>';ck.style.color="var(--text3)"}
+  };
+  setLvl("luL2","luChk2",lvlUnlocked(3));
+  setLvl("luL3","luChk3",lvlUnlocked(4));
+  setLvl("luO2","luChkO2",orbitUnlocked(3,0));
+  setLvl("luO3","luChkO3",orbitUnlocked(4,50));
+  setLvl("luO4","luChkO4",orbitUnlocked(5,200));
+  setLvl("luO5","luChkO5",orbitUnlocked(5,500));
+
   $("levelSelect").value="1";
   treeFilterLvl=1;
   $("levelMembers").innerHTML=buildLevelHtml(1)

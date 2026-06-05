@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
+    "migrate": "node migrate.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,6 +17,7 @@
     "dotenv": "^17.4.2",
     "ethers": "^6.16.0",
     "express": "^5.2.1",
-    "firebase-admin": "^13.10.0"
+    "firebase-admin": "^13.10.0",
+    "pg": "^8.21.0"
   }
 }

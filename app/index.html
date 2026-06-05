@@ -63,6 +63,7 @@ body.light{--bg:#ffffff;--bg2:#f8fafc;--bg3:#f1f5f9;--card:rgba(255,255,255,.95)
 
   // Apply lang
   const __=k=>{const l=localStorage.getItem("pb_lang")||"en";const L={en:{t:{connecting:"Connecting to Ecosystem..."}},hi:{t:{connecting:"इकोसिस्टम से कनेक्ट हो रहा है..."}},es:{t:{connecting:"Conectando al Ecosistema..."}},fr:{t:{connecting:"Connexion à l'Écosystème..."}},pt:{t:{connecting:"Conectando ao Ecossistema..."}},ru:{t:{connecting:"Подключение к экосистеме..."}},zh:{t:{connecting:"正在连接生态系统..."}},ar:{t:{connecting:"جاري الاتصال بالنظام..."}},ja:{t:{connecting:"エコシステムに接続中..."}},de:{t:{connecting:"Verbinde zum Ökosystem..."}}};return(L[l]?.t?.[k]||L.en.t[k]||k)};
+  function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
   const el=document.querySelector(".ls-sub");if(el)el.textContent=__("connecting");
 
   // DEBUG

@@ -14,10 +14,18 @@ body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition);scroll-behavior:smooth}
 .app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg);transition:background var(--transition)}
 body.light .app-container{background:var(--bg)}
-.pg-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);transition:background var(--transition)}
-.pg-header .pg-back{width:38px;height:38px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s;flex-shrink:0}
-.pg-header .pg-back:hover{color:var(--cyan);border-color:var(--cyan)}
-.pg-header .pg-title{font:800 16px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;flex:1}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
 .dep-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:24px 20px;position:relative;overflow:hidden;transition:all var(--transition);margin-bottom:14px}
 .dep-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
 .dep-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:8px;justify-content:center}
@@ -73,9 +81,16 @@ body.light .app-container{background:var(--bg)}
 </head>
 <body>
 <div class="app-container">
-  <div class="pg-header">
-    <a href="dashboard.html" class="pg-back"><i class="fa-solid fa-arrow-left"></i></a>
-    <span class="pg-title"><i class="fa-solid fa-circle-dollar" style="color:var(--cyan)"></i> Deposit</span>
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="profileLink">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
   </div>
 
   <div class="dep-success" id="depSuccess">
@@ -117,12 +132,9 @@ body.light .app-container{background:var(--bg)}
     <div id="historyList"><div class="history-empty">No deposits yet</div></div>
   </div>
 </div>
+<script>const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")}</script>
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getFirestore,query,collection,onSnapshot,where,limit}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
-const app=initializeApp(fbCfg);
-const db=getFirestore(app);
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand()}
 
@@ -217,45 +229,27 @@ function showDepositModal(d){
   document.getElementById("depositModal").classList.add("show");
 }
 
+function updateDepositList(deposits){
+  const el=document.getElementById("historyList");
+  const items=[...(deposits||[])];
+  items.sort((a,b)=>depositDateMs(b)-depositDateMs(a));
+  const top=items.slice(0,20);
+  let html="";
+  top.forEach(d=>{
+    if(d.status!=="confirmed")return;
+    const amt=d.amount>0?d.amount+" USDT":"—";
+    const addrShort=d.address?d.address.slice(0,8)+"...":"";
+    const dateText=formatDepositDate(d);
+    html+='<div class="history-item"><div class="hi-left"><span class="hi-amount">'+amt+'</span><span class="hi-date">'+dateText+'</span><span class="hi-address">'+addrShort+'</span></div><span class="hi-status confirmed">Completed</span></div>';
+  });
+  el.innerHTML=html||'<div class="history-empty">No deposits yet</div>'
+}
+
 function startDepositMonitor(){
   const uid=getUserId();
   if(!uid)return;
-
-  const q=query(collection(db,"deposits"),where("userId","==",uid),limit(50));
-  const successEl=document.getElementById("depSuccess");
-  const msgEl=document.getElementById("depSuccessMsg");
-
-  const shownSuccesses=new Set();
-  let initialSnap=true;
-
-  onSnapshot(q,snap=>{
-    const el=document.getElementById("historyList");
-    const items=[];
-    snap.forEach(d=>{items.push({id:d.id,...d.data()})});
-    items.sort((a,b)=>depositDateMs(b)-depositDateMs(a));
-    const top=items.slice(0,20);
-    let html="";
-    top.forEach(d=>{
-      if(d.status!=="confirmed")return;
-      const amt=d.amount>0?d.amount+" USDT":"—";
-      const addrShort=d.address?d.address.slice(0,8)+"...":"";
-      const dateText=formatDepositDate(d);
-      html+='<div class="history-item"><div class="hi-left"><span class="hi-amount">'+amt+'</span><span class="hi-date">'+dateText+'</span><span class="hi-address">'+addrShort+'</span></div><span class="hi-status confirmed">Completed</span></div>';
-      if(initialSnap){
-        shownSuccesses.add(d.id);
-      }else if(!shownSuccesses.has(d.id)){
-        shownSuccesses.add(d.id);
-        msgEl.innerHTML='<b>'+d.amount+' USDT</b> received and credited to your account!';
-        successEl.classList.add("show");
-        showDepositModal(d);
-        setTimeout(()=>successEl.classList.remove("show"),6000)
-      }
-    });
-    el.innerHTML=html||'<div class="history-empty">No deposits yet</div>';
-    initialSnap=false
-  },e=>{
-    document.getElementById("historyList").innerHTML='<div class="history-empty">Could not load history</div>'
-  })
+  API.getDeposits(uid).then(r=>{if(r.success)updateDepositList(r.deposits)});
+  setInterval(()=>{API.getDeposits(uid).then(r=>{if(r.success)updateDepositList(r.deposits)})},10000)
 }
 
 fetchAddress();

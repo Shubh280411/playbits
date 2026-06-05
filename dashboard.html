@@ -686,7 +686,7 @@ function startClaimTimer(){
 }
 
 // LIVE FEED
-function loadFeed(){
+async function loadFeed(){
   const el=document.getElementById("feedList");if(!el)return;
   const update=async()=>{
     try{
@@ -704,7 +704,7 @@ function loadFeed(){
       el.innerHTML=html||'<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No new joins yet</div>'
     }catch(e){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'}
   };
-  update();
+  await update();
   setInterval(update,30000)
 }
 function timeAgo(ts){
@@ -1125,10 +1125,10 @@ const initTimer=setTimeout(()=>showBlocked("Taking too long","Server might be sl
     // Quick background refresh if restored from cache
     if(!wasCached){await refreshBooster();setUI(S.user);await checkClaim()}
     else{refreshBooster();checkClaim();setUI(S.user)}
-    clearTimeout(initTimer);showApp();applyLang();
     drawParticles();
     startMining();startClaimTimer();startBoosterTimer();
-    loadFeed();loadLeaderboard();loadNetworkStats();
+    await Promise.allSettled([loadFeed(),loadLeaderboard(),loadNetworkStats()]);
+    clearTimeout(initTimer);showApp();applyLang();
     setInterval(()=>{refreshBooster();checkClaim()},60000)
     try{localStorage.setItem("pb_cache",JSON.stringify({u:S.user,ts:Date.now()}));localStorage.setItem("pb_uid",S.uid)}catch(e){}
   }catch(e){console.error(e);clearTimeout(initTimer);showBlocked("Error","Check console for details.")}

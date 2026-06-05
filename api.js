@@ -64,6 +64,9 @@ window.API = {
   claimOrbit(uid, rankName) { return this.post("/api/claim-orbit", { userId: uid, rankName }); },
   claimRankReward(uid) { return this.post("/api/claim-rank-reward", { userId: uid }); },
 
+  // Add income entry (used by ranks page)
+  addIncome(data) { return this.post("/api/add-income", data); },
+
   // Top users for live feed
   getRecentUsers(limit) { return this.get(`/api/users/recent?limit=${limit || 5}`); }
 };

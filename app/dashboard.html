@@ -1019,7 +1019,7 @@ async function bootstrap(){
   console.log("🔗 Final referral:", S.ref);
 
   const r=await API.getUser(uid);
-  if(!r||r.error||!r.id){
+  if(!r||r.error||!r.user){
     if(String(S.ref)===uid){
       S.ref="1001";
       console.log("⚠️ Self-referral detected, reset to seed");

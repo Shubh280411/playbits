@@ -99,8 +99,8 @@ tr:hover td{background:rgba(0,229,255,.02)}
       <button onclick="loadUsers()"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
     <div class="card" style="overflow-x:auto">
-      <table><thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Package</th><th>Deposit</th><th>Activation</th><th>Bits</th><th>Earned</th><th>Referred By</th><th>Created</th></tr></thead>
-      <tbody id="usersBody"><tr><td colspan="10" class="empty">Loading...</td></tr></tbody></table>
+      <table><thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Package</th><th>Deposit</th><th>Activation</th><th>Bits</th><th>Earned</th><th>Referred By</th><th>Created</th><th>Action</th></tr></thead>
+      <tbody id="usersBody"><tr><td colspan="11" class="empty">Loading...</td></tr></tbody></table>
       <div class="pagination" id="usersPages"></div>
     </div>
   </div>
@@ -188,6 +188,7 @@ async function loadUsers(){
     if(!d.success) return;
     const h = d.users?.map(u => {
       const pkg = u.packageStatus === 'active' ? `<span class="status active">${u.packageAmount}</span>` : `<span class="status none">none</span>`;
+      const delBtn = u.telegramId !== '1001' ? `<button class="btn-small btn-reject" onclick="deleteUser('${u.telegramId}')"><i class="fa-solid fa-trash-can"></i></button>` : '-';
       return `<tr>
         <td class="mono">${u.telegramId}</td>
         <td><strong>${u.firstName||'-'}</strong></td>
@@ -199,9 +200,10 @@ async function loadUsers(){
         <td class="mono">${Math.round(u.totalEarned||0)}</td>
         <td class="mono">${u.referredBy||'-'}</td>
         <td class="mono">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
+        <td style="text-align:center">${delBtn}</td>
       </tr>`;
     }).join('');
-    $('usersBody').innerHTML = h || '<tr><td colspan="10" class="empty">No users found</td></tr>';
+    $('usersBody').innerHTML = h || '<tr><td colspan="11" class="empty">No users found</td></tr>';
     renderPagination('usersPages', d.pagination, p => { pages.users = p; loadUsers(); });
   } catch(e){ $('usersBody').innerHTML = '<tr><td colspan="10" class="empty">Error loading users</td></tr>' }
 }
@@ -288,6 +290,19 @@ function renderPagination(elId, pg, cb){
   }
   html += `<button ${pg.page>=pg.totalPages?'disabled':''} onclick="cb(${pg.page+1})"><i class="fa-solid fa-chevron-right"></i></button>`;
   el.innerHTML = html;
+}
+
+function toast(msg){ const e=document.createElement('div'); e.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:999;background:rgba(0,0,0,.97);border:1px solid rgba(0,229,255,.15);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;color:#fff;animation:fadeIn .35s ease forwards;white-space:nowrap'; e.textContent=msg; document.body.appendChild(e); setTimeout(()=>e.remove(),2500) }
+
+async function deleteUser(telegramId){
+  if(!confirm(`Delete user ${telegramId} permanently? This will also delete all their deposits, packages, income, withdrawals, and team data.`)) return;
+  if(!confirm(`ARE YOU SURE? This CANNOT be undone. User: ${telegramId}`)) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/users/delete`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegramId}) });
+    const d = await r.json();
+    if(d.success){ loadUsers(); fetchStats(); toast('User deleted'); }
+    else alert('Error: '+(d.error||'unknown'));
+  } catch(e){ alert('Error: '+e.message) }
 }
 
 async function approveWD(id){

@@ -1312,6 +1312,26 @@ app.get("/api/admin/income", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 
+// Admin: delete user
+app.post("/api/admin/users/delete", async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.status(400).json({ error: "telegramId required" });
+    if (telegramId === "1001") return res.status(400).json({ error: "Cannot delete seed user" });
+    const user = await db.get("users", telegramId, "telegramId");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    await db.query('DELETE FROM income_history WHERE "userId" = $1', [telegramId]);
+    await db.query('DELETE FROM deposits WHERE "userId" = $1', [telegramId]);
+    await db.query('DELETE FROM packages WHERE "userId" = $1', [telegramId]);
+    await db.query('DELETE FROM daily_claims WHERE "userId" = $1', [telegramId]);
+    await db.query('DELETE FROM orbit_rewards WHERE "userId" = $1', [telegramId]);
+    await db.query('DELETE FROM booster_history WHERE "userId" = $1', [telegramId]);
+    await db.query('DELETE FROM withdrawals WHERE "telegramId" = $1', [telegramId]);
+    await db.query('DELETE FROM users WHERE "telegramId" = $1', [telegramId]);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
 // Admin: approve withdrawal
 app.post("/api/admin/withdraw/approve", async (req, res) => {
   try {

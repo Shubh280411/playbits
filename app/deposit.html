@@ -145,7 +145,8 @@ if(savedTheme==="light")document.body.classList.add("light");
 const BACKEND_URL="https://playbits-backend-132h.onrender.com";
 
 function getUserId(){
-  try{return localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}
+  const p=new URLSearchParams(location.search);
+  try{return p.get("uid")||localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}
   return null
 }
 

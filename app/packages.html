@@ -157,10 +157,10 @@ function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const
 const savedTheme = localStorage.getItem("pb_theme");
 if (savedTheme === "light") document.body.classList.add("light");
 
-let uid = null;
+const p=new URLSearchParams(location.search);let uid=p.get("uid")||localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
 
 try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}
-(function(){const uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}})();
+const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}
 let modalTier = null;
 
 function closeModal() { document.getElementById("buyModal").classList.remove("open"); modalTier = null }

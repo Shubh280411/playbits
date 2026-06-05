@@ -291,7 +291,7 @@ async function loadNetwork(){
   S.uid=p.get("uid")||getStoredId();
   if(!S.uid){$("app").style.display="none";t(__("noID"));return}
   try{
-    const userRes=await fetch(BACKEND_URL+"/api/user/"+S.uid);
+    const userRes=await fetch(BACKEND_URL+"/api/users/"+S.uid);
     const userData=await userRes.json();
     if(userData.success)S.user=userData.user;
 

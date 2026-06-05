@@ -241,7 +241,7 @@ async function loadProfile(){
   if(!S.uid){$("app").style.display="none";t(__("noUserID"));return}
 
   try{
-    const res=await fetch(BACKEND_URL+"/api/user/"+S.uid);
+    const res=await fetch(BACKEND_URL+"/api/users/"+S.uid);
     const data=await res.json();
     if(!data.success||!data.user){t(__("userNotFound"));return}
     S.user=data.user;

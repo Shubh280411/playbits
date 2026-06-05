@@ -196,16 +196,6 @@ const TYPE_MAP={
 };
 function t(m){const e=document.createElement("div");e.className="toast";e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2500)}
 
-function toVal(v){
-  if(v===null||v===undefined)return 0;
-  if(v.integerValue!==undefined)return parseInt(v.integerValue);
-  if(v.doubleValue!==undefined)return v.doubleValue;
-  if(v.stringValue!==undefined)return v.stringValue;
-  return 0;
-}
-
-
-
 function fmtDate(ts){
   if(!ts)return"--";
   const d=new Date(typeof ts==="number"?ts:(Number(ts)||0));
@@ -227,31 +217,6 @@ function fmtDateShort(ts){
 function getTypeIcon(type){
   const t=TYPE_MAP[type];
   return t?'<i class="'+t.icon+' '+t.cls+'"></i> '+t.label:type;
-}
-
-function getWeekRange(){
-  const d=new Date();d.setDate(d.getDate()-d.getDay());d.setHours(0,0,0,0);
-  return d.getTime();
-}
-function getMonthRange(){
-  const d=new Date();d.setDate(1);d.setHours(0,0,0,0);
-  return d.getTime();
-}
-
-function calcStats(entries){
-  let lifetime=0,today=0,week=0,month=0;
-  const now=Date.now(),todayStart=new Date();todayStart.setHours(0,0,0,0);
-  const weekStart=getWeekRange(),monthStart=getMonthRange();
-  for(const e of entries){
-    const amt=Number(e.amount)||0;
-    if(e.type==="withdrawal"||e.type==="withdraw"){lifetime-=amt;continue}
-    lifetime+=amt;
-    const ts=Number(e.createdAt)||0;
-    if(ts>=todayStart.getTime())today+=amt;
-    if(ts>=weekStart)week+=amt;
-    if(ts>=monthStart)month+=amt;
-  }
-  return{lifetime,today,week,month};
 }
 
 function renderDetail(entry){
@@ -296,11 +261,6 @@ document.getElementById("detailOverlay").addEventListener("click",closeDetail);
 function renderIncome(){
   const filtered=filter==="all"?allEntries:allEntries.filter(e=>e.type===filter);
   displayedEntries=filtered;
-  const stats=calcStats(allEntries);
-  document.getElementById("statLifetime").textContent=stats.lifetime.toLocaleString()+" B";
-  document.getElementById("statToday").textContent=stats.today.toLocaleString()+" B";
-  document.getElementById("statWeek").textContent=stats.week.toLocaleString()+" B";
-  document.getElementById("statMonth").textContent=stats.month.toLocaleString()+" B";
 
   const el=document.getElementById("incomeList");
   if(filtered.length===0){el.innerHTML='<div class="income-empty"><i class="fa-solid fa-receipt" style="font-size:28px;margin-bottom:10px;color:var(--text3);display:block"></i> No transactions found</div>';return}
@@ -319,8 +279,14 @@ async function loadIncome(){
   const el=document.getElementById("incomeList");
   el.innerHTML='<div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
   try{
-    const entries=await API.getIncome(uid, 200, filter);
-    allEntries=(entries||[]).sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+    const url=`/api/income/${uid}?page=1&limit=200${filter!=='all'?'&type='+filter:''}`;
+    const data=await fetch(BACKEND_URL+url).then(r=>r.json());
+    allEntries=(data?.entries||[]).sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+    const st=data?.stats||{};
+    document.getElementById("statLifetime").textContent=Number(st.lifetime||0).toLocaleString()+" B";
+    document.getElementById("statToday").textContent=Number(st.today||0).toLocaleString()+" B";
+    document.getElementById("statWeek").textContent=Number(st.week||0).toLocaleString()+" B";
+    document.getElementById("statMonth").textContent=Number(st.month||0).toLocaleString()+" B";
     page=0;renderIncome();
   }catch(e){
     console.error("Income load error:",e);

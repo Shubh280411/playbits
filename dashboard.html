@@ -1092,10 +1092,13 @@ async function doClaim(){
       S.user.bits=(S.user.bits||0)+p.round;
       S.user.totalEarned=(S.user.totalEarned||0)+p.round;
       S.user.packageEarned=(S.user.packageEarned||0)+p.round;
-      S.user.lastClaimDateUTC=S.today;
-      S.user.lastClaimAt=Date.now();
     }
-    setUI(S.user);checkClaim();t("Claimed "+p.round+" bits");
+    S.user.lastClaimDateUTC=S.today;
+    S.user.lastClaimAt=Date.now();
+    setUI(S.user);checkClaim();
+    const cb2=document.getElementById("claimBtn");
+    if(cb2){cb2.disabled=true;cb2.innerHTML='<i class="fa-regular fa-circle-check"></i> CLAIMED'}
+    t("Claimed "+p.round+" bits");
   }catch(e){
     console.error("Claim error:",e);
     S.canClaim=true;

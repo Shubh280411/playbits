@@ -151,7 +151,7 @@ if(tg){tg.ready();tg.expand()}
     const ws=await API.getWithdrawals(20);
     const hEl=document.getElementById("wdHistory");
     let html="";let count=0;
-    (ws||[]).forEach(w=>{
+    (ws?.withdrawals||[]).forEach(w=>{
       if(w.telegramId===uid){
         count++;
         let statusClass = w.status === "completed" ? "completed" : (w.status === "rejected" ? "rejected" : "pending");

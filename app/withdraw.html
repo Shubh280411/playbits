@@ -110,7 +110,7 @@ if(tg){tg.ready();tg.expand()}
   let uid=p.get("uid");
   if(!uid){try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}}
   if(!uid){document.getElementById("wdBalance").textContent="Login required";return}
-  const res=await fetch(BACKEND_URL+"/api/user/"+uid);
+  const res=await fetch(BACKEND_URL+"/api/users/"+uid);
   const uData=await res.json();
   if(!uData.success||!uData.user){document.getElementById("wdBalance").textContent="User not found";return}
   const u=uData.user;

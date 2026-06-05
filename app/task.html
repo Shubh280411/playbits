@@ -81,7 +81,7 @@ const TASKS=[
   if(!uid){try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}}
   let user=null;
   if(uid){
-    try{const res=await fetch(BACKEND_URL+"/api/user/"+uid);const d=await res.json();if(d.success)user=d.user}catch(e){}
+    try{const res=await fetch(BACKEND_URL+"/api/users/"+uid);const d=await res.json();if(d.success)user=d.user}catch(e){}
   }
   const el=document.getElementById("taskList");
   let html="";

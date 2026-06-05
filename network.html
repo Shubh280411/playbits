@@ -298,8 +298,8 @@ async function loadNetwork(){
     const netRes=await fetch(BACKEND_URL+"/api/network/"+S.uid+"?level=5");
     const netData=await netRes.json();
     S.allUsers=new Map();
-    if(netData.success&&netData.levels){
-      netData.levels.forEach(level=>{level.forEach(u=>{S.allUsers.set(u.id||u.telegramId,u)})})
+    if(netData.success&&netData.members){
+      netData.members.forEach(u=>{S.allUsers.set(u.telegramId||u.id,u)})
     }
   }catch(e){t(__("fbError"));console.error(e);return}
   applyNetwork()

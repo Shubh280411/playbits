@@ -80,6 +80,13 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .level-row .lr-check.qualified{color:var(--green)}
 .level-row .lr-check.active{color:var(--cyan)}
 
+/* WARNING */
+.warning-card{background:rgba(255,165,0,.05);border:2px solid rgba(255,165,0,.25);border-radius:var(--r);padding:14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;animation:warnPulse 1.8s ease-in-out infinite}
+@keyframes warnPulse{0%,100%{border-color:rgba(255,165,0,.25)}50%{border-color:rgba(255,165,0,.55)}}
+.warn-icon{width:32px;height:32px;border-radius:50%;background:rgba(255,165,0,.15);display:grid;place-items:center;flex-shrink:0;color:#ff9500;font-size:16px}
+.warn-text{font-size:12px;color:var(--text2);line-height:1.5;font-weight:500;margin-top:5px}
+.warn-text b{color:var(--gold);font-weight:700}
+
 /* HISTORY */
 .history-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
 .history-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink),transparent)}
@@ -113,7 +120,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="booster-grid">
       <div class="booster-item"><div class="bi-label">Extra ROI</div><div class="bi-value cyan" id="extraRoi">+0.00%</div></div>
       <div class="booster-item"><div class="bi-label">Remaining Time</div><div class="bi-value" id="remainTime">--</div></div>
-      <div class="booster-item"><div class="bi-label">Active Directs</div><div class="bi-value cyan" id="activeDir">0</div></div>
+      <div class="booster-item"><div class="bi-label">Total Directs</div><div class="bi-value cyan" id="totalDir">0</div></div>
       <div class="booster-item"><div class="bi-label">Qualified</div><div class="bi-value" id="qualDir">0</div></div>
     </div>
     <div class="booster-status locked" id="boosterStatus">Locked</div>
@@ -148,12 +155,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </div>
   </div>
 
+  <div class="warning-card">
+    <div class="warn-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="warn-text">Only directs with an <b>active package</b> of <b>same or higher</b> amount than your package count toward the booster requirement.</div>
+  </div>
+
   <div class="history-card">
     <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Booster History</div>
     <div id="historyList"><div class="history-empty">No history yet</div></div>
   </div>
 </div>
 <script>
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
 const BACKEND_URL="https://playbits-backend.onrender.com";
 const savedTheme=localStorage.getItem("pb_theme");
 if(savedTheme==="light")document.body.classList.add("light");
@@ -167,7 +181,7 @@ function setBoosterError(msg){
   document.getElementById("boosterStatus").className="booster-status expired";
   document.getElementById("extraRoi").textContent="+0.00%";
   document.getElementById("remainTime").textContent="--";
-  document.getElementById("activeDir").textContent="0";
+  document.getElementById("totalDir").textContent="0";
   document.getElementById("qualDir").textContent="0";
 }
 
@@ -191,8 +205,8 @@ async function loadBooster(){
     document.getElementById("boosterName").textContent=cur?cur.name:"Locked";
     document.getElementById("extraRoi").textContent="+"+Number(cur?.extraRoi||0).toFixed(2)+"%";
     document.getElementById("remainTime").textContent=fmtRemain(d.remainingMs||0);
-    document.getElementById("activeDir").textContent=d.activeDirectCount||0;
-    document.getElementById("qualDir").textContent=d.progress?.current||0;
+    document.getElementById("totalDir").textContent=d.totalDirectCount||0;
+    document.getElementById("qualDir").textContent=d.activeDirectCount||0;
 
     const stEl=document.getElementById("boosterStatus");
     stEl.textContent=s.toUpperCase();

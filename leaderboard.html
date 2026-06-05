@@ -9,13 +9,23 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition);scroll-behavior:smooth}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--vt:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition);scroll-behavior:smooth}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
 .app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg)}
-.pg-header{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
-.pg-header .pg-back{width:38px;height:38px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
-.pg-header .pg-back:hover{color:var(--cyan);border-color:var(--cyan)}
-.pg-header .pg-title{font:800 16px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
 .lb-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
 .lb-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
 .lb-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
@@ -41,9 +51,16 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 </head>
 <body>
 <div class="app-container">
-  <div class="pg-header">
-    <a href="dashboard.html" class="pg-back"><i class="fa-solid fa-arrow-left"></i></a>
-    <span class="pg-title"><i class="fa-solid fa-trophy" style="color:var(--gold)"></i> Leaderboard</span>
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="profileLink">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
   </div>
   <div class="lb-card">
     <div class="lb-header"><i class="fa-solid fa-ranking-star"></i> Top Miners</div>
@@ -51,38 +68,25 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
   </div>
 </div>
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
-const app=initializeApp(fbCfg);
 const tg=window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand()}
-const FIRESTORE_BASE="https://firestore.googleapis.com/v1/projects/playbits-9e671/databases/(default)/documents";
-const API_KEY="AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk";
+const savedTheme=localStorage.getItem("pb_theme");
+if(savedTheme==="light")document.body.classList.add("light");
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")}
 (async function(){
   let uid=null;
   try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}
   const el=document.getElementById("lbList");
   try{
-    const res=await fetch(FIRESTORE_BASE+":runQuery?key="+API_KEY,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        structuredQuery:{
-          from:[{collectionId:"users"}],
-          orderBy:[{field:{fieldPath:"totalEarned"},direction:"DESCENDING"}],
-          limit:100
-        }
-      })
-    });
-    const data=await res.json();
-    if(!data||data.length===0||!data[0]?.document){el.innerHTML='<div class="lb-loading">No miners yet</div>';return}
+    const data=await API.getLeaderboard(100);
+    if(!data||data.length===0){el.innerHTML='<div class="lb-loading">No miners yet</div>';return}
     let html="";let i=0;
     for(const item of data){
-      if(!item.document||!item.document.fields)continue;
-      const f=item.document.fields;
-      const docId=item.document.name.split("/").pop();
-      const n=f.firstName?.stringValue||"Player";
-      const te=f.totalEarned?.integerValue?parseInt(f.totalEarned.integerValue):f.totalEarned?.doubleValue||0;
+      const docId=item.telegramId||item.id||item.userId||"";
+      const n=item.firstName||"Player";
+      const te=item.totalEarned||0;
       const isMe=docId===uid;
       i++;
       html+='<div class="lb-item'+(isMe?' me':'')+'"><span class="lb-rank">#'+i+'</span><div class="lb-avatar">'+(n.slice(0,2).toUpperCase())+'</div><span class="lb-name">'+n+(isMe?' <span style="font-size:9px;color:var(--cyan)">(you)</span>':'')+'</span><span class="lb-bits">'+Number(te).toLocaleString()+'</span></div>'

@@ -207,6 +207,20 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .feed-item .fi-text b{color:var(--text);font-weight:700}
 .feed-item .fi-time{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 
+/* BOOSTER PROGRESS */
+.booster-progress-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all var(--transition)}
+.booster-progress-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.booster-progress-header{font:800 13px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.booster-progress-header i{color:var(--gold)}
+.bp-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.02)}
+.bp-label{color:var(--text3);font-weight:600}
+.bp-value{color:var(--text);font-weight:700;font-family:'JetBrains Mono',monospace}
+.bp-value.cyan{color:var(--cyan)}
+.bp-value.gold{color:var(--gold)}
+.bp-progress-bar{height:6px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin:10px 0 6px}
+.bp-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--cyan));border-radius:999px;transition:width .8s}
+.bp-progress-label{font-size:10px;color:var(--text3);text-align:center;font-weight:600}
+
 /* TIER CARD */
 .tier-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
 .tier-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
@@ -321,6 +335,8 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <a class="menu-item" href="#dash"><i class="fa-solid fa-gauge-high"></i><span data-lang="dash">Dashboard</span></a>
   <a class="menu-item" href="ranks.html"><i class="fa-solid fa-crown"></i><span>Ranks</span></a>
   <a class="menu-item" href="packages.html"><i class="fa-solid fa-rocket"></i><span>Packages</span></a>
+  <a class="menu-item" href="income.html"><i class="fa-solid fa-clock-rotate-left"></i><span data-lang="history">History</span></a>
+  <a class="menu-item" href="differential-roi.html"><i class="fa-solid fa-chart-simple"></i><span>Differential ROI</span></a>
   <a class="menu-item" href="booster.html"><i class="fa-solid fa-jet-fighter"></i><span>Booster</span></a>
   <a class="menu-item" href="task.html"><i class="fa-brands fa-twitter"></i><span>Tasks</span></a>
   <a class="menu-item" href="network.html?uid=UID"><i class="fa-solid fa-sitemap"></i><span>My Team</span></a>
@@ -405,9 +421,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
       <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-bolt"></i></div><div class="sc-label" data-lang="activation">Activation</div><div class="sc-value" id="activationEnergy">$0</div><div class="sc-bar"><div class="sc-fill" id="activationBar"></div></div></div>
       <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-jet-fighter"></i></div><div class="sc-label" data-lang="booster">Booster</div><div class="sc-value" id="boosterLevel">Lv.1</div><div class="sc-bar"><div class="sc-fill" id="boosterBar"></div></div></div>
       <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-layer-group"></i></div><div class="sc-label">User Level</div><div class="sc-value" id="userLevelDisplay">L1</div><div class="sc-bar"><div class="sc-fill" id="levelBar"></div></div></div>
-      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-chart-line"></i></div><div class="sc-label">Rewards</div><div class="sc-value" id="rewardProgress">0%</div><div class="sc-bar"><div class="sc-fill" id="rewardBar"></div></div></div>
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-chart-line"></i></div><div class="sc-label">Cap</div><div class="sc-value" id="rewardProgress">0%</div><div class="sc-bar"><div class="sc-fill" id="rewardBar"></div></div></div>
       <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-wallet"></i></div><div class="sc-label" data-lang="totalWD">Withdrawable</div><div class="sc-value" id="withdrawableVal">0</div><div class="sc-bar"><div class="sc-fill" id="withdrawableBar"></div></div></div>
       <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-users"></i></div><div class="sc-label">Directs</div><div class="sc-value" id="totalDirectsVal">0</div><div class="sc-sub">Active: <b id="activeDirectsVal">0</b></div></div>
+    </div>
+
+    <div class="booster-progress-card" id="boosterProgress" style="display:none">
+      <div class="booster-progress-header"><i class="fa-solid fa-jet-fighter"></i> Booster Status</div>
+      <div class="bp-row"><span class="bp-label">Active Booster</span><span class="bp-value" id="bpName">None</span></div>
+      <div class="bp-row"><span class="bp-label">Extra ROI</span><span class="bp-value cyan" id="bpExtraRoi">+0.00%</span></div>
+      <div class="bp-row"><span class="bp-label">Time Remaining</span><span class="bp-value gold" id="bpRemain">--</span></div>
+      <div class="bp-row"><span class="bp-label">Next Target</span><span class="bp-value" id="bpNext">Ignition (10)</span></div>
+      <div class="bp-progress-bar"><div class="bp-progress-fill" id="bpFill"></div></div>
+      <div class="bp-progress-label"><span id="bpProgressCur">0</span> / <span id="bpProgressTgt">10</span> directs</div>
     </div>
 
     <div class="tier-card">
@@ -477,6 +503,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <nav class="bottom-dock">
     <a class="dock-item active" href="#dash"><i class="fa-solid fa-gauge-high"></i><span>Home</span></a>
     <a class="dock-item" href="network.html?uid=UID"><i class="fa-solid fa-sitemap"></i><span>My Team</span></a>
+    <a class="dock-item" href="income.html"><i class="fa-solid fa-clock-rotate-left"></i><span>Income</span></a>
     <a class="dock-item" href="deposit.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Deposits</span></a>
     <a class="dock-item" href="withdraw.html"><i class="fa-solid fa-arrow-up-right-dots"></i><span>Withdrawal</span></a>
   </nav>
@@ -484,26 +511,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
 <script>
 try{
-  var $c=sessionStorage.getItem("pb_dash_state");
+  var $c=localStorage.getItem("pb_cache");
   if($c){
     var $d=JSON.parse($c);
-    if($d.uid&&$d.user){
+    if($d.u){
       document.getElementById("ssBlocked").classList.remove("s");
       document.getElementById("appWrap").style.display="block";
-      window.__pb_restored=1;
+      window.__pb_cu=$d.u;window.__pb_cr=1;
     }
   }
 }catch(e){}
 </script>
 <script type="module">
-import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import{getFirestore,doc,getDoc,getDocs,setDoc,updateDoc,increment,serverTimestamp,query,where,orderBy,limit,collection,onSnapshot}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const fbCfg={apiKey:"AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",authDomain:"playbits-9e671.firebaseapp.com",projectId:"playbits-9e671",storageBucket:"playbits-9e671.firebasestorage.app",messagingSenderId:"308371821857",appId:"1:308371821857:web:20e0a74b6f5d8097639a60"};
-const app=initializeApp(fbCfg);
-const db=getFirestore(app);
-const tg=window.Telegram?.WebApp;
-if(tg){tg.ready();tg.expand()}
+const TG=window.Telegram?.WebApp;if(TG){TG.ready();TG.expand()}
 
 const TIERS=[
   {min:10,max:49,roi:.5,cap:2,label:"Starter"},{min:50,max:199,roi:.8,cap:2.25,label:"Bronze"},
@@ -649,7 +669,7 @@ function startClaimTimer(){
     if(!S.user)return;
     const now=Date.now();
     const lc=S.user.lastClaimAt||0;
-    const lt=typeof lc==="number"?lc:(lc?.toMillis?lc.toMillis():0);
+    const lt=typeof lc==="number"?lc:0;
     const next=lt>0?lt+86400000:now;
     const rem=Math.max(0,next-now);
     const hh=Math.floor(rem/3600000),mm=Math.floor(rem%3600000/60000),ss=Math.floor(rem%60000/1000);
@@ -673,24 +693,27 @@ function startClaimTimer(){
 // LIVE FEED
 function loadFeed(){
   const el=document.getElementById("feedList");if(!el)return;
-  const q=query(collection(db,"users"),orderBy("createdAt","desc"),limit(5));
-  const sub=onSnapshot(q,snap=>{
-    if(snap.empty){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No activity yet</div>';return}
-    let html="";
-    snap.forEach(d=>{
-      const d2=d.data();
-      if(d.id===S.uid)return;
-      if(d2.totalEarned>0)return; // only new joins, skip activated users
-      const ago=timeAgo(d2.createdAt);
-      const name=d2.firstName||"Player";
-      html+='<div class="feed-item"><div class="fi-icon join"><i class="fa-solid fa-user-plus"></i></div><span class="fi-text"><b>'+name+'</b> joined PlayBits</span><span class="fi-time">'+ago+'</span></div>'
-    });
-    el.innerHTML=html||'<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No new joins yet</div>'
-  },e=>{el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'})
+  const update=async()=>{
+    try{
+      const r=await API.getRecentUsers(5);
+      if(!r||!r.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No activity yet</div>';return}
+      let html="";
+      r.forEach(u=>{
+        if(u.id===S.uid||u.telegramId===S.uid)return;
+        if(u.totalEarned>0)return;
+        const ago=timeAgo(u.createdAt);
+        const name=u.firstName||"Player";
+        html+='<div class="feed-item"><div class="fi-icon join"><i class="fa-solid fa-user-plus"></i></div><span class="fi-text"><b>'+name+'</b> joined PlayBits</span><span class="fi-time">'+ago+'</span></div>'
+      });
+      el.innerHTML=html||'<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No new joins yet</div>'
+    }catch(e){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'}
+  };
+  update();
+  setInterval(update,30000)
 }
 function timeAgo(ts){
   if(!ts)return"now";
-  const t=typeof ts==="number"?ts:(ts?.toMillis?ts.toMillis():Date.now());
+  const t=typeof ts==="number"?ts:Date.now();
   const s=Math.floor((Date.now()-t)/1000);
   if(s<5)return"just now";
   if(s<60)return s+"s ago";
@@ -704,11 +727,10 @@ function timeAgo(ts){
 async function loadLeaderboard(){
   const el=document.getElementById("lbList");if(!el)return;
   try{
-    const q=query(collection(db,"users"),orderBy("totalEarned","desc"),limit(3));
-    const snap=await getDocs(q);
-    if(snap.empty){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No miners yet</div>';return}
-    let html="";let i=0;
-    snap.forEach(d=>{i++;const d2=d.data();const n=d2.firstName||"Player";html+='<div class="lb-item"><span class="lb-rank">#'+i+'</span><div class="lb-avatar">'+(n.slice(0,2).toUpperCase())+'</div><span class="lb-name">'+n+'</span><span class="lb-bits">'+(d2.totalEarned||0).toLocaleString()+'</span></div>'});
+    const r=await API.getLeaderboard(3);
+    if(!r||!r.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No miners yet</div>';return}
+    let html="";
+    r.forEach((d2,i)=>{const n=d2.firstName||"Player";html+='<div class="lb-item"><span class="lb-rank">#'+(i+1)+'</span><div class="lb-avatar">'+(n.slice(0,2).toUpperCase())+'</div><span class="lb-name">'+n+'</span><span class="lb-bits">'+(d2.totalEarned||0).toLocaleString()+'</span></div>'});
     el.innerHTML=html
   }catch(e){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'}
 }
@@ -769,50 +791,32 @@ async function loadNetworkStats(){
       renderLevelCards(d);
       if (Date.now() - d.ts < 120000) return;
     }
-    const snap=await getDocs(query(collection(db,"users"), where("referredBy", "==", S.uid), limit(100)));
-    const level1=[];
-    snap.forEach(d=>level1.push({id:d.id,...d.data()}));
+    const allLevels=[];
+    const earningsByLevel=[];
+    let adTotal=0;
 
-    let adTotal=0,activeCount=0;
-    const allLevels=[level1];
-    const earningsByLevel=[level1.reduce((s,u)=>s+(u.totalEarned||0),0)];
-    adTotal+=level1.length;
-    activeCount=level1.filter(u=>u.isActivated10||(u.activationUSDT||0)>=10).length;
-
-    for(let depth=1;depth<5;depth++){
-      const parentIds=allLevels[depth-1].map(u=>u.id);
-      let levelUsers=[];
-      for(let i=0;i<parentIds.length;i+=30){
-        const batch=parentIds.slice(i,i+30);
-        const q=query(collection(db,"users"), where("referredBy", "in", batch), limit(200));
-        const s=await getDocs(q);
-        s.forEach(d=>levelUsers.push({id:d.id,...d.data()}));
-      }
-      allLevels.push(levelUsers);
-      const earn=levelUsers.reduce((s,u)=>s+(u.totalEarned||0),0);
+    for(let depth=1;depth<=5;depth++){
+      const users=await API.getNetwork(S.uid,depth)||[];
+      allLevels.push(users);
+      const earn=users.reduce((s,u)=>s+(u.totalEarned||0),0);
       earningsByLevel.push(earn);
-      adTotal+=levelUsers.length;
+      adTotal+=users.length;
     }
 
-    // Calculate levels
+    const level1=allLevels[0]||[];
+    const activeCount=level1.filter(u=>u.isActivated10||(u.activationUSDT||0)>=10).length;
+
     const ulvl=calcUserLevel(S.user||{}), olvl=calcOrbitLevel(S.user||{});
-    // Airdrop bits based on LEVELS (3 levels, no self pkg)
     let adEarned=0;
     for(let i=0;i<LEVELS.length;i++){
       if(i<=ulvl)adEarned+=(allLevels[i]?.length||0)*LEVELS[i].airdropBits;
     }
-    // Orbit commission based on ORBIT_LEVELS (5 levels, with self pkg)
     const orbEarnArr=ORBIT_LEVELS.map((_,i)=>Math.floor((earningsByLevel[i]||0)*ORBIT_LEVELS[i].orbitPct/100));
     const oeTotal=orbEarnArr.reduce((s,v)=>s+v,0);
 
-    // Auto-credit airdrop once per day
     if(S.user && adEarned>0 && S.user.lastAirdropDate!==S.today){
       try{
-        await updateDoc(doc(db,"users",S.uid),{
-          withdrawableBits:increment(adEarned),bits:increment(adEarned),
-          totalEarned:increment(adEarned),lastAirdropDate:S.today,
-          updatedAt:serverTimestamp()
-        });
+        await fetch(BACKEND_URL+"/api/airdrop",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:S.uid,amount:adEarned,date:S.today,level:ulvl+1})});
         S.user.withdrawableBits=(S.user.withdrawableBits||0)+adEarned;
         S.user.bits=(S.user.bits||0)+adEarned;
         S.user.totalEarned=(S.user.totalEarned||0)+adEarned;
@@ -859,9 +863,9 @@ function setUI(u){
   const ulIdx=calcUserLevel(u);
   e("userLevelDisplay",LEVELS[ulIdx].label);
   s("levelBar",((ulIdx+1)/LEVELS.length*100)+"%");
-  const ri=rankInfo(u.totalEarned||0);
-  e("rewardProgress",ri.p+"%");
-  s("rewardBar",ri.p+"%");
+  const cpPct=pkg.maxEarnings>0?Math.min(100,Math.round((pkg.earned/pkg.maxEarnings)*100)):0;
+  e("rewardProgress",cpPct+"%");
+  s("rewardBar",cpPct+"%");
   e("fusionBalance",Math.min(10,(u.unlockedFromSignup||0)+(u.unlockingBits||0))+(u.followBits||0));
   updateFusion(u);
   if(u.followClaimed){
@@ -876,14 +880,15 @@ function setUI(u){
   e("dailyCap",pkg.roi>0?(pkg.roi+pkg.boostRoi).toFixed(2)+"% ROI ("+pkg.round+" Bits)":"0 Bits");
   e("tierAct","$"+pkg.w);
   e("tierSpeed",pkg.roi+"%");
-  const cpPct=pkg.maxEarnings>0?Math.min(100,(pkg.earned/pkg.maxEarnings)*100):0;
-  e("tierCapPct",cpPct.toFixed(0)+"%");
+  const tcp=pkg.maxEarnings>0?Math.min(100,(pkg.earned/pkg.maxEarnings)*100):0;
+  e("tierCapPct",tcp.toFixed(0)+"%");
   e("tierCapEarned",pkg.earned.toFixed(2)+" / "+pkg.maxEarnings.toFixed(0));
-  const cb=document.getElementById("tierCapBar");if(cb)cb.style.width=cpPct+"%";
+  const cb=document.getElementById("tierCapBar");if(cb)cb.style.width=tcp+"%";
   const cta=document.getElementById("tierCta");if(cta)cta.style.display=(pkg.w<=0||pkg.exhausted)?"block":"none";
   e("totalDirectsVal",u.totalDirects||0);
   e("activeDirectsVal",u.activeDirects||0);
-  document.getElementById("refLink").textContent="https://t.me/PBTESTING2BOT/app?startapp="+S.uid
+  document.getElementById("refLink").textContent="https://t.me/PBTESTING2BOT/app?startapp="+S.uid;
+  updateBoosterUI();
 }
 
 async function refreshBooster(){
@@ -899,6 +904,10 @@ async function refreshBooster(){
     S.boosterStatus=d.boosterStatus||"locked";
     S.boosterName=d.currentBooster?.name||"None";
     S.boosterExpiresAt=Number(d.currentBooster?.expiresAt||0);
+    S.boosterRemainingMs=Number(d.remainingMs||0);
+    S.boosterNext=d.nextBooster||null;
+    S.boosterProgress=d.progress||{current:0,target:10,pct:0};
+    S.boosterActiveDirects=d.activeDirectCount||0;
     if(S.user){
       S.user.boosterExtraROI=S.boosterExtraROI;
       S.user.boosterStatus=S.boosterStatus;
@@ -910,8 +919,45 @@ async function refreshBooster(){
   }catch(e){console.warn("Booster refresh failed",e)}
 }
 
+function updateBoosterUI(){
+  const el=document.getElementById("boosterProgress");
+  if(!el)return;
+  const isActive=S.boosterStatus==="active";
+  const hasNext=S.boosterNext||(S.boosterProgress?.current>0);
+  el.style.display=(isActive||hasNext)?"block":"none";
+  document.getElementById("bpName").textContent=S.boosterName||"None";
+  document.getElementById("bpExtraRoi").textContent="+"+Number(S.boosterExtraROI||0).toFixed(2)+"%";
+  const remain=S.boosterRemainingMs||0;
+  if(isActive&&remain>0){
+    const d=Math.floor(remain/86400000),h=Math.floor((remain%86400000)/3600000);
+    document.getElementById("bpRemain").textContent=d+"d "+h+"h";
+  }else{
+    document.getElementById("bpRemain").textContent=isActive?"Expiring...":"--";
+  }
+  const nxt=S.boosterNext;
+  document.getElementById("bpNext").textContent=nxt?nxt.name+" ("+nxt.targetDirects+" direct)":"Max Level";
+  document.getElementById("bpProgressCur").textContent=S.boosterProgress?.current||0;
+  document.getElementById("bpProgressTgt").textContent=S.boosterProgress?.target||10;
+  document.getElementById("bpFill").style.width=(S.boosterProgress?.pct||0)+"%";
+}
+
+// Booster countdown timer (updates remaining every 10s)
+function startBoosterTimer(){
+  setInterval(()=>{
+    if(S.boosterStatus==="active"&&S.boosterExpiresAt>0){
+      S.boosterRemainingMs=Math.max(0,S.boosterExpiresAt-Date.now());
+      if(S.boosterRemainingMs<=0){
+        S.boosterStatus="expired";
+        S.boosterExtraROI=0;
+        if(S.user){S.user.boosterStatus="expired";S.user.boosterExtraROI=0;setUI(S.user)}
+      }
+    }
+    updateBoosterUI();
+  },10000);
+}
+
 function updateFusion(u){
-  const ts=typeof u.createdAt==="number"?u.createdAt:(u.createdAt?.toMillis?u.createdAt.toMillis():Date.now());
+  const ts=typeof u.createdAt==="number"?u.createdAt:Date.now();
   const end=ts+45*24*60*60*1000;
   const rem=Math.max(0,end-Date.now());
   const dd=Math.floor(rem/86400000),hh=Math.floor(rem%86400000/3600000),mm=Math.floor(rem%3600000/60000),ss=Math.floor(rem%60000/1000);
@@ -934,11 +980,7 @@ function drawParticles(){
   addEventListener("resize",init);init();dr()
 }
 
-async function ensureSeed(){
-  const s=doc(db,"users","1001");
-  if((await getDoc(s)).exists())return;
-  await setDoc(s,{telegramId:"1001",username:"seed_upline",firstName:"Seed Upline",referredBy:"SYSTEM",isActive:true,bits:0,withdrawableBits:0,unlockingBits:0,lockedBits:10,lockedSignupBits:10,unlockedFromSignup:0,followClaimed:false,followBits:0,followClaimedAt:null,totalEarned:0,activationUSDT:10,isActivated10:true,packageAmount:10,packageROI:0.5,packageCapMultiplier:2,packageMaxEarnings:20,packageEarned:0,packageStatus:"active",unlockStartedAt:serverTimestamp(),lastUnlockDateUTC:null,activeDirects:0,totalDirects:0,teamBusiness:0,referralEarnings:0,lastClaimDateUTC:null,lastClaimAt:null,depositAddress:"0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18",boosterLevelId:"none",boosterStatus:"locked",boosterName:"None",boosterExtraROI:0,boosterActivatedAt:0,boosterExpiresAt:0,boosterUpdatedAt:0,createdAt:serverTimestamp(),updatedAt:serverTimestamp()})
-}
+async function ensureSeed(){}
 
 async function bootstrap(){
   const tg=window.Telegram?.WebApp;
@@ -950,7 +992,6 @@ async function bootstrap(){
   if(!ref)ref="1001";
   S.ref=ref;
 
-  // Persist test users across sessions
   function getStoredId(){
     try{const v=localStorage.getItem("pb_uid");if(v)return v}catch(e){}
     try{const v=sessionStorage.getItem("pb_uid");if(v)return v}catch(e){}
@@ -973,75 +1014,48 @@ async function bootstrap(){
   console.log("👤 User ID:", uid);
   console.log("🔗 Final referral:", S.ref);
 
-  // Check if user exists in Firebase
-  const userDoc=doc(db,"users",uid);
-  const snap=await getDoc(userDoc);
-  console.log("📁 Firebase user exists:", snap.exists());
-
-  if(!snap.exists()){
-    // NEW USER — create account
+  const r=await API.getUser(uid);
+  if(!r||r.error||!r.id){
     if(String(S.ref)===uid){
       S.ref="1001";
       console.log("⚠️ Self-referral detected, reset to seed");
     }
-    await ensureSeed();
-    const nu={telegramId:uid,username:tUser?.username||"",firstName:(tUser?.username||tUser?.first_name)||("Player_"+uid.slice(-4)),referredBy:String(S.ref),isActive:true,bits:0,withdrawableBits:0,unlockingBits:0,lockedBits:10,lockedSignupBits:10,unlockedFromSignup:0,followClaimed:false,followBits:0,followClaimedAt:null,totalEarned:0,activationUSDT:0,isActivated10:false,unlockStartedAt:null,lastUnlockDateUTC:null,lastClaimAt:null,activeDirects:0,totalDirects:0,teamBusiness:0,referralEarnings:0,depositAddress:"",lastAirdropDate:"",createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
-    await setDoc(userDoc,nu);
-    console.log("✅ User created with referredBy:", S.ref);
-    // Increment referrer's totalDirects (silent if doesn't exist)
-    if(S.ref!=="1001"){
-      try{const rs=await getDoc(doc(db,"users",String(S.ref)));if(rs.exists()){await updateDoc(doc(db,"users",String(S.ref)),{totalDirects:increment(1),updatedAt:serverTimestamp()})}}catch(e){}
-    }
-    S.user=nu
+    const firstName=(tUser?.username||tUser?.first_name)||("Player_"+uid.slice(-4));
+    const username=tUser?.username||"";
+    const signupRes=await API.signup({userId:uid,firstName,username,referredBy:String(S.ref)});
+    console.log("✅ User created with referredBy:", S.ref, signupRes);
+    if(signupRes&&signupRes.user)S.user=signupRes.user;
+    else S.user={telegramId:uid,username,firstName,referredBy:String(S.ref),bits:0,withdrawableBits:0,unlockingBits:0,lockedBits:10,unlockedFromSignup:0}
   }else{
-    // EXISTING USER — NEVER overwrite referredBy
-    S.user=snap.data();
+    S.user=r;
     S.ref=S.user.referredBy||"1001";
     console.log("🔄 Existing user, stored referredBy:", S.user.referredBy);
-    // Migration: old users with activationUSDT but no packageAmount
     if((S.user.activationUSDT||0)>0&&!S.user.packageAmount){
       const a=S.user.activationUSDT;
       let t=TIERS.find(t=>a>=t.min&&a<=t.max)||TIERS[TIERS.length-1];
       const mf={packageAmount:a,packageROI:t.roi,packageCapMultiplier:t.cap,packageMaxEarnings:a*t.cap*100,packageEarned:0,packageStatus:"active",isActivated10:a>=10?true:(S.user.isActivated10||false)};
-      try{await updateDoc(doc(db,"users",S.uid),mf);Object.assign(S.user,mf);console.log("✅ Migrated old package:",mf)}catch(e){console.warn("Migration failed:",e)}
+      try{
+        await API.updateProfile(S.uid,mf);
+        Object.assign(S.user,mf);
+        console.log("✅ Migrated old package:",mf)
+      }catch(e){console.warn("Migration failed:",e)}
     }
   }
 }
 
 async function runUnlock(){
-  const u=S.user;if(!u)return;
-  const now=Date.now();
-  let l=u.lockedBits||0,ul=u.unlockingBits||0,w=u.withdrawableBits||0,fr=u.unlockedFromSignup||0;
-  let fb=u.followBits||0;
-  let changed=false;
-
-  // Follow bits: 7-day lock → lockedBits, 45-day expiry
-  if(u.followClaimed&&fb>0){
-    const claimTime=typeof u.followClaimedAt==="number"?u.followClaimedAt:(u.followClaimedAt?.toMillis?u.followClaimedAt.toMillis():0);
-    const daysSinceClaim=(now-claimTime)/86400000;
-    if(daysSinceClaim>=45){fb=0;changed=true}
-    else if(daysSinceClaim>=7){l+=fb;fb=0;changed=true}
-  }
-
-  // Signup unlock (requires activation)
-  if(u.isActivated10&&u.lastUnlockDateUTC!==S.today){
-    if(ul>0){w+=ul;fr+=ul;ul=0}
-    const mv=Math.min(2,l);if(mv>0){l-=mv;ul+=mv}
-    changed=true;
-  }
-
-  if(changed){
-    await updateDoc(doc(db,"users",S.uid),{lockedBits:l,unlockingBits:ul,withdrawableBits:w,unlockedFromSignup:fr,followBits:fb,bits:l+ul+w+fb,lastUnlockDateUTC:S.today,updatedAt:serverTimestamp()});
-    S.user={...u,lockedBits:l,unlockingBits:ul,withdrawableBits:w,unlockedFromSignup:fr,followBits:fb,bits:l+ul+w+fb,lastUnlockDateUTC:S.today}
-  }
+  if(!S.user)return;
+  try{
+    const r=await API.runUnlock(S.uid);
+    if(r&&r.user)S.user=r.user;
+  }catch(e){console.warn("runUnlock failed:",e)}
 }
 
 async function checkClaim(){
-  const id=S.uid+"_"+S.today,snap=await getDoc(doc(db,"claims",id));
-  S.canClaim=!snap.exists();
   const b=document.getElementById("claimBtn");
   const p=calcPkg(S.user||{});
   const exhausted=p.exhausted||p.status==="exhausted"||p.status==="none";
+  S.canClaim=(S.user?.lastClaimDateUTC||"")!==S.today;
   if(exhausted||p.round<=0){
     b.disabled=true;
     b.innerHTML='<i class="fa-solid fa-circle-exclamation"></i> '+(p.status==="none"?'ACTIVATE PACKAGE FIRST':'PACKAGE EXHAUSTED');
@@ -1050,6 +1064,12 @@ async function checkClaim(){
     b.disabled=!S.canClaim;
     b.innerHTML=S.canClaim?'<i class="fa-solid fa-bolt"></i> CLAIM '+p.round+' BITS':'<i class="fa-regular fa-circle-check"></i> CLAIMED'
   }
+}
+
+async function addIncomeEntry(type, amount, extra){
+  try{
+    await fetch(BACKEND_URL+"/api/income",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:S.uid,type,amount,...extra,createdAt:Date.now()})})
+  }catch(e){console.warn("Income entry failed:",e)}
 }
 
 async function doClaim(){
@@ -1062,22 +1082,22 @@ async function doClaim(){
   }
   const p=calcPkg(S.user||{});
   if(p.exhausted||p.round<=0){t("Package exhausted or inactive");checkClaim();return}
-  const id=S.uid+"_"+S.today,cRef=doc(db,"claims",id);
   try{
-    if((await getDoc(cRef)).exists()){checkClaim();return}
-    const now=Date.now();
-    await setDoc(cRef,{telegramId:S.uid,dateUTC:S.today,claimAmount:p.round,claimedAt:serverTimestamp()});
-    const newEarned=(S.user.packageEarned||0)+p.round;
-    const updates={withdrawableBits:increment(p.round),bits:increment(p.round),totalEarned:increment(p.round),packageEarned:increment(p.round),lastClaimDateUTC:S.today,lastClaimAt:now,updatedAt:serverTimestamp()};
-    if(newEarned>=p.maxEarnings)updates.packageStatus="exhausted";
-    await updateDoc(doc(db,"users",S.uid),updates);
-    S.user.withdrawableBits=(S.user.withdrawableBits||0)+p.round;
-    S.user.bits=(S.user.bits||0)+p.round;
-    S.user.totalEarned=(S.user.totalEarned||0)+p.round;
-    S.user.packageEarned=newEarned;
-    if(newEarned>=p.maxEarnings)S.user.packageStatus="exhausted";
-    S.user.lastClaimDateUTC=S.today;S.user.lastClaimAt=now;
-    setUI(S.user);checkClaim();t("Claimed "+p.round+" bits")
+    const r=await API.claimDaily(S.uid);
+    if(r&&r.error){
+      if(r.error==="already_claimed"){checkClaim();return}
+      t(r.error);checkClaim();return
+    }
+    if(r&&r.user)S.user=r.user;
+    else{
+      S.user.withdrawableBits=(S.user.withdrawableBits||0)+p.round;
+      S.user.bits=(S.user.bits||0)+p.round;
+      S.user.totalEarned=(S.user.totalEarned||0)+p.round;
+      S.user.packageEarned=(S.user.packageEarned||0)+p.round;
+      S.user.lastClaimDateUTC=S.today;
+      S.user.lastClaimAt=Date.now();
+    }
+    setUI(S.user);checkClaim();t("Claimed "+p.round+" bits");
   }catch(e){
     console.error("Claim error:",e);
     S.canClaim=true;
@@ -1091,28 +1111,25 @@ const initTimer=setTimeout(()=>showBlocked("Taking too long","Server might be sl
 (async function(){
   try{
     // Restore cached session for instant UI (back-navigation)
-    if(!window.__pb_restored){
-      const cachedS=sessionStorage.getItem("pb_dash_state");
-      if(cachedS){
-        try{
-          const cs=JSON.parse(cachedS);
-          S.uid=cs.uid;S.user=cs.user;
-          const d=new Date();S.today=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-          if(S.user){setUI(S.user);checkClaim();showApp();applyLang();clearTimeout(initTimer)}
-        }catch(e){}
-      }
+    if(window.__pb_cr&&window.__pb_cu){
+      S.user=window.__pb_cu;S.uid=S.user.telegramId||localStorage.getItem("pb_uid")||"";S.today=ud();
+      if(S.user){try{setUI(S.user);checkClaim();showApp();applyLang();clearTimeout(initTimer)}catch(e){}}
     }
 
+    const wasCached=window.__pb_cr?1:0;
     await ensureSeed();await bootstrap();
     if(!S.user)return;
     document.querySelectorAll("[href*='UID']").forEach(el=>{el.setAttribute("href",el.getAttribute("href").replace("UID",S.uid||"guest"))});
-    await runUnlock();await refreshBooster();setUI(S.user);await checkClaim();
+    await runUnlock();
+    // Quick background refresh if restored from cache
+    if(!wasCached){await refreshBooster();setUI(S.user);await checkClaim()}
+    else{refreshBooster();checkClaim();setUI(S.user)}
     clearTimeout(initTimer);showApp();applyLang();
     drawParticles();
-    startMining();startClaimTimer();
+    startMining();startClaimTimer();startBoosterTimer();
     loadFeed();loadLeaderboard();loadNetworkStats();
     setInterval(()=>{refreshBooster();checkClaim()},60000)
-    try{sessionStorage.setItem("pb_dash_state",JSON.stringify({uid:S.uid,user:S.user}))}catch(e){}
+    try{localStorage.setItem("pb_cache",JSON.stringify({u:S.user,ts:Date.now()}));localStorage.setItem("pb_uid",S.uid)}catch(e){}
   }catch(e){console.error(e);clearTimeout(initTimer);showBlocked("Error","Check console for details.")}
 })()
 </script>

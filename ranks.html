@@ -236,6 +236,12 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 
 <script>
+async function addIncomeEntry(uid, type, amount, extra){
+  try{
+    await API.addIncome({userId:uid,type,amount:Math.floor(amount),extra:extra||{}});
+  }catch(e){console.warn("Income entry failed:",e)}
+}
+
 const RANK_DATA = [
   { name: "Bit Rookie",       biz: 1000,    color: "#cd7b37", icon: "fa-seedling",         orbit: 150,    dailyTotal: 50,   dailyDays: 5,   selfPkg: 10,   directs: 2,  leadReq: "50:50 Business Rule" },
   { name: "Bit Hunter",       biz: 3000,    color: "#c0c0c0", icon: "fa-crosshairs",       orbit: 405,    dailyTotal: 150,  dailyDays: 10,  selfPkg: 50,   directs: 4,  leadReq: "2 Bit Rookie Achievers (1 Left + 1 Right Leg)" },
@@ -251,6 +257,8 @@ const RANK_DATA = [
 
 const savedTheme = localStorage.getItem("pb_theme");
 if (savedTheme === "light") document.body.classList.add("light");
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
 
 function fmt$(n) { return "$" + Number(n).toLocaleString() }
 
@@ -362,44 +370,23 @@ function getRank(user, allUsers) {
   return { idx: qIdx, r, next, remaining, progress, isMax: qIdx === RANK_DATA.length - 1, dailyRate, rankTotal };
 }
 
-async function handleRewardCredits(user, rank, db) {
+async function handleRewardCredits(user, rank) {
   if (rank.idx === -1) return;
-  const claimed = { ...(user.claimedRanks || {}) };
-  let changed = false;
-  const updates = {};
-
-  // One-time Orbit Reward credits
   for (let i = 0; i <= rank.idx; i++) {
-    if (!claimed[String(i)]) {
-      const rewardBits = RANK_DATA[i].dailyTotal * 100;
-      claimed[String(i)] = true;
-      updates.withdrawableBits = (updates.withdrawableBits || user.withdrawableBits || 0) + rewardBits;
-      updates.bits = (updates.bits || user.bits || 0) + rewardBits;
-      updates.totalEarned = (updates.totalEarned || user.totalEarned || 0) + rewardBits;
-      changed = true;
-      showToast("Rank achieved: Orbit Reward " + fmt$(RANK_DATA[i].dailyTotal) + " credited!");
+    const rankName = RANK_DATA[i].name;
+    try {
+      const res = await API.claimOrbit(S.uid, rankName);
+      if (res && res.success) {
+        showToast("Orbit Reward for " + rankName + " claimed!");
+      }
+    } catch(e) { console.warn("Orbit claim error:", e) }
+  }
+  try {
+    const res = await API.claimRankReward(S.uid);
+    if (res && res.success) {
+      showToast("Rank Daily Payout Activated!");
     }
-  }
-
-  if (changed) {
-    updates.claimedRanks = claimed;
-  }
-
-  // Active Daily Payout configuration (if tier unlocked is newer)
-  if (user.dailyRewardTier === undefined || rank.idx > (user.dailyRewardTier || 0)) {
-    updates.dailyRewardTier = rank.idx;
-    updates.dailyRewardDay = 0;
-    updates.dailyRewardNextClaim = Date.now() + 86400000;
-    changed = true;
-    showToast("Rank Daily Payout Activated for " + RANK_DATA[rank.idx].name);
-  }
-
-  if (changed) {
-    const { doc, updateDoc, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-    updates.updatedAt = serverTimestamp();
-    await updateDoc(doc(db, "users", user.telegramId || S.uid), updates);
-    Object.assign(user, updates);
-  }
+  } catch(e) { console.warn("Rank reward claim error:", e) }
 }
 
 function renderAll(rank, user, allUsers) {
@@ -549,25 +536,17 @@ async function init() {
   try { sessionStorage.setItem("pb_uid", uid) } catch(e) {}
   try { document.cookie = "pb_uid=" + uid + ";path=/;max-age=31536000" } catch(e) {}
   document.querySelectorAll("[href*='UID']").forEach(el => { el.setAttribute("href", el.getAttribute("href").replace("UID", uid)) });
-  
-  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-  const { getFirestore, doc, getDoc, getDocs, collection } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-  const app = initializeApp({ apiKey: "AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk", authDomain: "playbits-9e671.firebaseapp.com", projectId: "playbits-9e671", storageBucket: "playbits-9e671.firebasestorage.app", messagingSenderId: "308371821857", appId: "1:308371821857:web:20e0a74b6f5d8097639a60" });
-  const db = getFirestore(app);
-  
+
   try {
-    const snap = await getDoc(doc(db, "users", uid));
-    if (!snap.exists()) {
+    const rankRes = await API.getRank(S.uid);
+    if (!rankRes || !rankRes.success) {
       document.getElementById("appWrap").innerHTML = '<div style="padding:40px 30px;color:var(--text3);text-align:center"><i class="fa-solid fa-triangle-exclamation" style="font-size:36px;color:var(--gold);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700">User not found</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none;font-size:13px">Go to Dashboard</a></div>';
       return;
     }
-    S.user = snap.data();
+    S.user = rankRes.user || {};
+    S.allUsers = new Map(Object.entries(rankRes.allUsers || {}));
     const dn = S.user.firstName || "Player";
     document.getElementById("avatar").textContent = dn.slice(0, 2).toUpperCase();
-
-    const allSnap = await getDocs(collection(db, "users"));
-    S.allUsers = new Map();
-    allSnap.forEach(d => S.allUsers.set(d.id, d.data()));
 
     const teamBiz = calcTreeBusiness(uid, S.allUsers, 1, 10);
     const { left, right } = calcBinaryLegs(uid, S.allUsers);
@@ -576,12 +555,12 @@ async function init() {
     S.user.rightLegBusiness = right;
 
     const rank = getRank(S.user, S.allUsers);
-    await handleRewardCredits(S.user, rank, db);
+    await handleRewardCredits(S.user, rank);
 
     renderAll(rank, S.user, S.allUsers);
-    renderDaily(rank, S.user, db);
-    startDailyTimer(rank, S.user, db);
-    autoClaimDaily(S.user, db);
+    renderDaily(rank, S.user);
+    startDailyTimer(rank, S.user);
+    autoClaimDaily(S.user);
     drawParticles();
   } catch(e) {
     console.error(e);
@@ -589,7 +568,7 @@ async function init() {
   }
 }
 
-function renderDaily(rank, user, db) {
+function renderDaily(rank, user) {
   if (rank.idx === -1 || !rank.r) {
     document.getElementById("dailyValue").textContent = "$0";
     document.getElementById("dailySub").textContent = "Achieve a rank to unlock daily payouts";
@@ -612,7 +591,7 @@ function renderDaily(rank, user, db) {
   }
 }
 
-function startDailyTimer(rank, user, db) {
+function startDailyTimer(rank, user) {
   setInterval(async () => {
     const u = S.user;
     if (!u) return;
@@ -630,7 +609,7 @@ function startDailyTimer(rank, user, db) {
       if (rem <= 0) {
         st.className = "daily-status ready";
         stt.textContent = "Payout ready — auto-crediting...";
-        await autoClaimDaily(u, db);
+        await autoClaimDaily(u);
       } else {
         st.className = "daily-status waiting";
         stt.textContent = "Next payout in";
@@ -639,7 +618,7 @@ function startDailyTimer(rank, user, db) {
   }, 1000);
 }
 
-async function autoClaimDaily(user, db) {
+async function autoClaimDaily(user) {
   if (S.claimingDaily) return;
   S.claimingDaily = true;
   try {
@@ -648,25 +627,13 @@ async function autoClaimDaily(user, db) {
     const day = user.dailyRewardDay || 0;
     if (day >= r.dailyDays) return;
     if (Date.now() < (user.dailyRewardNextClaim || 0)) return;
-    
-    const bits = r.dailyDays > 0 ? Math.floor(r.dailyTotal / r.dailyDays) * 100 : 0;
-    if (bits <= 0) return;
 
-    const { doc, updateDoc, increment, serverTimestamp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-    await updateDoc(doc(db, "users", S.uid), {
-      withdrawableBits: increment(bits), bits: increment(bits),
-      dailyRewardDay: increment(1), dailyRewardNextClaim: Date.now() + 86400000,
-      updatedAt: serverTimestamp()
-    });
-
-    user.dailyRewardDay = (user.dailyRewardDay || 0) + 1;
-    user.dailyRewardNextClaim = Date.now() + 86400000;
-    user.withdrawableBits = (user.withdrawableBits || 0) + bits;
-    user.bits = (user.bits || 0) + bits;
+    const res = await API.claimRankReward(S.uid);
+    if (!res || !res.success) return;
 
     if (S.allUsers) {
       const rank = getRank(user, S.allUsers);
-      renderDaily(rank, user, db);
+      renderDaily(rank, user);
       renderAll(rank, user, S.allUsers);
     }
   } catch(e) { console.error("Auto-daily payout error:", e) }

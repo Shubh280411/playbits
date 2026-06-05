@@ -915,54 +915,62 @@ app.post("/api/migrate", async (req, res) => {
 
     const deposits = await fetchAll("deposits");
     for (const d of deposits) {
-      await db.insert("deposits", d.id, {
-        userId: d.userId || "", network: d.network || "bep20", address: d.address || "",
-        amount: Number(d.amount) || 0, status: d.status || "pending", credited: !!d.credited,
-        creditedAt: Number(d.creditedAt) || 0, confirmedAt: Number(d.confirmedAt) || 0,
-        swept: !!d.swept, sweptAt: Number(d.sweptAt) || 0, sweepError: d.sweepError || "",
-        creditError: d.creditError || "", index: Number(d.index) || 0, txHash: d.txHash || "",
-        createdAt: Number(d.createdAt) || 0, updatedAt: Number(d.updatedAt) || 0
-      });
+      try {
+        await db.insert("deposits", d.id, {
+          userId: d.userId || "", network: d.network || "bep20", address: d.address || "",
+          amount: Number(d.amount) || 0, status: d.status || "pending", credited: !!d.credited,
+          creditedAt: Number(d.creditedAt) || 0, confirmedAt: Number(d.confirmedAt) || 0,
+          swept: !!d.swept, sweptAt: Number(d.sweptAt) || 0, sweepError: d.sweepError || "",
+          creditError: d.creditError || "", index: Number(d.index) || 0, txHash: d.txHash || "",
+          createdAt: Number(d.createdAt) || 0, updatedAt: Number(d.updatedAt) || 0
+        });
+      } catch (e) { console.warn("[MIGRATE] Skipped deposit", d.id, e.message) }
     }
     results.deposits = deposits.length;
 
     const packages = await fetchAll("packages");
     for (const p of packages) {
-      await db.insert("packages", p.id, {
-        userId: p.userId || "", amount: Number(p.amount) || 0, roi: Number(p.roi) || 0,
-        capMultiplier: Number(p.capMultiplier) || 0, maxEarnings: Number(p.maxEarnings) || 0,
-        totalEarned: Number(p.totalEarned) || 0, status: p.status || "active",
-        activatedAt: Number(p.activatedAt) || 0, createdAt: Number(p.createdAt) || 0
-      });
+      try {
+        await db.insert("packages", p.id, {
+          userId: p.userId || "", amount: Number(p.amount) || 0, roi: Number(p.roi) || 0,
+          capMultiplier: Number(p.capMultiplier) || 0, maxEarnings: Number(p.maxEarnings) || 0,
+          totalEarned: Number(p.totalEarned) || 0, status: p.status || "active",
+          activatedAt: Number(p.activatedAt) || 0, createdAt: Number(p.createdAt) || 0
+        });
+      } catch (e) { console.warn("[MIGRATE] Skipped package", p.id, e.message) }
     }
     results.packages = packages.length;
 
     const incomes = await fetchAll("incomeHistory");
     for (const i of incomes) {
-      await db.insert("income_history", i.id, {
-        userId: i.userId || "", amount: Number(i.amount) || 0, type: i.type || "",
-        description: i.description || "", sourceUserId: i.sourceUserId || "",
-        sourceUserName: i.sourceUserName || "", level: i.level || "",
-        status: i.status || "completed", packageName: i.packageName || "",
-        packageAmount: Number(i.packageAmount) || 0, roi: Number(i.roi) || 0,
-        boosterName: i.boosterName || "", extraRoi: Number(i.extraRoi) || 0,
-        rankName: i.rankName || "", rewardCycle: i.rewardCycle || "",
-        network: i.network || "", txHash: i.txHash || "", walletAddress: i.walletAddress || "",
-        reason: i.reason || "", createdAt: Number(i.createdAt) || 0,
-        updatedAt: Number(i.updatedAt) || 0
-      });
+      try {
+        await db.insert("income_history", i.id, {
+          userId: i.userId || "", amount: Number(i.amount) || 0, type: i.type || "",
+          description: i.description || "", sourceUserId: i.sourceUserId || "",
+          sourceUserName: i.sourceUserName || "", level: i.level || "",
+          status: i.status || "completed", packageName: i.packageName || "",
+          packageAmount: Number(i.packageAmount) || 0, roi: Number(i.roi) || 0,
+          boosterName: i.boosterName || "", extraRoi: Number(i.extraRoi) || 0,
+          rankName: i.rankName || "", rewardCycle: i.rewardCycle || "",
+          network: i.network || "", txHash: i.txHash || "", walletAddress: i.walletAddress || "",
+          reason: i.reason || "", createdAt: Number(i.createdAt) || 0,
+          updatedAt: Number(i.updatedAt) || 0
+        });
+      } catch (e) { console.warn("[MIGRATE] Skipped income", i.id, e.message) }
     }
     results.incomes = incomes.length;
 
     const boosters = await fetchAll("boosterHistory");
     for (const b of boosters) {
-      await db.insert("booster_history", b.id, {
-        userId: b.userId || "", boosterId: b.boosterId || "", boosterName: b.boosterName || "",
-        status: b.status || "", extraRoi: Number(b.extraRoi) || 0, at: Number(b.at) || 0,
-        expiresAt: Number(b.expiresAt) || 0, activeDirectCount: Number(b.activeDirectCount) || 0,
-        reason: b.reason || "", createdAt: Number(b.createdAt) || 0,
-        updatedAt: Number(b.updatedAt) || 0
-      });
+      try {
+        await db.insert("booster_history", b.id, {
+          userId: b.userId || "", boosterId: b.boosterId || "", boosterName: b.boosterName || "",
+          status: b.status || "", extraRoi: Number(b.extraRoi) || 0, at: Number(b.at) || 0,
+          expiresAt: Number(b.expiresAt) || 0, activeDirectCount: Number(b.activeDirectCount) || 0,
+          reason: b.reason || "", createdAt: Number(b.createdAt) || 0,
+          updatedAt: Number(b.updatedAt) || 0
+        });
+      } catch (e) { console.warn("[MIGRATE] Skipped booster", b.id, e.message) }
     }
     results.boosters = boosters.length;
 

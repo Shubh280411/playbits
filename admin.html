@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Admin Panel</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--red:#ff3355;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+.app-container{width:100%;max-width:1000px;min-height:100vh;padding:20px 18px 30px;box-sizing:border-box;position:relative;background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-title{font:800 16px 'Orbitron',sans-serif;color:var(--cyan);letter-spacing:2px}
+.card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:16px;overflow:hidden}
+.card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.card{position:relative}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--rs);padding:14px;text-align:center}
+.stat-card .num{font:800 18px 'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:2px}
+.stat-card .lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.stat-card.pending .num{color:var(--gold)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{padding:8px 16px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:all .3s}
+.tab:hover{color:var(--text);background:rgba(0,229,255,.04)}
+.tab.active{color:var(--cyan);background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2)}
+.tab.count{position:relative}
+.tab .badge{position:absolute;top:-4px;right:-4px;background:var(--pink);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;min-width:16px;text-align:center}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:10px 8px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:10px;border-bottom:1px solid var(--card-border);position:sticky;top:0;background:var(--card)}
+td{padding:8px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2);vertical-align:middle}
+tr:hover td{background:rgba(0,229,255,.02)}
+.status{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.status.active{background:rgba(0,255,136,.1);color:var(--green)}
+.status.pending{background:rgba(255,215,0,.1);color:var(--gold)}
+.status.completed{background:rgba(0,229,255,.1);color:var(--cyan)}
+.status.approved{background:rgba(0,255,136,.1);color:var(--green)}
+.status.rejected{background:rgba(255,51,85,.1);color:var(--red)}
+.status.none{background:rgba(150,150,182,.1);color:var(--text3)}
+.search-box{display:flex;gap:8px;margin-bottom:12px}
+.search-box input{flex:1;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font:500 14px 'Rajdhani',sans-serif;outline:none}
+.search-box input:focus{border-color:var(--cyan)}
+.search-box button{padding:10px 18px;border-radius:var(--rs);border:none;background:rgba(0,229,255,.1);color:var(--cyan);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;transition:all .3s}
+.search-box button:hover{background:rgba(0,229,255,.2)}
+.pagination{display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap}
+.pagination button{padding:6px 12px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text2);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;transition:all .3s}
+.pagination button:hover{color:var(--cyan);border-color:var(--cyan)}
+.pagination button.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.08)}
+.pagination button:disabled{opacity:.3;cursor:default}
+.btn-small{padding:4px 10px;border-radius:var(--rs);border:none;cursor:pointer;font:700 10px 'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.5px;transition:all .3s}
+.btn-approve{background:rgba(0,255,136,.15);color:var(--green)}
+.btn-approve:hover{background:rgba(0,255,136,.25)}
+.btn-reject{background:rgba(255,51,85,.15);color:var(--red)}
+.btn-reject:hover{background:rgba(255,51,85,.25)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.empty{text-align:center;padding:30px;color:var(--text3);font-size:13px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+.truncate{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+.refresh-btn{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(0,229,255,.1);color:var(--cyan);cursor:pointer;display:grid;place-items:center;font-size:15px;transition:all .3s}
+.refresh-btn:hover{background:rgba(0,229,255,.2)}
+.refresh-btn.spinning i{animation:spin .6s linear}
+@keyframes spin{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:0}
+@media(max-width:600px){.app-container{max-width:100%;padding:12px 10px 20px}.stats-grid{grid-template-columns:repeat(2,1fr)}th,td{padding:6px 4px;font-size:11px}}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <span class="topbar-title"><i class="fa-solid fa-shield-halved"></i> Admin Panel</span>
+    </div>
+    <div>
+      <button class="refresh-btn" onclick="loadAll()"><i class="fa-solid fa-rotate"></i></button>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="users"><i class="fa-solid fa-users"></i> Users</button>
+    <button class="tab count" data-tab="deposits"><i class="fa-solid fa-circle-dollar"></i> Deposits <span class="badge" id="depBadge">0</span></button>
+    <button class="tab count" data-tab="withdrawals"><i class="fa-solid fa-arrow-up-right-from-square"></i> Withdrawals <span class="badge" id="wdBadge">0</span></button>
+    <button class="tab" data-tab="income"><i class="fa-solid fa-chart-line"></i> Income</button>
+  </div>
+
+  <!-- Users Tab -->
+  <div class="tab-content active" id="tab-users">
+    <div class="search-box">
+      <input type="text" id="userSearch" placeholder="Search by ID, name or username..." onkeydown="if(event.key==='Enter')loadUsers()">
+      <button onclick="loadUsers()"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <table><thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Package</th><th>Deposit</th><th>Activation</th><th>Bits</th><th>Earned</th><th>Referred By</th><th>Created</th></tr></thead>
+      <tbody id="usersBody"><tr><td colspan="10" class="empty">Loading...</td></tr></tbody></table>
+      <div class="pagination" id="usersPages"></div>
+    </div>
+  </div>
+
+  <!-- Deposits Tab -->
+  <div class="tab-content" id="tab-deposits">
+    <div class="card" style="overflow-x:auto">
+      <table><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Swept</th><th>Created</th></tr></thead>
+      <tbody id="depositsBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table>
+      <div class="pagination" id="depositsPages"></div>
+    </div>
+  </div>
+
+  <!-- Withdrawals Tab -->
+  <div class="tab-content" id="tab-withdrawals">
+    <div class="card" style="overflow-x:auto">
+      <table><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Address</th><th>Network</th><th>Status</th><th>Action</th><th>Date</th></tr></thead>
+      <tbody id="withdrawalsBody"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody></table>
+      <div class="pagination" id="withdrawalsPages"></div>
+    </div>
+  </div>
+
+  <!-- Income Tab -->
+  <div class="tab-content" id="tab-income">
+    <div class="card" style="overflow-x:auto">
+      <table><thead><tr><th>User</th><th>Amount</th><th>Type</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody id="incomeBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
+      <div class="pagination" id="incomePages"></div>
+    </div>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+const BACKEND_URL = "https://playbits-backend-132h.onrender.com";
+let pages = { users: 1, deposits: 1, withdrawals: 1, income: 1 };
+let refreshTimer = null;
+
+function $(id){return document.getElementById(id)}
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    $(`tab-${t.dataset.tab}`).classList.add('active');
+    loadTab(t.dataset.tab);
+  });
+});
+
+function loadAll(){ fetchStats(); loadTab(getActiveTab()); $('.refresh-btn').classList.add('spinning'); setTimeout(()=>$('.refresh-btn').classList.remove('spinning'),600) }
+
+function getActiveTab(){ return document.querySelector('.tab.active')?.dataset?.tab || 'users' }
+
+async function fetchStats(){
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/stats`);
+    const d = await r.json();
+    if(!d.success) return;
+    const s = d.stats;
+    $('statsGrid').innerHTML = `
+      <div class="stat-card"><div class="num">${s.totalUsers}</div><div class="lbl">Total Users</div></div>
+      <div class="stat-card"><div class="num">${s.todayUsers}</div><div class="lbl">Today</div></div>
+      <div class="stat-card"><div class="num">${s.totalDeposits}</div><div class="lbl">Deposits</div></div>
+      <div class="stat-card"><div class="num">$${s.totalDepositAmount.toFixed(2)}</div><div class="lbl">Deposited</div></div>
+      <div class="stat-card pending"><div class="num">${s.pendingWithdrawals}</div><div class="lbl">Pending WD</div></div>
+      <div class="stat-card"><div class="num">${s.totalIncome}</div><div class="lbl">Income Entries</div></div>
+      <div class="stat-card pending"><div class="num">${s.pendingDeposits}</div><div class="lbl">Pending Dep</div></div>
+      <div class="stat-card"><div class="num">$${s.totalWithdrawalAmount.toFixed(2)}</div><div class="lbl">Withdrawn</div></div>
+    `;
+    $('wdBadge').textContent = s.pendingWithdrawals;
+    $('depBadge').textContent = s.pendingDeposits;
+  } catch(e){}
+}
+
+async function loadUsers(){
+  const p = pages.users;
+  const search = $('userSearch').value.trim();
+  try {
+    let url = `${BACKEND_URL}/api/admin/users?page=${p}&limit=50`;
+    if(search) url += `&search=${encodeURIComponent(search)}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    if(!d.success) return;
+    const h = d.users?.map(u => {
+      const pkg = u.packageStatus === 'active' ? `<span class="status active">${u.packageAmount}</span>` : `<span class="status none">none</span>`;
+      return `<tr>
+        <td class="mono">${u.telegramId}</td>
+        <td><strong>${u.firstName||'-'}</strong></td>
+        <td>${u.username||'-'}</td>
+        <td>${pkg}</td>
+        <td>$${(u.depositBalance||0).toFixed(2)}</td>
+        <td>$${(u.activationUSDT||0).toFixed(2)}</td>
+        <td class="mono">${Math.round(u.bits||0)}</td>
+        <td class="mono">${Math.round(u.totalEarned||0)}</td>
+        <td class="mono">${u.referredBy||'-'}</td>
+        <td class="mono">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
+      </tr>`;
+    }).join('');
+    $('usersBody').innerHTML = h || '<tr><td colspan="10" class="empty">No users found</td></tr>';
+    renderPagination('usersPages', d.pagination, p => { pages.users = p; loadUsers(); });
+  } catch(e){ $('usersBody').innerHTML = '<tr><td colspan="10" class="empty">Error loading users</td></tr>' }
+}
+
+async function loadDeposits(){
+  const p = pages.deposits;
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/deposits?page=${p}&limit=50`);
+    const d = await r.json();
+    if(!d.success) return;
+    const h = d.deposits?.map(dp => {
+      const st = dp.status === 'confirmed' ? 'completed' : dp.status;
+      return `<tr>
+        <td class="mono truncate">${dp.id}</td>
+        <td class="mono">${dp.userId}</td>
+        <td class="mono">${dp.amount} USDT</td>
+        <td class="mono truncate">${dp.address||'-'}</td>
+        <td><span class="status ${st}">${dp.status}</span></td>
+        <td>${dp.swept ? '<span class="status completed">yes</span>' : '<span class="status pending">no</span>'}</td>
+        <td class="mono">${dp.createdAt ? new Date(dp.createdAt).toLocaleDateString() : '-'}</td>
+      </tr>`;
+    }).join('');
+    $('depositsBody').innerHTML = h || '<tr><td colspan="7" class="empty">No deposits</td></tr>';
+    renderPagination('depositsPages', d.pagination, p => { pages.deposits = p; loadDeposits(); });
+  } catch(e){ $('depositsBody').innerHTML = '<tr><td colspan="7" class="empty">Error loading deposits</td></tr>' }
+}
+
+async function loadWithdrawals(){
+  const p = pages.withdrawals;
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/withdrawals?page=${p}&limit=50`);
+    const d = await r.json();
+    if(!d.success) return;
+    const h = d.withdrawals?.map(w => {
+      let action = '';
+      if(w.status === 'pending') {
+        action = `<button class="btn-small btn-approve" onclick="approveWD('${w.id}')"><i class="fa-solid fa-check"></i></button>
+                  <button class="btn-small btn-reject" onclick="rejectWD('${w.id}')"><i class="fa-solid fa-xmark"></i></button>`;
+      }
+      return `<tr>
+        <td class="mono truncate">${w.id}</td>
+        <td>${w.firstName||''} <span class="mono" style="color:var(--text3)">(${w.telegramId})</span></td>
+        <td class="mono">${(w.amount||0).toFixed(2)} bits</td>
+        <td class="mono truncate">${w.address||'-'}</td>
+        <td>${w.network||'BEP20'}</td>
+        <td><span class="status ${w.status}">${w.status}</span></td>
+        <td style="white-space:nowrap">${action}</td>
+        <td class="mono">${w.createdAt ? new Date(w.createdAt).toLocaleDateString() : '-'}</td>
+      </tr>`;
+    }).join('');
+    $('withdrawalsBody').innerHTML = h || '<tr><td colspan="8" class="empty">No withdrawals</td></tr>';
+    renderPagination('withdrawalsPages', d.pagination, p => { pages.withdrawals = p; loadWithdrawals(); });
+  } catch(e){ $('withdrawalsBody').innerHTML = '<tr><td colspan="8" class="empty">Error loading withdrawals</td></tr>' }
+}
+
+async function loadIncome(){
+  const p = pages.income;
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/income?page=${p}&limit=50`);
+    const d = await r.json();
+    if(!d.success) return;
+    const h = d.entries?.map(e => {
+      return `<tr>
+        <td class="mono">${e.userId}</td>
+        <td class="mono">${(e.amount||0).toFixed(2)}</td>
+        <td><span class="status ${e.type}">${e.type||'-'}</span></td>
+        <td class="truncate" style="max-width:200px">${e.description||'-'}</td>
+        <td><span class="status ${e.status}">${e.status||'-'}</span></td>
+        <td class="mono">${e.createdAt ? new Date(e.createdAt).toLocaleDateString() : '-'}</td>
+      </tr>`;
+    }).join('');
+    $('incomeBody').innerHTML = h || '<tr><td colspan="6" class="empty">No entries</td></tr>';
+    renderPagination('incomePages', d.pagination, p => { pages.income = p; loadIncome(); });
+  } catch(e){ $('incomeBody').innerHTML = '<tr><td colspan="6" class="empty">Error loading income</td></tr>' }
+}
+
+function renderPagination(elId, pg, cb){
+  const el = $(elId);
+  if(!pg || pg.totalPages <= 1){ el.innerHTML = ''; return }
+  let html = '';
+  html += `<button ${pg.page<=1?'disabled':''} onclick="cb(${pg.page-1})"><i class="fa-solid fa-chevron-left"></i></button>`;
+  for(let i=Math.max(1,pg.page-2); i<=Math.min(pg.totalPages, pg.page+2); i++){
+    html += `<button class="${i===pg.page?'active':''}" onclick="cb(${i})">${i}</button>`;
+  }
+  html += `<button ${pg.page>=pg.totalPages?'disabled':''} onclick="cb(${pg.page+1})"><i class="fa-solid fa-chevron-right"></i></button>`;
+  el.innerHTML = html;
+}
+
+async function approveWD(id){
+  if(!confirm('Approve this withdrawal?')) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/withdraw/approve`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
+    await r.json();
+    loadWithdrawals();
+    fetchStats();
+  } catch(e){ alert('Error') }
+}
+
+async function rejectWD(id){
+  if(!confirm('Reject this withdrawal? Funds will be returned to user.')) return;
+  try {
+    const r = await fetch(`${BACKEND_URL}/api/admin/withdraw/reject`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
+    await r.json();
+    loadWithdrawals();
+    fetchStats();
+  } catch(e){ alert('Error') }
+}
+
+function loadTab(tab){
+  switch(tab){
+    case 'users': loadUsers(); break;
+    case 'deposits': loadDeposits(); break;
+    case 'withdrawals': loadWithdrawals(); break;
+    case 'income': loadIncome(); break;
+  }
+}
+
+// Auto-refresh every 30s
+fetchStats();
+loadAll();
+setInterval(() => { fetchStats(); if(!document.hidden) loadTab(getActiveTab()); }, 30000);
+</script>
+</body>
+</html>

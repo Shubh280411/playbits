@@ -528,6 +528,26 @@ app.get("/api/check-deposit/:address", async (req, res) => {
 
 // ==== NEW APIs ====
 
+// Add income entry (used by ranks page)
+app.post("/api/add-income", async (req, res) => {
+  try {
+    const { userId, type, amount, extra } = req.body;
+    if (!userId) return res.status(400).json({ success: false, error: "userId required" });
+    await createIncomeEntry({
+      userId: String(userId),
+      amount: amount || 0,
+      type: type || "",
+      description: extra?.description || "",
+      sourceUserId: extra?.sourceUserId || "",
+      sourceUserName: extra?.sourceUserName || "",
+      level: extra?.level || "",
+      status: extra?.status || "completed",
+      reason: extra?.reason || "",
+    });
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
 // Recent users for live feed (MUST be before :userId route)
 app.get("/api/users/recent", async (req, res) => {
   try {

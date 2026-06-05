@@ -61,6 +61,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div id="taskList"></div>
 </div>
 <script>try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")}</script>
+<script src="api.js"></script>
 <script type="module">
 const BACKEND_URL="https://playbits-backend-132h.onrender.com";
 const tg=window.Telegram?.WebApp;

@@ -100,6 +100,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 </div>
 <script>const savedTheme=localStorage.getItem("pb_theme");if(savedTheme==="light")document.body.classList.add("light");const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
 try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}document.getElementById("profileLink").onclick=function(){window.location.href='profile.html?uid='+(localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"")}</script>
+<script src="api.js"></script>
 <script type="module">
 const BACKEND_URL="https://playbits-backend-132h.onrender.com";
 const tg=window.Telegram?.WebApp;

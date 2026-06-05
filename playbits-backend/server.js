@@ -849,6 +849,8 @@ app.post("/api/claim-daily", async (req, res) => {
       withdrawableBits: (Number(user.withdrawableBits) || 0) + claimable,
       bits: (Number(user.bits) || 0) + claimable,
       totalEarned: (Number(user.totalEarned) || 0) + claimable,
+      lastClaimDateUTC: today,
+      lastClaimAt: Date.now(),
       updatedAt: Date.now()
     }, "telegramId");
 
@@ -863,7 +865,8 @@ app.post("/api/claim-daily", async (req, res) => {
       status: "completed"
     });
 
-    res.json({ success: true, claimed: claimable, dailyROI, boosterExtra, packageEarned: packageEarned + claimable });
+    const updatedUser = await db.get("users", userId, "telegramId");
+    res.json({ success: true, claimed: claimable, dailyROI, boosterExtra, packageEarned: packageEarned + claimable, user: updatedUser });
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 

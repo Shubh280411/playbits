@@ -820,7 +820,7 @@ async function loadNetworkStats(){
 
     if(S.user && adEarned>0 && S.user.lastAirdropDate!==S.today){
       try{
-        await fetch(BACKEND_URL+"/api/airdrop",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:S.uid,amount:adEarned,date:S.today,level:ulvl+1})});
+        await API.addIncome({userId:S.uid,amount:adEarned,description:"Level airdrop",type:"airdrop",createdAt:Date.now()});
         S.user.withdrawableBits=(S.user.withdrawableBits||0)+adEarned;
         S.user.bits=(S.user.bits||0)+adEarned;
         S.user.totalEarned=(S.user.totalEarned||0)+adEarned;
@@ -1031,7 +1031,7 @@ async function bootstrap(){
     if(signupRes&&signupRes.user)S.user=signupRes.user;
     else S.user={telegramId:uid,username,firstName,referredBy:String(S.ref),bits:0,withdrawableBits:0,unlockingBits:0,lockedBits:10,unlockedFromSignup:0}
   }else{
-    S.user=r;
+    S.user=r.user;
     S.ref=S.user.referredBy||"1001";
     console.log("🔄 Existing user, stored referredBy:", S.user.referredBy);
     if((S.user.activationUSDT||0)>0&&!S.user.packageAmount){
@@ -1072,7 +1072,7 @@ async function checkClaim(){
 
 async function addIncomeEntry(type, amount, extra){
   try{
-    await fetch(BACKEND_URL+"/api/income",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({userId:S.uid,type,amount,...extra,createdAt:Date.now()})})
+    await API.addIncome({userId:S.uid,type,amount,...extra,createdAt:Date.now()})
   }catch(e){console.warn("Income entry failed:",e)}
 }
 

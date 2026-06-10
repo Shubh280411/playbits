@@ -873,7 +873,7 @@ app.get("/api/airdrop/:userId", async (req, res) => {
     const historyRows = await db.query(
       'SELECT "source", "bits", "createdAt" FROM airdrop_history WHERE "userId"=$1 ORDER BY "createdAt" DESC LIMIT 100',
       [userId]
-    );
+    ).catch(() => ({ rows: [] }));
     const history = (historyRows.rows || []).map(r => ({
       source: r.source,
       bits: Number(r.bits) || 0,

@@ -664,24 +664,21 @@ function startMining(){
   },1000)
 }
 
-// CLAIM TIMER (24h)
+// CLAIM TIMER (24h cooldown)
 function startClaimTimer(){
   setInterval(()=>{
     if(!S.user)return;
-    const now=Date.now();
-    const claimed=S.user.lastClaimDateUTC===S.today;
-    // Countdown to midnight UTC
-    const ms=24*60*60*1000;
-    const msDay=now%ms;
-    const rem=Math.max(0,ms-msDay);
+    const lastAt=Number(S.user.lastClaimAt)||0;
+    const claimed=lastAt>0&&(Date.now()-lastAt)<86400000;
+    // Countdown to 24h from last claim
+    const rem=Math.max(0,86400000-(Date.now()-lastAt));
     const hh=Math.floor(rem/3600000),mm=Math.floor(rem%3600000/60000),ss=Math.floor(rem%60000/1000);
     ["h","m","s"].forEach((id,i)=>{
       const el=document.getElementById(id);
       if(el)el.textContent=[String(hh).padStart(2,"0"),String(mm).padStart(2,"0"),String(ss).padStart(2,"0")][i]
     });
     const pr=document.getElementById("progressRing");const pg=document.getElementById("progressGlow");
-    if(pr){const pct=claimed?0:Math.max(0,Math.min(1,rem/ms));const off=553*pct;pr.style.strokeDashoffset=off;if(pg)pg.style.strokeDashoffset=off}
-    if(ud(new Date(now))!==S.today){S.today=ud(new Date(now));if(S.user){(async()=>{await runUnlock();await checkClaim();setUI(S.user)})()}}
+    if(pr){const pct=claimed?0:Math.max(0,Math.min(1,rem/86400000));const off=553*pct;pr.style.strokeDashoffset=off;if(pg)pg.style.strokeDashoffset=off}
   },1000)
 }
 
@@ -1052,15 +1049,17 @@ async function checkClaim(){
   const b=document.getElementById("claimBtn");
   const p=calcPkg(S.user||{});
   const exhausted=p.exhausted||p.status==="exhausted"||p.status==="none";
-  S.canClaim=(S.user?.lastClaimDateUTC||"")!==S.today;
+  const lastAt=Number(S.user?.lastClaimAt)||0;
+  S.canClaim=lastAt===0||(Date.now()-lastAt)>=86400000;
   if(exhausted||p.round<=0){
     b.disabled=true;
     b.innerHTML='<i class="fa-solid fa-circle-exclamation"></i> '+(p.status==="none"?'ACTIVATE PACKAGE FIRST':'PACKAGE EXHAUSTED');
     S.canClaim=false;
-  } else {
-    b.disabled=!S.canClaim;
-    b.innerHTML=S.canClaim?'<i class="fa-solid fa-bolt"></i> CLAIM '+p.round+' BITS':'<i class="fa-regular fa-circle-check"></i> CLAIMED'
+    return
   }
+  b.disabled=!S.canClaim;
+  b.innerHTML=S.canClaim?'<i class="fa-solid fa-bolt"></i> CLAIM '+p.round+' BITS':'<i class="fa-regular fa-circle-check"></i> CLAIMED'
+}
 }
 
 async function addIncomeEntry(type, amount, extra){
@@ -1082,7 +1081,7 @@ async function doClaim(){
   try{
     const r=await API.claimDaily(S.uid);
     if(r&&r.error){
-      if(r.error==="already_claimed"||r.error==="Already claimed today"){S.user.lastClaimDateUTC=S.today;S.user.lastClaimAt=Date.now();setUI(S.user);checkClaim();return}
+      if(r.error==="already_claimed"||r.error==="Already claimed today"||r.error==="Already claimed in last 24 hours"){S.user.lastClaimDateUTC=new Date().toISOString().split("T")[0];S.user.lastClaimAt=Date.now();setUI(S.user);checkClaim();return}
       t(r.error);checkClaim();return
     }
     if(r&&r.user)S.user=r.user;
@@ -1092,7 +1091,7 @@ async function doClaim(){
       S.user.totalEarned=(S.user.totalEarned||0)+p.round;
       S.user.packageEarned=(S.user.packageEarned||0)+p.round;
     }
-    S.user.lastClaimDateUTC=S.today;
+    S.user.lastClaimDateUTC=new Date().toISOString().split("T")[0];
     S.user.lastClaimAt=Date.now();
     setUI(S.user);checkClaim();
     const cb2=document.getElementById("claimBtn");

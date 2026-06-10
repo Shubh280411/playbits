@@ -830,11 +830,10 @@ app.post("/api/claim-daily", async (req, res) => {
     const user = await db.get("users", userId, "telegramId");
     if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
-    const today = new Date().toISOString().split("T")[0];
-
-    const existing = await db.get("daily_claims", `${userId}_${today}`, "id");
-    if (existing) {
-      return res.json({ success: false, error: "Already claimed today" });
+    const now = Date.now();
+    const lastClaim = Number(user.lastClaimAt) || 0;
+    if (lastClaim > 0 && now - lastClaim < 86400000) {
+      return res.json({ success: false, error: "Already claimed in last 24 hours" });
     }
 
     if (user.packageStatus !== "active" || !user.packageAmount) {
@@ -853,21 +852,14 @@ app.post("/api/claim-daily", async (req, res) => {
       return res.json({ success: false, error: "Package cap exhausted" });
     }
 
-    const claimId = `${userId}_${today}`;
-    await db.insert("daily_claims", claimId, {
-      userId,
-      date: today,
-      claimedAt: Date.now()
-    });
-
     await db.patch("users", userId, {
       packageEarned: packageEarned + claimable,
       withdrawableBits: (Number(user.withdrawableBits) || 0) + claimable,
       bits: (Number(user.bits) || 0) + claimable,
       totalEarned: (Number(user.totalEarned) || 0) + claimable,
-      lastClaimDateUTC: today,
-      lastClaimAt: Date.now(),
-      updatedAt: Date.now()
+      lastClaimDateUTC: new Date().toISOString().split("T")[0],
+      lastClaimAt: now,
+      updatedAt: now
     }, "telegramId");
 
     createIncomeEntry({

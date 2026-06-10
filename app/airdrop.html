@@ -13,8 +13,42 @@
 :root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--orange:#ff8c00;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
 body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--card-glow:rgba(0,150,255,.06);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--orange:#d97706;--vt:transparent}
 body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
-.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg);transition:background var(--transition)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+::-webkit-scrollbar{width:0}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;z-index:5;background:var(--bg);transition:background var(--transition)}
 #gridOverlay{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.012)1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.012)1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes ef{0%{opacity:0;transform:scale(.95)}100%{opacity:1;transform:scale(1)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.98);color:#fff;padding:12px 24px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:99999;pointer-events:none;animation:toast-up .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center;border:1px solid var(--card-border)}
+.hamburger-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+.hamburger-overlay.open{opacity:1;pointer-events:auto}
+.hamburger-menu{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--bg2);border-right:1px solid var(--card-border);z-index:9999;transform:translateX(-100%);transition:transform var(--transition);overflow-y:auto;padding:16px 0}
+.hamburger-menu.open{transform:translateX(0)}
+.hamburger-menu .menu-header{padding:10px 24px 18px;border-bottom:1px solid var(--card-border);margin-bottom:10px}
+.hamburger-menu .menu-header .hm-logo{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.hamburger-menu .menu-header .hm-logo img{width:26px;height:26px;object-fit:contain}
+.hamburger-menu .menu-header .hm-logo .play{font:800 22px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px}
+.hamburger-menu .menu-header .hm-logo .bits{font:800 22px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:2px}
+.hamburger-menu .menu-header .tagline{font-size:10px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:3px;font-weight:600}
+.hamburger-menu .menu-header .hm-lang{display:flex;align-items:center;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--card-border);cursor:pointer;position:relative;user-select:none;font-size:16px}
+.hamburger-menu .menu-header .hm-lang i{font-size:11px;color:var(--text3);width:14px;text-align:center}
+.hamburger-menu .menu-header .hm-lang .lang-popup{position:absolute;top:100%;left:0;background:var(--bg2);border:1px solid var(--card-border);border-radius:var(--rs);padding:4px 0;z-index:100;min-width:140px;display:none}
+.hamburger-menu .menu-header .hm-lang .lang-popup.show{display:block}
+.hamburger-menu .menu-header .hm-lang .lang-opt{padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
+.hamburger-menu .menu-header .hm-lang .lang-opt:hover{background:rgba(0,229,255,.05);color:var(--text)}
+.hamburger-menu .menu-header .hm-lang .lang-opt.active{color:var(--cyan);font-weight:700}
+.hamburger-menu .menu-item{display:flex;align-items:center;gap:14px;padding:14px 24px;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .3s;border-left:3px solid transparent;letter-spacing:.5px;text-decoration:none}
+.hamburger-menu .menu-item:hover{color:var(--text);background:rgba(0,229,255,.05);border-left-color:var(--cyan)}
+.hamburger-menu .menu-item i,.hamburger-menu .menu-item svg{width:22px;text-align:center;font-size:16px;color:var(--cyan);flex-shrink:0}
+.hamburger-menu .menu-item svg{width:20px;height:20px}
+.hamburger-menu .menu-item.logout{color:var(--pink);margin-top:auto}
+.hamburger-menu .menu-item.logout i{color:var(--pink)}
+.hamburger-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:14px}
+.bottom-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:2px solid var(--card-border);display:flex;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:50;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.dock-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-size:9px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.5px;text-transform:uppercase;padding:4px 12px;border-radius:var(--rs);border:none;background:transparent;font-family:'Rajdhani',sans-serif;text-decoration:none}
+.dock-item i,.dock-item svg{font-size:18px;transition:all .3s;color:inherit}
+.dock-item:hover,.dock-item.active{color:var(--cyan)}
+.dock-item:hover i,.dock-item.active i,.dock-item:hover svg,.dock-item.active svg{color:var(--cyan);filter:drop-shadow(0 0 6px rgba(0,229,255,.15))}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px;position:relative;z-index:10}
 .topbar-left{display:flex;align-items:center;gap:10px}
 .hamburger-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px;transition:color var(--transition)}
@@ -22,15 +56,19 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 .logo{font:800 18px 'Orbitron',sans-serif;letter-spacing:2px}
 .logo .play{color:var(--text)}.logo .bits{color:var(--pink)}
 .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;cursor:pointer;flex-shrink:0}
-.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;animation:ef .5s ease both}
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange),var(--gold))}
 .section-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .section-title i{color:var(--gold)}
-.hero{text-align:center;padding:28px 20px 20px}
+.hero{text-align:center;padding:28px 20px 20px;animation:ef .5s ease both}
 .hero-icon{font-size:42px;color:var(--gold);margin-bottom:10px}
 .hero h1{font:800 22px 'Orbitron',sans-serif;background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
 .hero p{font-size:13px;color:var(--text2);margin-top:4px}
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.stat-grid .stat-box{animation:ef .5s ease both}
+.stat-grid .stat-box:nth-child(2){animation-delay:.08s}
+.stat-grid .stat-box:nth-child(3){animation-delay:.16s}
+.stat-grid .stat-box:nth-child(4){animation-delay:.24s}
 .stat-box{background:var(--card);border:1px solid var(--card-border);border-radius:var(--rs);padding:16px;text-align:center}
 .stat-box .sb-val{font-size:22px;font-weight:800;color:var(--gold)}
 .stat-box .sb-label{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
@@ -58,10 +96,33 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 </head>
 <body>
 <div id="gridOverlay"></div>
+<div class="hamburger-overlay" id="hamOverlay"></div>
+<nav class="hamburger-menu" id="hamMenu">
+  <button class="hamburger-close" onclick="toggleHam()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="menu-header">
+    <div class="hm-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    <div class="tagline" data-lang="tagline">Power - Play - Evolve</div>
+    <div class="hm-lang" id="langBtn"><i class="fa-solid fa-globe"></i><span id="langFlag">&#127470;&#127475;</span></div>
+  </div>
+  <a class="menu-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i><span data-lang="mnuDashboard">Dashboard</span></a>
+  <a class="menu-item" href="ranks.html"><i class="fa-solid fa-crown"></i><span data-lang="mnuRanks">Ranks</span></a>
+  <a class="menu-item" href="packages.html"><i class="fa-solid fa-rocket"></i><span data-lang="mnuPackages">Packages</span></a>
+  <a class="menu-item" href="income.html"><i class="fa-solid fa-clock-rotate-left"></i><span data-lang="mnuHistory">History</span></a>
+  <a class="menu-item" href="differential-roi.html"><i class="fa-solid fa-chart-simple"></i><span data-lang="mnuDiffROI">Differential ROI</span></a>
+  <a class="menu-item" href="booster.html"><i class="fa-solid fa-jet-fighter"></i><span data-lang="mnuBooster">Booster</span></a>
+  <a class="menu-item" href="airdrop.html"><i class="fa-solid fa-gift"></i><span data-lang="mnuAirdrop">Airdrop Vault</span></a>
+  <a class="menu-item" href="task.html"><i class="fa-brands fa-twitter"></i><span data-lang="mnuTasks">Tasks</span></a>
+  <a class="menu-item" href="network.html?uid=UID"><i class="fa-solid fa-sitemap"></i><span data-lang="mnuTeam">My Team</span></a>
+  <a class="menu-item" href="deposit.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span data-lang="mnuDeposits">Deposits</span></a>
+  <a class="menu-item" href="withdraw.html"><i class="fa-solid fa-arrow-up-right-dots"></i><span data-lang="mnuWithdraw">Withdraw</span></a>
+  <a class="menu-item" href="leaderboard.html"><i class="fa-solid fa-ranking-star"></i><span data-lang="mnuLeaderboard">Leaderboard</span></a>
+  <a class="menu-item" href="profile.html?uid=UID"><i class="fa-solid fa-gear"></i><span data-lang="mnuSettings">Settings</span></a>
+  <div class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i><span data-lang="mnuLogout">Logout</span></div>
+</nav>
 <div class="app-container" id="appWrap" style="display:none">
   <div class="topbar">
     <div class="topbar-left">
-      <button class="hamburger-btn" id="hamBtn"><i class="fa-solid fa-bars"></i></button>
+      <button class="hamburger-btn" id="hamBtn" onclick="toggleHam()"><i class="fa-solid fa-bars"></i></button>
       <div class="topbar-center">
         <div class="logo"><img src="logo.png" alt=""><span class="play">PLAY</span><span class="bits">BITS</span></div>
       </div>
@@ -71,70 +132,83 @@ body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;mi
 
   <div class="hero">
     <div class="hero-icon"><i class="fa-solid fa-gift"></i></div>
-    <h1>FREE AIRDROP VAULT</h1>
-    <p>Collect Utility Bits &bull; Boost Your ROI</p>
+    <h1 data-lang="airdropTitle">FREE AIRDROP VAULT</h1>
+    <p data-lang="airdropSub">Collect Utility Bits &bull; Boost Your ROI</p>
   </div>
 
   <div class="stat-grid">
-    <div class="stat-box"><div class="sb-val" id="freeBalance">0</div><div class="sb-label">Free Bits</div></div>
-    <div class="stat-box"><div class="sb-val" id="utilityVal">$0.00</div><div class="sb-label">Utility Value</div></div>
-    <div class="stat-box"><div class="sb-val" id="daysLeft">0</div><div class="sb-label">Days Remaining</div></div>
-    <div class="stat-box"><div class="sb-val" id="totalEarnedVal">0</div><div class="sb-label">Total Earned</div></div>
+    <div class="stat-box"><div class="sb-val" id="freeBalance">0</div><div class="sb-label" data-lang="freeBits">Free Bits</div></div>
+    <div class="stat-box"><div class="sb-val" id="utilityVal">$0.00</div><div class="sb-label" data-lang="utilityValue">Utility Value</div></div>
+    <div class="stat-box"><div class="sb-val" id="daysLeft">0</div><div class="sb-label" data-lang="daysRemaining">Days Remaining</div></div>
+    <div class="stat-box"><div class="sb-val" id="totalEarnedVal">0</div><div class="sb-label" data-lang="totalEarned">Total Earned</div></div>
   </div>
 
   <div class="card">
-    <div class="section-title"><i class="fa-solid fa-calculator"></i> Utility Formula</div>
-    <div style="text-align:center;font-size:16px;color:var(--text2);padding:8px 0">
+    <div class="section-title"><i class="fa-solid fa-calculator"></i> <span data-lang="utilityFormula">Utility Formula</span></div>
+    <div style="text-align:center;font-size:16px;color:var(--text2);padding:8px 0" data-lang="utilityDesc">
       100 Bits = <b style="color:var(--gold)">$1</b> Utility Value
     </div>
   </div>
 
   <div class="card" id="earningSources">
-    <div class="section-title"><i class="fa-solid fa-circle-dollar"></i> Earning Sources</div>
+    <div class="section-title"><i class="fa-solid fa-circle-dollar"></i> <span data-lang="earningSources">Earning Sources</span></div>
     <div class="source-list" id="sourceList"></div>
   </div>
 
   <div class="card">
-    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Usage Rules</div>
+    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> <span data-lang="usageRules">Usage Rules</span></div>
     <div class="rule-list">
-      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> Minimum Use = 100 Bits</div>
-      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> Maximum Use = 1,000 Bits</div>
-      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> Minimum Package = $10</div>
-      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> Only usable during Package Activation / Top-Up</div>
-      <div class="rule-item"><i class="fa-solid fa-ban"></i> Cannot Withdraw</div>
-      <div class="rule-item"><i class="fa-solid fa-ban"></i> Cannot Transfer</div>
-      <div class="rule-item"><i class="fa-solid fa-ban"></i> Cannot be used for Rank Qualification</div>
+      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> <span data-lang="ruleMinUse">Minimum Use = 100 Bits</span></div>
+      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> <span data-lang="ruleMaxUse">Maximum Use = 1,000 Bits</span></div>
+      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> <span data-lang="ruleMinPkg">Minimum Package = $10</span></div>
+      <div class="rule-item"><i class="fa-solid fa-check-circle"></i> <span data-lang="ruleUseOnly">Only usable during Package Activation / Top-Up</span></div>
+      <div class="rule-item"><i class="fa-solid fa-ban"></i> <span data-lang="ruleNoWithdraw">Cannot Withdraw</span></div>
+      <div class="rule-item"><i class="fa-solid fa-ban"></i> <span data-lang="ruleNoTransfer">Cannot Transfer</span></div>
+      <div class="rule-item"><i class="fa-solid fa-ban"></i> <span data-lang="ruleNoRank">Cannot be used for Rank Qualification</span></div>
     </div>
   </div>
 
   <div class="card" id="roiPreviewCard" style="display:none">
-    <div class="section-title"><i class="fa-solid fa-chart-line"></i> ROI Booster Preview</div>
+    <div class="section-title"><i class="fa-solid fa-chart-line"></i> <span data-lang="roiBoosterPreview">ROI Booster Preview</span></div>
     <div class="roi-preview" id="roiPreview"></div>
   </div>
 
   <div class="card">
-    <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Airdrop History</div>
+    <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> <span data-lang="airdropHistory">Airdrop History</span></div>
     <div id="historyContainer"></div>
   </div>
+
+  <nav class="bottom-dock">
+    <a class="dock-item" href="dashboard.html"><i class="fa-solid fa-gauge-high"></i><span data-lang="dockHome">Home</span></a>
+    <a class="dock-item" href="network.html?uid=UID"><i class="fa-solid fa-sitemap"></i><span data-lang="dockTeam">My Team</span></a>
+    <a class="dock-item" href="income.html"><i class="fa-solid fa-clock-rotate-left"></i><span data-lang="dockIncome">Income</span></a>
+    <a class="dock-item" href="deposit.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span data-lang="dockDeposits">Deposits</span></a>
+    <a class="dock-item" href="withdraw.html"><i class="fa-solid fa-arrow-up-right-dots"></i><span data-lang="dockWithdraw">Withdrawal</span></a>
+  </nav>
 </div>
 
 <div id="ssBlocked" class="loading-screen" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:999">
-  <div style="text-align:center"><i class="fa-solid fa-spinner fa-spin" style="font-size:28px;color:var(--cyan)"></i><div style="margin-top:12px;font-size:13px;color:var(--text3)">Loading Airdrop Vault...</div></div>
+  <div style="text-align:center"><i class="fa-solid fa-spinner fa-spin" style="font-size:28px;color:var(--cyan)"></i><div style="margin-top:12px;font-size:13px;color:var(--text3)"><span data-lang="loadingAirdrop">Loading Airdrop Vault...</span></div></div>
 </div>
 
 <script>
+const savedTheme = localStorage.getItem("pb_theme");
+if (savedTheme === "light") document.body.classList.add("light");
+
 const S={uid:null,user:null};
-const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
-function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
-function goProfile(){const u=localStorage.getItem("pb_uid");if(u)window.location.href="profile.html?uid="+u}
+const LANGS={en:{flag:"&#127470;&#127475;",native:"English",t:{tagline:"Power - Play - Evolve",mnuDashboard:"Dashboard",mnuRanks:"Ranks",mnuPackages:"Packages",mnuHistory:"History",mnuDiffROI:"Differential ROI",mnuBooster:"Booster",mnuAirdrop:"Airdrop Vault",mnuTasks:"Tasks",mnuTeam:"My Team",mnuDeposits:"Deposits",mnuWithdraw:"Withdraw",mnuLeaderboard:"Leaderboard",mnuSettings:"Settings",mnuLogout:"Logout",dockHome:"Home",dockTeam:"My Team",dockIncome:"Income",dockDeposits:"Deposits",dockWithdraw:"Withdrawal",airdropTitle:"FREE AIRDROP VAULT",airdropSub:"Collect Utility Bits &bull; Boost Your ROI",freeBits:"Free Bits",utilityValue:"Utility Value",daysRemaining:"Days Remaining",totalEarned:"Total Earned",utilityFormula:"Utility Formula",utilityDesc:'100 Bits = <b style="color:#ffd700">$1</b> Utility Value',earningSources:"Earning Sources",usageRules:"Usage Rules",ruleMinUse:"Minimum Use = 100 Bits",ruleMaxUse:"Maximum Use = 1,000 Bits",ruleMinPkg:"Minimum Package = $10",ruleUseOnly:"Only usable during Package Activation / Top-Up",ruleNoWithdraw:"Cannot Withdraw",ruleNoTransfer:"Cannot Transfer",ruleNoRank:"Cannot be used for Rank Qualification",roiBoosterPreview:"ROI Booster Preview",airdropHistory:"Airdrop History",loadingAirdrop:"Loading Airdrop Vault...",sourcesSignup:"Signup Bonus",sourcesTelegram:"Telegram Join",sourcesInsta:"Instagram Follow",sourcesX:"X Follow",sourcesYT:"YouTube Subscribe",sourcesReferral:"Referral Airdrop",sourcesUsed:"Used for ROI Boost","Please login first":"Please login first","Go to Dashboard":"Go to Dashboard","Error loading vault":"Error loading vault","No earnings yet":"No earnings yet","Package Amount":"Package Amount","Free Bits Available":"Free Bits Available","Effective ROI Value":"Effective ROI Value","Boosted ROI":"Boosted ROI","Cap Multiplier":"Cap Multiplier","Date":"Date","Source":"Source","Bits":"Bits","No airdrop history yet":"No airdrop history yet"}},hi:{flag:"&#127470;&#127475;",native:"हिन्दी",t:{tagline:"पावर - प्ले - एवॉल्व",mnuDashboard:"डैशबोर्ड",mnuRanks:"रैंक्स",mnuPackages:"पैकेजेस",mnuHistory:"हिस्ट्री",mnuDiffROI:"डिफरेंशियल ROI",mnuBooster:"बूस्टर",mnuAirdrop:"एयरड्रॉप वॉल्ट",mnuTasks:"टास्क्स",mnuTeam:"मेरी टीम",mnuDeposits:"डिपॉज़िट",mnuWithdraw:"वापसी",mnuLeaderboard:"लीडरबोर्ड",mnuSettings:"सेटिंग्स",mnuLogout:"लॉग आउट",dockHome:"होम",dockTeam:"मेरी टीम",dockIncome:"इनकम",dockDeposits:"डिपॉज़िट",dockWithdraw:"वापसी",airdropTitle:"फ्री एयरड्रॉप वॉल्ट",airdropSub:"यूटिलिटी बिट्स इकट्ठा करें और अपना ROI बढ़ाएं",freeBits:"फ्री बिट्स",utilityValue:"यूटिलिटी वैल्यू",daysRemaining:"बचे दिन",totalEarned:"कुल कमाई",utilityFormula:"यूटिलिटी फॉर्मूला",utilityDesc:'100 बिट्स = <b style="color:#ffd700">$1</b> यूटिलिटी वैल्यू',earningSources:"कमाई के स्रोत",usageRules:"उपयोग के नियम",ruleMinUse:"न्यूनतम उपयोग = 100 बिट्स",ruleMaxUse:"अधिकतम उपयोग = 1,000 बिट्स",ruleMinPkg:"न्यूनतम पैकेज = $10",ruleUseOnly:"केवल पैकेज एक्टिवेशन / टॉप-अप के दौरान उपयोग करें",ruleNoWithdraw:"वापसी नहीं कर सकते",ruleNoTransfer:"ट्रांसफर नहीं कर सकते",ruleNoRank:"रैंक क्वालिफिकेशन के लिए उपयोग नहीं कर सकते",roiBoosterPreview:"ROI बूस्टर प्रीव्यू",airdropHistory:"एयरड्रॉप हिस्ट्री",loadingAirdrop:"एयरड्रॉप वॉल्ट लोड हो रहा है...",sourcesSignup:"साइनअप बोनस",sourcesTelegram:"टेलीग्राम जॉइन",sourcesInsta:"इंस्टाग्राम फॉलो",sourcesX:"X फॉलो",sourcesYT:"यूट्यूब सब्सक्राइब",sourcesReferral:"रेफरल एयरड्रॉप",sourcesUsed:"ROI बूस्ट के लिए उपयोग","Please login first":"कृपया पहले लॉगिन करें","Go to Dashboard":"डैशबोर्ड पर जाएं","Error loading vault":"वॉल्ट लोड करने में त्रुटि","No earnings yet":"अभी तक कोई कमाई नहीं","Package Amount":"पैकेज राशि","Free Bits Available":"उपलब्ध फ्री बिट्स","Effective ROI Value":"प्रभावी ROI वैल्यू","Boosted ROI":"बूस्टेड ROI","Cap Multiplier":"कैप मल्टीप्लायर","Date":"तारीख","Source":"स्रोत","Bits":"बिट्स","No airdrop history yet":"अभी तक कोई एयरड्रॉप हिस्ट्री नहीं"}}};
+let __=(key,l)=>{const lang=l||localStorage.getItem("pb_lang")||"en";const t=LANGS[lang]?.t||{};return t[key]||LANGS.en.t[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.innerHTML=__(k)})}
+window.switchLang=function(l){localStorage.setItem("pb_lang",l);location.reload()};
+(function initLang(){const btn=document.getElementById("langBtn");if(!btn)return;const cur=localStorage.getItem("pb_lang")||"en";const flag=document.getElementById("langFlag");if(flag)flag.innerHTML=LANGS[cur].flag;const popup=document.createElement("div");popup.className="lang-popup";Object.keys(LANGS).forEach(k=>{const o=document.createElement("div");o.className="lang-opt"+(k===cur?" active":"");o.innerHTML=LANGS[k].flag+" "+LANGS[k].native;o.onclick=()=>switchLang(k);popup.appendChild(o)});btn.appendChild(popup);btn.onclick=function(e){e.stopPropagation();popup.classList.toggle("show")};document.addEventListener("click",function(){popup.classList.remove("show")});popup.onclick=function(e){e.stopPropagation()}})();
+function t(m){const e=document.createElement("div");e.className="toast";e.innerHTML=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2500)}
+window.toggleHam=function(){document.getElementById("hamOverlay").classList.toggle("open");document.getElementById("hamMenu").classList.toggle("open")};
+document.getElementById("hamOverlay").addEventListener("click",toggleHam);
+document.querySelectorAll(".menu-item").forEach(el=>{if(el.tagName==="A")el.addEventListener("click",()=>{document.getElementById("hamOverlay").classList.remove("open");document.getElementById("hamMenu").classList.remove("open")})});
+function goProfile(){const u=S.uid||localStorage.getItem("pb_uid");if(u)window.location.href="profile.html?uid="+u}
 function fmt$(n){return"$"+Number(n).toFixed(2)}
 function fmt(n){return Number(n).toLocaleString()}
-
-function showApp(){
-  document.getElementById("ssBlocked").style.display="none";
-  document.getElementById("appWrap").style.display="block"
-}
-
+function showApp(){document.getElementById("ssBlocked").style.display="none";document.getElementById("appWrap").style.display="block"}
 (async function(){
   const tg=window.Telegram?.WebApp;
   if(tg){tg.ready();tg.expand()}
@@ -142,39 +216,31 @@ function showApp(){
   const urlUid=qp.get("uid");
   const stored=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||(document.cookie.match(/(?:^|;\s*)pb_uid=([^;]+)/)||[])[1];
   S.uid=urlUid||stored;
-  if(!S.uid){document.getElementById("ssBlocked").innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)"><i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:var(--gold)"></i><div style="margin-top:12px;font-size:16px">Please login first</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none">Go to Dashboard</a></div>';showApp();return}
-
+  if(!S.uid){document.getElementById("ssBlocked").innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)"><i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:var(--gold)"></i><div style="margin-top:12px;font-size:16px">'+__("Please login first")+'</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none">'+__("Go to Dashboard")+'</a></div>';showApp();return}
   try{
-    // Get user + airdrop data
     const [userRes, airRes]=await Promise.all([API.getUser(S.uid),API.getAirdrop(S.uid)]);
     S.user=userRes?.user||{};
+    document.querySelectorAll("[href*='UID']").forEach(el=>{el.setAttribute("href",el.getAttribute("href").replace("UID",S.uid||"guest"))});
     const d=airRes?.success?airRes:{balance:0,totalEarned:0,totalUsed:0,expiry:0,daysLeft:0,expired:false,history:[],sources:{}};
-
-    // Avatar
     const tu=tg?.initDataUnsafe?.user;
     const dn=tu?.username||tu?.first_name||S.user.firstName||"Player";
     document.getElementById("avatar").textContent=dn.slice(0,2).toUpperCase();
-
-    // Stats
     const bal=d.expired?0:(d.balance||0);
     document.getElementById("freeBalance").textContent=fmt(bal);
     document.getElementById("utilityVal").textContent=fmt$(bal/100);
     document.getElementById("daysLeft").textContent=d.daysLeft||0;
     document.getElementById("totalEarnedVal").textContent=fmt(d.totalEarned||0);
-
-    // Earning sources
     const knownSources=["Signup Bonus","Telegram Join","Instagram Follow","X Follow","YouTube Subscribe","Referral Airdrop","Used for ROI Boost"];
+    const srcKeys={};
+    knownSources.forEach(k=>{srcKeys[k]=k==="Signup Bonus"?__("sourcesSignup"):k==="Telegram Join"?__("sourcesTelegram"):k==="Instagram Follow"?__("sourcesInsta"):k==="X Follow"?__("sourcesX"):k==="YouTube Subscribe"?__("sourcesYT"):k==="Referral Airdrop"?__("sourcesReferral"):__("sourcesUsed")});
     const srcHtml=knownSources.map(key=>{
       const bits=d.sources[key]||0;
       const icons={"Signup Bonus":"fa-gift","Telegram Join":"fa-telegram","Instagram Follow":"fa-instagram","X Follow":"fa-twitter","YouTube Subscribe":"fa-youtube","Referral Airdrop":"fa-users","Used for ROI Boost":"fa-arrow-right"}
       const ico=icons[key]||"fa-coins";
       const sign=key==="Used for ROI Boost"?"":"+";
-      const cls=key==="Used for ROI Boost"?"":"";
-      return '<div class="source-item"><div class="si-name"><i class="fa-brands '+ico+'"></i><span>'+key+'</span></div><span class="si-bits">'+sign+fmt(bits)+' Bits</span></div>'
+      return '<div class="source-item"><div class="si-name"><i class="fa-brands '+ico+'"></i><span>'+srcKeys[key]+'</span></div><span class="si-bits">'+sign+fmt(bits)+' Bits</span></div>'
     }).join("");
-    document.getElementById("sourceList").innerHTML=srcHtml||'<div class="empty-state">No earnings yet</div>';
-
-    // ROI Booster Preview
+    document.getElementById("sourceList").innerHTML=srcHtml||'<div class="empty-state">'+__("No earnings yet")+'</div>';
     const pkgAmt=Number(S.user.packageAmount)||0;
     const pkgStatus=S.user.packageStatus||"none";
     const roiPreviewEl=document.getElementById("roiPreviewCard");
@@ -185,27 +251,25 @@ function showApp(){
       const tier=[{min:0,max:9,roi:0,cap:0},{min:10,max:49,roi:.5,cap:2},{min:50,max:199,roi:.8,cap:2.25},{min:200,max:499,roi:1,cap:2.5},{min:500,max:999,roi:1.25,cap:3},{min:1000,max:999999,roi:2,cap:3}].find(t=>effective>=t.min&&effective<=t.max)||{roi:0,cap:0};
       roiPreviewEl.style.display="block";
       document.getElementById("roiPreview").innerHTML=
-        '<div class="rp-row"><span class="rpl">Package Amount</span><span class="rpv">$'+fmt(pkgAmt)+'</span></div>'+
-        '<div class="rp-row"><span class="rpl">Free Bits Available</span><span class="rpv">'+fmt(cappedFree)+' Bits</span></div>'+
-        '<div class="rp-row"><span class="rpl">Utility Value</span><span class="rpv">'+fmt$(utility)+'</span></div>'+
-        '<div class="rp-row"><span class="rpl">Effective ROI Value</span><span class="rpv" style="color:var(--gold)">'+fmt$(effective)+'</span></div>'+
-        '<div class="rp-row" style="border-top:1px solid var(--card-border);padding-top:8px;margin-top:4px"><span class="rpl">Boosted ROI</span><span class="rpv" style="color:var(--green)">'+tier.roi+'%</span></div>'+
-        '<div class="rp-row"><span class="rpl">Cap Multiplier</span><span class="rpv">'+tier.cap+'X</span></div>'
+        '<div class="rp-row"><span class="rpl">'+__("Package Amount")+'</span><span class="rpv">$'+fmt(pkgAmt)+'</span></div>'+
+        '<div class="rp-row"><span class="rpl">'+__("Free Bits Available")+'</span><span class="rpv">'+fmt(cappedFree)+' Bits</span></div>'+
+        '<div class="rp-row"><span class="rpl">'+__("Utility Value")+'</span><span class="rpv">'+fmt$(utility)+'</span></div>'+
+        '<div class="rp-row"><span class="rpl">'+__("Effective ROI Value")+'</span><span class="rpv" style="color:var(--gold)">'+fmt$(effective)+'</span></div>'+
+        '<div class="rp-row" style="border-top:1px solid var(--card-border);padding-top:8px;margin-top:4px"><span class="rpl">'+__("Boosted ROI")+'</span><span class="rpv" style="color:var(--green)">'+tier.roi+'%</span></div>'+
+        '<div class="rp-row"><span class="rpl">'+__("Cap Multiplier")+'</span><span class="rpv">'+tier.cap+'X</span></div>'
     }else{roiPreviewEl.style.display="none"}
-
-    // History
     const hist=d.history||[];
-    const histHtml=hist.length?'<table class="history-table"><thead><tr><th>Date</th><th>Source</th><th>Bits</th></tr></thead><tbody>'+
+    const histHtml=hist.length?'<table class="history-table"><thead><tr><th>'+__("Date")+'</th><th>'+__("Source")+'</th><th>'+__("Bits")+'</th></tr></thead><tbody>'+
       hist.map(h=>{
         const d2=new Date(Number(h.createdAt)||Date.now());
         const ds=d2.toISOString().split("T")[0];
         const cls=h.bits<0?"used":"";
         return '<tr><td>'+ds+'</td><td>'+h.source+'</td><td class="'+cls+'">'+(h.bits>0?"+":"")+fmt(h.bits)+'</td></tr>'
-      }).join("")+'</tbody></table>':'<div class="empty-state">No airdrop history yet</div>';
+      }).join("")+'</tbody></table>':'<div class="empty-state">'+__("No airdrop history yet")+'</div>';
     document.getElementById("historyContainer").innerHTML=histHtml;
-
+    applyLang();
     showApp();
-  }catch(e){console.error(e);document.getElementById("ssBlocked").innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)"><i class="fa-solid fa-circle-exclamation" style="font-size:32px;color:var(--pink)"></i><div style="margin-top:12px;font-size:16px">Error loading vault</div></div>';showApp()}
+  }catch(e){console.error(e);document.getElementById("ssBlocked").innerHTML='<div style="text-align:center;padding:40px;color:var(--text3)"><i class="fa-solid fa-circle-exclamation" style="font-size:32px;color:var(--pink)"></i><div style="margin-top:12px;font-size:16px">'+__("Error loading vault")+'</div></div>';showApp()}
 })()
 </script>
 </body>

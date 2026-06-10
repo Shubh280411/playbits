@@ -724,16 +724,16 @@ app.get("/api/rank/:userId", async (req, res) => {
     if (!user) return res.status(404).json({ error: "User not found" });
 
     const RANKS = [
-      { name: "R1 - Investor", minBiz: 0, bizReq: 0, directsReq: 0, commission: 15, dailyCap: 10, teamShare: 5, dailyIncome: 2, income: 2, level: 1 },
-      { name: "R2 - Senior Investor", minBiz: 5, bizReq: 5, directsReq: 3, commission: 20, dailyCap: 20, teamShare: 5, dailyIncome: 4, income: 4, level: 2 },
-      { name: "R3 - Executive", minBiz: 20, bizReq: 20, directsReq: 5, commission: 25, dailyCap: 40, teamShare: 5, dailyIncome: 8, income: 8, level: 3 },
-      { name: "R4 - Manager", minBiz: 80, bizReq: 80, directsReq: 6, commission: 30, dailyCap: 80, teamShare: 5, dailyIncome: 16, income: 16, level: 4 },
-      { name: "R5 - Senior Manager", minBiz: 300, bizReq: 300, directsReq: 8, commission: 35, dailyCap: 160, teamShare: 5, dailyIncome: 32, income: 32, level: 5 },
-      { name: "R6 - Director", minBiz: 1200, bizReq: 1200, directsReq: 10, commission: 40, dailyCap: 320, teamShare: 10, dailyIncome: 64, income: 64, level: 6 },
-      { name: "R7 - Senior Director", minBiz: 5000, bizReq: 5000, directsReq: 12, commission: 45, dailyCap: 640, teamShare: 10, dailyIncome: 128, income: 128, level: 7 },
-      { name: "R8 - Vice President", minBiz: 20000, bizReq: 20000, directsReq: 15, commission: 50, dailyCap: 1280, teamShare: 10, dailyIncome: 256, income: 256, level: 8 },
-      { name: "R9 - Senior Vice President", minBiz: 100000, bizReq: 100000, directsReq: 18, commission: 55, dailyCap: 2560, teamShare: 10, dailyIncome: 512, income: 512, level: 9 },
-      { name: "R10 - Emperor", minBiz: 500000, bizReq: 500000, directsReq: 20, commission: 60, dailyCap: 5120, teamShare: 10, dailyIncome: 1024, income: 1024, level: 10 }
+      { name: "R1 - Investor", minBiz: 0, bizReq: 0, directsReq: 3, selfPkgReq: 10, commission: 15, dailyCap: 10, teamShare: 5, dailyIncome: 2, income: 2, level: 1 },
+      { name: "R2 - Senior Investor", minBiz: 5, bizReq: 5, directsReq: 3, selfPkgReq: 10, commission: 20, dailyCap: 20, teamShare: 5, dailyIncome: 4, income: 4, level: 2 },
+      { name: "R3 - Executive", minBiz: 20, bizReq: 20, directsReq: 3, selfPkgReq: 50, commission: 25, dailyCap: 40, teamShare: 5, dailyIncome: 8, income: 8, level: 3 },
+      { name: "R4 - Manager", minBiz: 80, bizReq: 80, directsReq: 5, selfPkgReq: 50, commission: 30, dailyCap: 80, teamShare: 5, dailyIncome: 16, income: 16, level: 4 },
+      { name: "R5 - Senior Manager", minBiz: 300, bizReq: 300, directsReq: 5, selfPkgReq: 200, commission: 35, dailyCap: 160, teamShare: 5, dailyIncome: 32, income: 32, level: 5 },
+      { name: "R6 - Director", minBiz: 1200, bizReq: 1200, directsReq: 5, selfPkgReq: 200, commission: 40, dailyCap: 320, teamShare: 10, dailyIncome: 64, income: 64, level: 6 },
+      { name: "R7 - Senior Director", minBiz: 5000, bizReq: 5000, directsReq: 7, selfPkgReq: 500, commission: 45, dailyCap: 640, teamShare: 10, dailyIncome: 128, income: 128, level: 7 },
+      { name: "R8 - Vice President", minBiz: 20000, bizReq: 20000, directsReq: 7, selfPkgReq: 500, commission: 50, dailyCap: 1280, teamShare: 10, dailyIncome: 256, income: 256, level: 8 },
+      { name: "R9 - Senior Vice President", minBiz: 100000, bizReq: 100000, directsReq: 7, selfPkgReq: 500, commission: 55, dailyCap: 2560, teamShare: 10, dailyIncome: 512, income: 512, level: 9 },
+      { name: "R10 - Emperor", minBiz: 500000, bizReq: 500000, directsReq: 7, selfPkgReq: 1000, commission: 60, dailyCap: 5120, teamShare: 10, dailyIncome: 1024, income: 1024, level: 10 }
     ];
 
     const directs = await db.runQuery({
@@ -773,20 +773,25 @@ app.get("/api/rank/:userId", async (req, res) => {
       const bizReq = r.bizReq;
       const mainLeg = leftLegBusiness;
       const otherLeg = rightLegBusiness;
+      const selfPkg = Number(user.activationUSDT) || 0;
       const bizOk = bizReq === 0 || teamBusiness >= bizReq;
       const directsOk = directCount >= r.directsReq;
+      const selfPkgOk = selfPkg >= r.selfPkgReq;
       const binaryOk = bizReq === 0 || (mainLeg >= bizReq / 2 && otherLeg >= bizReq / 2);
-      if (bizOk && directsOk && binaryOk) {
+      if (bizOk && directsOk && selfPkgOk && binaryOk) {
         currentRank = r;
         nextRank = i < RANKS.length - 1 ? RANKS[i + 1] : null;
         break;
       }
     }
 
+    const selfPkg = Number(user.activationUSDT) || 0;
     const nextBizNeeded = nextRank ? Math.max(0, nextRank.bizReq - teamBusiness) : 0;
     const nextDirectsNeeded = nextRank ? Math.max(0, nextRank.directsReq - directCount) : 0;
+    const nextSelfPkgNeeded = nextRank ? Math.max(0, nextRank.selfPkgReq - selfPkg) : 0;
     const bizProgress = nextRank ? Math.min(100, Math.round((teamBusiness / nextRank.bizReq) * 100)) : 100;
     const directsProgress = nextRank ? Math.min(100, Math.round((directCount / nextRank.directsReq) * 100)) : 100;
+    const selfPkgProgress = nextRank ? Math.min(100, Math.round((selfPkg / nextRank.selfPkgReq) * 100)) : 100;
 
     res.json({
       success: true,
@@ -799,7 +804,7 @@ app.get("/api/rank/:userId", async (req, res) => {
       leftLegBusiness,
       rightLegBusiness,
       binaryCondition: { mainLeg: leftLegBusiness, otherLeg: rightLegBusiness, required: currentRank.bizReq / 2 },
-      progress: { bizProgress, directsProgress, nextBizNeeded, nextDirectsNeeded },
+      progress: { bizProgress, directsProgress, selfPkgProgress, nextBizNeeded, nextDirectsNeeded, nextSelfPkgNeeded },
       ranks: RANKS
     });
   } catch (e) { res.status(500).json({ error: e.message }) }

@@ -101,6 +101,7 @@ async function commitDepositCredit({ depositDocId, userId, amount, address, txHa
 async function ensureUserDoc(userId) {
   const existing = await db.get("users", String(userId), "telegramId");
   if (existing) return true;
+  const now = Date.now();
   await db.insert("users", String(userId), {
     telegramId: String(userId),
     firstName: `Player_${String(userId).slice(-4)}`,
@@ -111,10 +112,14 @@ async function ensureUserDoc(userId) {
     activationUSDT: 0,
     packageAmount: 0,
     packageStatus: "none",
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    freeBitsBalance: 10, freeBitsEarned: 10, freeBitsUsed: 0, freeBitsExpiry: now + 365 * 86400000,
+    createdAt: now,
+    updatedAt: now,
     referredBy: "1001"
   }, "telegramId");
+  await db.insert("airdrop_history", `${userId}_signup_${now}`, {
+    userId: String(userId), source: "Signup Bonus", bits: 10, createdAt: now
+  }).catch(() => {});
   return true;
 }
 
@@ -391,7 +396,7 @@ app.get("/api/booster/:userId", async (req, res) => {
 // Buy a package
 app.post("/api/buy-package", async (req, res) => {
   try {
-    const { userId, amount } = req.body;
+    const { userId, amount, useFreeBits } = req.body;
     if (!userId || !amount) return res.json({ success: false, error: "userId and amount required" });
 
     const user = await db.get("users", userId, "telegramId");
@@ -406,7 +411,25 @@ app.post("/api/buy-package", async (req, res) => {
     }
     if (!tier) return res.json({ success: false, error: "Amount not in any tier range" });
 
-    const maxEarningsBits = amount * tier.cap * 100;
+    let maxEarningsBits = amount * tier.cap * 100;
+    let effectiveAmount = amount;
+    let freeUsed = 0;
+
+    // Free Bits ROI boost
+    const freeBal = Number(user.freeBitsBalance) || 0;
+    const freeExpiry = Number(user.freeBitsExpiry) || 0;
+    const freeNotExpired = freeExpiry === 0 || Date.now() < freeExpiry;
+    if (useFreeBits && freeBal >= 100 && freeNotExpired) {
+      const cappedFree = Math.min(freeBal, 1000);
+      const utilityVal = cappedFree / 100;
+      effectiveAmount = amount + utilityVal;
+      // Recalculate tier based on effective amount only for ROI
+      for (const t of TIERS) {
+        if (effectiveAmount >= t.min && effectiveAmount <= t.max) { tier = t; break; }
+      }
+      maxEarningsBits = effectiveAmount * tier.cap * 100;
+      freeUsed = cappedFree;
+    }
 
     const updates = {
       depositBalance: depBal - amount,
@@ -420,6 +443,17 @@ app.post("/api/buy-package", async (req, res) => {
       packageStatus: "active",
       packageActivatedAt: Date.now()
     };
+    if (freeUsed > 0) {
+      updates.freeBitsBalance = freeBal - freeUsed;
+      updates.freeBitsUsed = (Number(user.freeBitsUsed) || 0) + freeUsed;
+      // Record usage in airdrop_history
+      await db.insert("airdrop_history", `${userId}_used_${Date.now()}_${Math.random().toString(36).slice(2,6)}`, {
+        userId: String(userId),
+        bits: -freeUsed,
+        source: "Used for ROI Boost",
+        createdAt: Date.now()
+      }).catch(() => {});
+    }
     if (!user.isActivated10 && amount >= 10) updates.isActivated10 = true;
 
     try {
@@ -474,7 +508,7 @@ app.post("/api/buy-package", async (req, res) => {
       } catch (e) { console.error("[REFERRAL] Commission error:", e.message) }
     })();
 
-    res.json({ success: true, amount, roi: tier.roi, cap: tier.cap, maxEarnings: maxEarningsBits, tier: tier.label });
+    res.json({ success: true, amount, roi: tier.roi, cap: tier.cap, maxEarnings: maxEarningsBits, tier: tier.label, effectiveAmount, freeBitsUsed: freeUsed });
   } catch (e) { res.status(500).json({ success: false, error: e.message }) }
 });
 
@@ -821,6 +855,79 @@ app.get("/api/rank/:userId", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 
+// Airdrop vault data
+app.get("/api/airdrop/:userId", async (req, res) => {
+  try {
+    const userId = String(req.params.userId);
+    const user = await db.get("users", userId, "telegramId");
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+    const freeBal = Number(user.freeBitsBalance) || 0;
+    const freeEarned = Number(user.freeBitsEarned) || 0;
+    const freeUsed = Number(user.freeBitsUsed) || 0;
+    const freeExpiry = Number(user.freeBitsExpiry) || 0;
+    const now = Date.now();
+    const daysLeft = freeExpiry > 0 ? Math.max(0, Math.floor((freeExpiry - now) / 86400000)) : 0;
+    const expired = freeExpiry > 0 && now >= freeExpiry;
+
+    const historyRows = await db.query(
+      'SELECT "source", "bits", "createdAt" FROM airdrop_history WHERE "userId"=$1 ORDER BY "createdAt" DESC LIMIT 100',
+      [userId]
+    );
+    const history = (historyRows.rows || []).map(r => ({
+      source: r.source,
+      bits: Number(r.bits) || 0,
+      createdAt: Number(r.createdAt) || 0
+    }));
+
+    // Group by source for earnings overview
+    const sourceTotals = {};
+    for (const h of history) {
+      sourceTotals[h.source] = (sourceTotals[h.source] || 0) + h.bits;
+    }
+
+    res.json({
+      success: true,
+      balance: expired ? 0 : freeBal,
+      totalEarned: freeEarned,
+      totalUsed: freeUsed,
+      expiry: freeExpiry,
+      daysLeft: expired ? 0 : daysLeft,
+      expired,
+      history,
+      sources: sourceTotals
+    });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Credit airdrop bits (internal helper)
+async function creditAirdrop(userId, source, bits, expiryDays) {
+  try {
+    const user = await db.get("users", userId, "telegramId");
+    if (!user) return false;
+    const now = Date.now();
+    const currentExpiry = Number(user.freeBitsExpiry) || 0;
+    const newExpiry = expiryDays > 0 ? now + expiryDays * 86400000 : currentExpiry;
+    const finalExpiry = currentExpiry > now ? Math.max(currentExpiry, newExpiry) : (newExpiry || now + 365 * 86400000);
+
+    await db.patch("users", userId, {
+      freeBitsBalance: (Number(user.freeBitsBalance) || 0) + bits,
+      freeBitsEarned: (Number(user.freeBitsEarned) || 0) + bits,
+      freeBitsExpiry: finalExpiry,
+      updatedAt: now
+    }, "telegramId");
+
+    const id = `${userId}_airdrop_${source}_${now}_${Math.random().toString(36).slice(2,6)}`;
+    await db.insert("airdrop_history", id, {
+      userId: String(userId),
+      source,
+      bits,
+      createdAt: now
+    });
+    return true;
+  } catch (e) { console.error("[AIRDROP] credit failed:", e.message); return false }
+}
+
 // Daily claim
 app.post("/api/claim-daily", async (req, res) => {
   try {
@@ -1040,8 +1147,13 @@ app.post("/api/signup", async (req, res) => {
       lockedBits: 10, unlockingBits: 0, unlockedFromSignup: 0,
       followClaimed: false, followBits: 0, followClaimedAt: 0,
       lastUnlockDateUTC: "", lastClaimDateUTC: "", lastClaimAt: 0,
+      freeBitsBalance: 10, freeBitsEarned: 10, freeBitsUsed: 0, freeBitsExpiry: now + 365 * 86400000,
       createdAt: now, updatedAt: now
     }, "telegramId");
+
+    await db.insert("airdrop_history", `${userId}_signup_${now}`, {
+      userId: String(userId), source: "Signup Bonus", bits: 10, createdAt: now
+    }).catch(() => {});
 
     // Increment upline's totalDirects
     if (ref !== "SYSTEM" && ref !== "1001") {

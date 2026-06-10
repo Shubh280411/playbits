@@ -68,5 +68,9 @@ window.API = {
   addIncome(data) { return this.post("/api/add-income", data); },
 
   // Top users for live feed
-  getRecentUsers(limit) { return this.get(`/api/users/recent?limit=${limit || 5}`); }
+  getRecentUsers(limit) { return this.get(`/api/users/recent?limit=${limit || 5}`); },
+
+  // Airdrop vault
+  getAirdrop(uid) { return this.get(`/api/airdrop/${uid}`); },
+  buyPackageWithFreeBits(uid, amount, useFreeBits) { return this.post("/api/buy-package", { userId: uid, amount, useFreeBits }); }
 };

@@ -695,10 +695,9 @@ async function loadFeed(){
       if(!users.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No activity yet</div>';return}
       let html="";
       users.forEach(u=>{
-        if(u.id===S.uid||u.telegramId===S.uid)return;
-        if(u.totalEarned>0)return;
+        if(u.telegramId===S.uid)return;
         const ago=timeAgo(u.createdAt);
-        const name=u.firstName||"Player";
+        const name=u.firstName||"Player_"+String(u.telegramId).slice(-4);
         html+='<div class="feed-item"><div class="fi-icon join"><i class="fa-solid fa-user-plus"></i></div><span class="fi-text"><b>'+name+'</b> joined PlayBits</span><span class="fi-time">'+ago+'</span></div>'
       });
       el.innerHTML=html||'<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No new joins yet</div>'
@@ -1004,7 +1003,7 @@ async function bootstrap(){
   let uid=tUser?.id?String(tUser.id):(p.get("uid")||null);
   if(!uid){
     const stored=getStoredId();
-    if(stored&&stored.startsWith("test_")){uid=stored}
+    if(stored){uid=stored}
     else{uid="test_"+Math.floor(Math.random()*9000+1000);setStoredId(uid)}
   }
   S.uid=uid;

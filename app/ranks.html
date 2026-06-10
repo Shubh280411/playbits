@@ -540,8 +540,8 @@ async function init() {
 
   try {
     const rankRes = await API.getRank(S.uid);
-    if (!rankRes || !rankRes.success) {
-      document.getElementById("appWrap").innerHTML = '<div style="padding:40px 30px;color:var(--text3);text-align:center"><i class="fa-solid fa-triangle-exclamation" style="font-size:36px;color:var(--gold);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700">User not found</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none;font-size:13px">Go to Dashboard</a></div>';
+    if (!rankRes || rankRes.error) {
+      document.getElementById("appWrap").innerHTML = '<div style="padding:40px 30px;color:var(--text3);text-align:center"><i class="fa-solid fa-triangle-exclamation" style="font-size:36px;color:var(--gold);margin-bottom:12px"></i><div style="font-size:16px;font-weight:700">'+(rankRes?.error||'User not found')+'</div><a href="dashboard.html" style="display:inline-block;margin-top:12px;padding:10px 24px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:700;text-decoration:none;font-size:13px">Go to Dashboard</a></div>';
       return;
     }
     S.user = rankRes.user || {};

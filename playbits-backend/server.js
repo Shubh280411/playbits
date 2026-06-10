@@ -721,12 +721,12 @@ app.get("/api/rank/:userId", async (req, res) => {
   try {
     const userId = String(req.params.userId);
     const user = await db.get("users", userId, "telegramId");
-    if (!user) return res.status(404).json({ error: "User not found" });
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
 
     // Get all users for frontend rank calculation
     const allUsersRows = await db.query(
-      'SELECT "telegramId", "referredBy", "firstName", "activationUSDT", "packageAmount", "isActivated10", "dailyRewardDay", "dailyRewardTier", "orbitRewardsClaimed" FROM users LIMIT 500'
-    );
+      'SELECT "telegramId", "referredBy", "firstName", "activationUSDT", "packageAmount", "isActivated10" FROM users LIMIT 500'
+    ).catch(() => ({ rows: [] }));
     const allUsersMap = {};
     for (const row of allUsersRows.rows) {
       allUsersMap[row.telegramId] = row;

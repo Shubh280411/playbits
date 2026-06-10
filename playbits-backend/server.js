@@ -187,10 +187,10 @@ app.get("/", (req, res) => {
 });
 
 const TIERS = [
-  { min: 10, max: 49, roi: 0.5, cap: 2, label: "Starter" },
-  { min: 50, max: 199, roi: 0.8, cap: 2.25, label: "Bronze" },
-  { min: 200, max: 499, roi: 1.0, cap: 2.5, label: "Silver" },
-  { min: 500, max: 999, roi: 1.25, cap: 3, label: "Gold" }
+  { min: 10, max: 49, roi: 0.5, cap: 2, label: "Spark" },
+  { min: 50, max: 199, roi: 0.8, cap: 2.25, label: "Ignite" },
+  { min: 200, max: 499, roi: 1.0, cap: 2.5, label: "Nitro" },
+  { min: 500, max: 999, roi: 1.25, cap: 3, label: "Apex" }
 ];
 
 const BOOSTERS = [

@@ -4,340 +4,620 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PLAYBITS — Admin Panel</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--red:#ff3355;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
-.app-container{width:100%;max-width:1000px;min-height:100vh;padding:20px 18px 30px;box-sizing:border-box;position:relative;background:var(--bg)}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
-.topbar-left{display:flex;align-items:center;gap:12px}
-.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
-.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
-.topbar-title{font:800 16px 'Orbitron',sans-serif;color:var(--cyan);letter-spacing:2px}
-.card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:16px;overflow:hidden}
-.card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
-.card{position:relative}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+:root{--bg:#000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#fff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--red:#ff3355;--orange:#ff8c00;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:0}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:9999;flex-direction:column;gap:16px;padding:20px}
+.login-box{width:100%;max-width:380px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:32px 24px;text-align:center}
+.login-box .lb-logo{font:900 28px 'Orbitron',sans-serif;margin-bottom:4px}
+.login-box .lb-logo .play{color:var(--text)}
+.login-box .lb-logo .bits{color:var(--pink)}
+.login-box .lb-sub{font-size:12px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-bottom:24px}
+.login-box input{width:100%;padding:14px 16px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font:500 15px 'Rajdhani',sans-serif;outline:none;margin-bottom:12px;transition:border .3s}
+.login-box input:focus{border-color:var(--cyan)}
+.login-box .login-btn{width:100%;padding:14px;border-radius:var(--rs);border:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font:700 14px 'Orbitron',sans-serif;letter-spacing:2px;cursor:pointer;transition:all .3s;text-transform:uppercase}
+.login-box .login-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,229,255,.2)}
+.login-box .login-btn[disabled]{opacity:.4;cursor:default;transform:none}
+.login-box .login-error{font-size:12px;color:var(--red);margin-top:8px;min-height:18px}
+
+/* LAYOUT */
+#appWrap{display:flex;width:100%;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:240px;min-width:240px;background:var(--bg2);border-right:1px solid var(--card-border);padding:16px 0;display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto}
+.sidebar .sb-logo{padding:8px 20px 20px;border-bottom:1px solid var(--card-border);margin-bottom:8px}
+.sidebar .sb-logo .play{font:900 20px 'Orbitron',sans-serif;color:var(--text)}
+.sidebar .sb-logo .bits{font:900 20px 'Orbitron',sans-serif;color:var(--pink)}
+.sidebar .sb-logo .sb-role{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.sidebar .sb-user{font-size:12px;color:var(--text2);padding:8px 20px 12px;border-bottom:1px solid var(--card-border);margin-bottom:8px}
+.sidebar .nav-item{display:flex;align-items:center;gap:12px;padding:12px 20px;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .3s;border-left:3px solid transparent;letter-spacing:.5px}
+.sidebar .nav-item:hover{color:var(--text);background:rgba(0,229,255,.03);border-left-color:var(--cyan)}
+.sidebar .nav-item.active{color:var(--cyan);background:rgba(0,229,255,.06);border-left-color:var(--cyan)}
+.sidebar .nav-item i{width:18px;font-size:14px;color:inherit}
+.sidebar .nav-item.logout{margin-top:auto;color:var(--pink);border-left-color:transparent}
+.sidebar .nav-item.logout:hover{background:rgba(255,45,149,.06);border-left-color:var(--pink)}
+.main{flex:1;padding:20px 24px 40px;max-width:calc(100vw - 240px)}
+.main .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.main .topbar h1{font:800 22px 'Orbitron',sans-serif;color:var(--cyan);letter-spacing:2px}
+.main .topbar .refresh-btn{width:38px;height:38px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,229,255,.06);color:var(--cyan);cursor:pointer;display:grid;place-items:center;font-size:15px;transition:all .3s}
+.main .topbar .refresh-btn:hover{background:rgba(0,229,255,.12)}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:20px}
 .stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--rs);padding:14px;text-align:center}
-.stat-card .num{font:800 18px 'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:2px}
-.stat-card .lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
-.stat-card.pending .num{color:var(--gold)}
-.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.tab{padding:8px 16px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:all .3s}
-.tab:hover{color:var(--text);background:rgba(0,229,255,.04)}
-.tab.active{color:var(--cyan);background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2)}
-.tab.count{position:relative}
-.tab .badge{position:absolute;top:-4px;right:-4px;background:var(--pink);color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:99px;min-width:16px;text-align:center}
+.stat-card .num{font:800 20px 'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:2px}
+.stat-card .lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.stat-card.gold .num{color:var(--gold)}
+.stat-card.pink .num{color:var(--pink)}
+.stat-card.green .num{color:var(--green)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:16px;overflow-x:auto}
+.card-title{font:700 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--cyan)}
+
+/* TABLE */
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{text-align:left;padding:10px 8px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:10px;border-bottom:1px solid var(--card-border);position:sticky;top:0;background:var(--card)}
+th{text-align:left;padding:10px 8px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:10px;border-bottom:1px solid var(--card-border);position:sticky;top:0;background:var(--card);white-space:nowrap}
 td{padding:8px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2);vertical-align:middle}
 tr:hover td{background:rgba(0,229,255,.02)}
-.status{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.5px}
-.status.active{background:rgba(0,255,136,.1);color:var(--green)}
-.status.pending{background:rgba(255,215,0,.1);color:var(--gold)}
-.status.completed{background:rgba(0,229,255,.1);color:var(--cyan)}
-.status.approved{background:rgba(0,255,136,.1);color:var(--green)}
-.status.rejected{background:rgba(255,51,85,.1);color:var(--red)}
-.status.none{background:rgba(150,150,182,.1);color:var(--text3)}
-.search-box{display:flex;gap:8px;margin-bottom:12px}
-.search-box input{flex:1;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font:500 14px 'Rajdhani',sans-serif;outline:none}
-.search-box input:focus{border-color:var(--cyan)}
-.search-box button{padding:10px 18px;border-radius:var(--rs);border:none;background:rgba(0,229,255,.1);color:var(--cyan);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;transition:all .3s}
-.search-box button:hover{background:rgba(0,229,255,.2)}
+
+/* TABS */
+.tab-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tab-btn{padding:8px 16px;border-radius:var(--rs);border:1px solid transparent;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:all .3s}
+.tab-btn:hover{color:var(--text);background:rgba(0,229,255,.04)}
+.tab-btn.active{color:var(--cyan);background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.2)}
+.tab-content{display:none}.tab-content.active{display:block}
+
+/* STATUS BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.badge.green{background:rgba(0,255,136,.1);color:var(--green)}
+.badge.gold{background:rgba(255,215,0,.1);color:var(--gold)}
+.badge.cyan{background:rgba(0,229,255,.1);color:var(--cyan)}
+.badge.red{background:rgba(255,51,85,.1);color:var(--red)}
+.badge.gray{background:rgba(150,150,182,.1);color:var(--text3)}
+.badge.purple{background:rgba(168,85,247,.1);color:var(--purple)}
+
+/* SEARCH */
+.search-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:200px;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font:500 14px 'Rajdhani',sans-serif;outline:none}
+.search-bar input:focus{border-color:var(--cyan)}
+.search-bar button{padding:10px 18px;border-radius:var(--rs);border:none;background:rgba(0,229,255,.1);color:var(--cyan);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;transition:all .3s}
+.search-bar button:hover{background:rgba(0,229,255,.2)}
+.search-bar select{padding:10px 14px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font:500 14px 'Rajdhani',sans-serif;outline:none}
+
+/* PAGINATION */
 .pagination{display:flex;justify-content:center;gap:6px;margin-top:12px;flex-wrap:wrap}
 .pagination button{padding:6px 12px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text2);cursor:pointer;font:700 12px 'Rajdhani',sans-serif;transition:all .3s}
 .pagination button:hover{color:var(--cyan);border-color:var(--cyan)}
 .pagination button.active{color:var(--cyan);border-color:var(--cyan);background:rgba(0,229,255,.08)}
 .pagination button:disabled{opacity:.3;cursor:default}
-.btn-small{padding:4px 10px;border-radius:var(--rs);border:none;cursor:pointer;font:700 10px 'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.5px;transition:all .3s}
-.btn-approve{background:rgba(0,255,136,.15);color:var(--green)}
-.btn-approve:hover{background:rgba(0,255,136,.25)}
-.btn-reject{background:rgba(255,51,85,.15);color:var(--red)}
-.btn-reject:hover{background:rgba(255,51,85,.25)}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.empty{text-align:center;padding:30px;color:var(--text3);font-size:13px}
+
+/* BUTTONS */
+.btn-s{padding:4px 10px;border-radius:var(--rs);border:none;cursor:pointer;font:700 10px 'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:.5px;transition:all .3s;margin:1px}
+.btn-green{background:rgba(0,255,136,.15);color:var(--green)}
+.btn-green:hover{background:rgba(0,255,136,.25)}
+.btn-red{background:rgba(255,51,85,.15);color:var(--red)}
+.btn-red:hover{background:rgba(255,51,85,.25)}
+.btn-cyan{background:rgba(0,229,255,.15);color:var(--cyan)}
+.btn-cyan:hover{background:rgba(0,229,255,.25)}
+.btn-gold{background:rgba(255,215,0,.15);color:var(--gold)}
+.btn-gold:hover{background:rgba(255,215,0,.25)}
 .mono{font-family:'JetBrains Mono',monospace;font-size:11px}
-.truncate{max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
-.refresh-btn{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(0,229,255,.1);color:var(--cyan);cursor:pointer;display:grid;place-items:center;font-size:15px;transition:all .3s}
-.refresh-btn:hover{background:rgba(0,229,255,.2)}
-.refresh-btn.spinning i{animation:spin .6s linear}
-@keyframes spin{to{transform:rotate(360deg)}}
-::-webkit-scrollbar{width:0}
-@media(max-width:600px){.app-container{max-width:100%;padding:12px 10px 20px}.stats-grid{grid-template-columns:repeat(2,1fr)}th,td{padding:6px 4px;font-size:11px}}
+.truncate{max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+.empty{padding:30px;text-align:center;color:var(--text3);font-size:13px}
+.fade-in{animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:flex;justify-content:center;align-items:center;padding:20px;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{visibility:visible;opacity:1;pointer-events:auto}
+.modal-box{background:var(--bg2);border:2px solid var(--card-border);border-radius:var(--r);padding:24px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+.modal-box .modal-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:14px}
+.modal-box{position:relative}
+.modal-box h2{font:800 16px 'Orbitron',sans-serif;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-box .field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.modal-box .field label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.modal-box .field input,.modal-box .field select{width:100%;padding:10px 14px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font:500 14px 'Rajdhani',sans-serif;outline:none}
+.modal-box .field input:focus,.modal-box .field select:focus{border-color:var(--cyan)}
+.modal-box .field .ro{font-size:13px;color:var(--text2);padding:6px 0}
+
+/* RESPONSIVE */
+@media(max-width:768px){.sidebar{width:56px;min-width:56px}.sidebar .sb-logo .play,.sidebar .sb-logo .bits,.sidebar .sb-logo .sb-role,.sidebar .sb-user,.sidebar .nav-item span{display:none}.sidebar .nav-item{padding:14px;justify-content:center}.sidebar .nav-item i{width:auto;font-size:18px}.sidebar .sb-logo{padding:8px 14px 14px}.main{max-width:calc(100vw - 56px);padding:14px 12px 30px}.stats-row{grid-template-columns:repeat(2,1fr)}.search-bar input{min-width:120px}}
 </style>
 </head>
 <body>
-<div class="app-container">
-  <div class="topbar">
-    <div class="topbar-left">
-      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
-      <span class="topbar-title"><i class="fa-solid fa-shield-halved"></i> Admin Panel</span>
-    </div>
-    <div>
-      <button class="refresh-btn" onclick="loadAll()"><i class="fa-solid fa-rotate"></i></button>
-    </div>
-  </div>
 
-  <div class="stats-grid" id="statsGrid"></div>
-
-  <div class="tabs" id="tabs">
-    <button class="tab active" data-tab="users"><i class="fa-solid fa-users"></i> Users</button>
-    <button class="tab count" data-tab="deposits"><i class="fa-solid fa-circle-dollar"></i> Deposits <span class="badge" id="depBadge">0</span></button>
-    <button class="tab count" data-tab="withdrawals"><i class="fa-solid fa-arrow-up-right-from-square"></i> Withdrawals <span class="badge" id="wdBadge">0</span></button>
-    <button class="tab" data-tab="income"><i class="fa-solid fa-chart-line"></i> Income</button>
-  </div>
-
-  <!-- Users Tab -->
-  <div class="tab-content active" id="tab-users">
-    <div class="search-box">
-      <input type="text" id="userSearch" placeholder="Search by ID, name or username..." onkeydown="if(event.key==='Enter')loadUsers()">
-      <button onclick="loadUsers()"><i class="fa-solid fa-magnifying-glass"></i></button>
-    </div>
-    <div class="card" style="overflow-x:auto">
-      <table><thead><tr><th>ID</th><th>Name</th><th>Username</th><th>Package</th><th>Deposit</th><th>Activation</th><th>Bits</th><th>Earned</th><th>Referred By</th><th>Created</th><th>Action</th></tr></thead>
-      <tbody id="usersBody"><tr><td colspan="11" class="empty">Loading...</td></tr></tbody></table>
-      <div class="pagination" id="usersPages"></div>
-    </div>
-  </div>
-
-  <!-- Deposits Tab -->
-  <div class="tab-content" id="tab-deposits">
-    <div class="card" style="overflow-x:auto">
-      <table><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Swept</th><th>Created</th></tr></thead>
-      <tbody id="depositsBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table>
-      <div class="pagination" id="depositsPages"></div>
-    </div>
-  </div>
-
-  <!-- Withdrawals Tab -->
-  <div class="tab-content" id="tab-withdrawals">
-    <div class="card" style="overflow-x:auto">
-      <table><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Address</th><th>Network</th><th>Status</th><th>Action</th><th>Date</th></tr></thead>
-      <tbody id="withdrawalsBody"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody></table>
-      <div class="pagination" id="withdrawalsPages"></div>
-    </div>
-  </div>
-
-  <!-- Income Tab -->
-  <div class="tab-content" id="tab-income">
-    <div class="card" style="overflow-x:auto">
-      <table><thead><tr><th>User</th><th>Amount</th><th>Type</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
-      <tbody id="incomeBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table>
-      <div class="pagination" id="incomePages"></div>
-    </div>
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="lb-logo"><span class="play">PLAY</span><span class="bits">BITS</span></div>
+    <div class="lb-sub">Admin Control Panel</div>
+    <input type="email" id="loginUser" placeholder="Email" autocomplete="off" onkeydown="if(event.key==='Enter')login()">
+    <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+    <div class="login-error" id="loginError"></div>
+    <button class="login-btn" id="loginBtn" onclick="login()"><i class="fa-solid fa-shield-halved"></i> Sign In</button>
   </div>
 </div>
 
-<script src="api.js"></script>
+<div id="appWrap" style="display:none">
+  <nav class="sidebar">
+    <div class="sb-logo"><span class="play">PLAY</span><span class="bits">BITS</span><div class="sb-role" id="sbRole">ADMIN</div></div>
+    <div class="sb-user" id="sbUser">Loading...</div>
+    <div class="nav-item active" data-page="dashboard"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></div>
+    <div class="nav-item" data-page="users"><i class="fa-solid fa-users"></i><span>Users</span></div>
+    <div class="nav-item" data-page="deposits"><i class="fa-solid fa-circle-dollar"></i><span>Deposits</span></div>
+    <div class="nav-item" data-page="withdrawals"><i class="fa-solid fa-arrow-up-right-from-square"></i><span>Withdrawals</span></div>
+    <div class="nav-item" data-page="income"><i class="fa-solid fa-chart-line"></i><span>Income Logs</span></div>
+    <div class="nav-item" data-page="ranks"><i class="fa-solid fa-crown"></i><span>Ranks</span></div>
+    <div class="nav-item" data-page="airdrop"><i class="fa-solid fa-gift"></i><span>Airdrop</span></div>
+    <div class="nav-item" data-page="boosters"><i class="fa-solid fa-jet-fighter"></i><span>Boosters</span></div>
+    <div class="nav-item" data-page="settings" id="navSettings" style="display:none"><i class="fa-solid fa-gear"></i><span>Settings</span></div>
+    <div class="nav-item" data-page="admins" id="navAdmins" style="display:none"><i class="fa-solid fa-shield-halved"></i><span>Admins</span></div>
+    <div class="nav-item logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></div>
+  </nav>
+  <div class="main" id="mainContent"></div>
+</div>
+
 <script>
-const BACKEND_URL = "https://playbits-backend-132h.onrender.com";
-let pages = { users: 1, deposits: 1, withdrawals: 1, income: 1 };
-let refreshTimer = null;
+let TOKEN = localStorage.getItem("pb_admin_token") || "";
+let ADMIN = null;
+const API = "https://playbits-backend-132h.onrender.com";
 
 function $(id){return document.getElementById(id)}
 
-// Tab switching
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    $(`tab-${t.dataset.tab}`).classList.add('active');
-    loadTab(t.dataset.tab);
+async function login(){
+  const e=$("loginUser").value.trim(), p=$("loginPass").value;
+  if(!e||!p)return;
+  const btn=$("loginBtn");btn.disabled=true;btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
+  try{
+    const r=await fetch(API+"/api/admin/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:e,password:p})});
+    const d=await r.json();
+    if(!d.success){$("loginError").textContent=d.error||"Login failed";btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-shield-halved"></i> Sign In';return}
+    TOKEN=d.token;ADMIN=d.admin;
+    localStorage.setItem("pb_admin_token",TOKEN);
+    localStorage.setItem("pb_admin_user",JSON.stringify(d.admin));
+    initApp();
+  }catch(e){$("loginError").textContent="Backend unavailable";btn.disabled=false;btn.innerHTML='<i class="fa-solid fa-shield-halved"></i> Sign In'}
+}
+
+function logout(){
+  localStorage.removeItem("pb_admin_token");localStorage.removeItem("pb_admin_user");
+  TOKEN="";ADMIN=null;$("appWrap").style.display="none";$("loginScreen").style.display="flex";
+  $("loginPass").value="";
+}
+
+function initApp(){
+  ADMIN=JSON.parse(localStorage.getItem("pb_admin_user")||"{}");
+  $("loginScreen").style.display="none";$("appWrap").style.display="flex";
+  $("sbRole").textContent=ADMIN.role||"ADMIN";
+  $("sbUser").textContent=ADMIN.email||ADMIN.username||"Admin";
+  if(ADMIN.role==="SUPER_ADMIN"){$("navSettings").style.display="flex";$("navAdmins").style.display="flex"}
+  document.querySelectorAll(".nav-item[data-page]").forEach(el=>{
+    el.addEventListener("click",()=>{
+      document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));
+      el.classList.add("active");loadPage(el.dataset.page);
+    });
   });
-});
-
-function loadAll(){ fetchStats(); loadTab(getActiveTab()); $('.refresh-btn').classList.add('spinning'); setTimeout(()=>$('.refresh-btn').classList.remove('spinning'),600) }
-
-function getActiveTab(){ return document.querySelector('.tab.active')?.dataset?.tab || 'users' }
-
-async function fetchStats(){
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/stats`);
-    const d = await r.json();
-    if(!d.success) return;
-    const s = d.stats;
-    $('statsGrid').innerHTML = `
-      <div class="stat-card"><div class="num">${s.totalUsers}</div><div class="lbl">Total Users</div></div>
-      <div class="stat-card"><div class="num">${s.todayUsers}</div><div class="lbl">Today</div></div>
-      <div class="stat-card"><div class="num">${s.totalDeposits}</div><div class="lbl">Deposits</div></div>
-      <div class="stat-card"><div class="num">$${s.totalDepositAmount.toFixed(2)}</div><div class="lbl">Deposited</div></div>
-      <div class="stat-card pending"><div class="num">${s.pendingWithdrawals}</div><div class="lbl">Pending WD</div></div>
-      <div class="stat-card"><div class="num">${s.totalIncome}</div><div class="lbl">Income Entries</div></div>
-      <div class="stat-card pending"><div class="num">${s.pendingDeposits}</div><div class="lbl">Pending Dep</div></div>
-      <div class="stat-card"><div class="num">$${s.totalWithdrawalAmount.toFixed(2)}</div><div class="lbl">Withdrawn</div></div>
-    `;
-    $('wdBadge').textContent = s.pendingWithdrawals;
-    $('depBadge').textContent = s.pendingDeposits;
-  } catch(e){}
+  loadPage("dashboard");
 }
 
-async function loadUsers(){
-  const p = pages.users;
-  const search = $('userSearch').value.trim();
-  try {
-    let url = `${BACKEND_URL}/api/admin/users?page=${p}&limit=50`;
-    if(search) url += `&search=${encodeURIComponent(search)}`;
-    const r = await fetch(url);
-    const d = await r.json();
-    if(!d.success) return;
-    const h = d.users?.map(u => {
-      const pkg = u.packageStatus === 'active' ? `<span class="status active">${u.packageAmount}</span>` : `<span class="status none">none</span>`;
-      const delBtn = u.telegramId !== '1001' ? `<button class="btn-small btn-reject" onclick="deleteUser('${u.telegramId}')"><i class="fa-solid fa-trash-can"></i></button>` : '-';
-      return `<tr>
-        <td class="mono">${u.telegramId}</td>
-        <td><strong>${u.firstName||'-'}</strong></td>
-        <td>${u.username||'-'}</td>
-        <td>${pkg}</td>
-        <td>$${(u.depositBalance||0).toFixed(2)}</td>
-        <td>$${(u.activationUSDT||0).toFixed(2)}</td>
-        <td class="mono">${Math.round(u.bits||0)}</td>
-        <td class="mono">${Math.round(u.totalEarned||0)}</td>
-        <td class="mono">${u.referredBy||'-'}</td>
-        <td class="mono">${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '-'}</td>
-        <td style="text-align:center">${delBtn}</td>
-      </tr>`;
-    }).join('');
-    $('usersBody').innerHTML = h || '<tr><td colspan="11" class="empty">No users found</td></tr>';
-    renderPagination('usersPages', d.pagination, p => { pages.users = p; loadUsers(); });
-  } catch(e){ $('usersBody').innerHTML = '<tr><td colspan="10" class="empty">Error loading users</td></tr>' }
+function getHeaders(){return{"Authorization":"Bearer "+TOKEN,"Content-Type":"application/json"}}
+async function api(path,opts={}){
+  try{
+    const r=await fetch(API+path,{...opts,headers:{...getHeaders(),...opts.headers}});
+    const d=await r.json();
+    if(!d.success&&r.status===401){logout();return null}
+    return d;
+  }catch(e){return null}
 }
 
-async function loadDeposits(){
-  const p = pages.deposits;
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/deposits?page=${p}&limit=50`);
-    const d = await r.json();
-    if(!d.success) return;
-    const h = d.deposits?.map(dp => {
-      const st = dp.status === 'confirmed' ? 'completed' : dp.status;
-      return `<tr>
-        <td class="mono truncate">${dp.id}</td>
-        <td class="mono">${dp.userId}</td>
-        <td class="mono">${dp.amount} USDT</td>
-        <td class="mono truncate">${dp.address||'-'}</td>
-        <td><span class="status ${st}">${dp.status}</span></td>
-        <td>${dp.swept ? '<span class="status completed">yes</span>' : '<span class="status pending">no</span>'}</td>
-        <td class="mono">${dp.createdAt ? new Date(dp.createdAt).toLocaleDateString() : '-'}</td>
-      </tr>`;
-    }).join('');
-    $('depositsBody').innerHTML = h || '<tr><td colspan="7" class="empty">No deposits</td></tr>';
-    renderPagination('depositsPages', d.pagination, p => { pages.deposits = p; loadDeposits(); });
-  } catch(e){ $('depositsBody').innerHTML = '<tr><td colspan="7" class="empty">Error loading deposits</td></tr>' }
+const PAGES={users:1,deposits:1,withdrawals:1,income:1,logs:1};
+const PAGE_LIMIT=50;
+
+function showToast(m){const e=document.createElement("div");e.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:9999;background:rgba(0,0,0,.97);border:1px solid rgba(0,229,255,.15);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;color:#fff;animation:fi .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2500)}
+
+function pagination(elId,pg,cb){
+  const el=$(elId);if(!el||!pg||pg.totalPages<=1){if(el)el.innerHTML="";return}
+  let h='<button '+(pg.page<=1?'disabled':'')+' onclick="cb('+(pg.page-1)+')"><i class="fa-solid fa-chevron-left"></i></button>';
+  for(let i=Math.max(1,pg.page-2);i<=Math.min(pg.totalPages,pg.page+2);i++)
+    h+='<button class="'+(i===pg.page?'active':'')+'" onclick="cb('+i+')">'+i+'</button>';
+  h+='<button '+(pg.page>=pg.totalPages?'disabled':'')+' onclick="cb('+(pg.page+1)+')"><i class="fa-solid fa-chevron-right"></i></button>';
+  el.innerHTML=h;
 }
 
-async function loadWithdrawals(){
-  const p = pages.withdrawals;
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/withdrawals?page=${p}&limit=50`);
-    const d = await r.json();
-    if(!d.success) return;
-    const h = d.withdrawals?.map(w => {
-      let action = '';
-      if(w.status === 'pending') {
-        action = `<button class="btn-small btn-approve" onclick="approveWD('${w.id}')"><i class="fa-solid fa-check"></i></button>
-                  <button class="btn-small btn-reject" onclick="rejectWD('${w.id}')"><i class="fa-solid fa-xmark"></i></button>`;
-      }
-      return `<tr>
-        <td class="mono truncate">${w.id}</td>
-        <td>${w.firstName||''} <span class="mono" style="color:var(--text3)">(${w.telegramId})</span></td>
-        <td class="mono">${(w.amount||0).toFixed(2)} bits</td>
-        <td class="mono truncate">${w.address||'-'}</td>
-        <td>${w.network||'BEP20'}</td>
-        <td><span class="status ${w.status}">${w.status}</span></td>
-        <td style="white-space:nowrap">${action}</td>
-        <td class="mono">${w.createdAt ? new Date(w.createdAt).toLocaleDateString() : '-'}</td>
-      </tr>`;
-    }).join('');
-    $('withdrawalsBody').innerHTML = h || '<tr><td colspan="8" class="empty">No withdrawals</td></tr>';
-    renderPagination('withdrawalsPages', d.pagination, p => { pages.withdrawals = p; loadWithdrawals(); });
-  } catch(e){ $('withdrawalsBody').innerHTML = '<tr><td colspan="8" class="empty">Error loading withdrawals</td></tr>' }
-}
-
-async function loadIncome(){
-  const p = pages.income;
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/income?page=${p}&limit=50`);
-    const d = await r.json();
-    if(!d.success) return;
-    const h = d.entries?.map(e => {
-      return `<tr>
-        <td class="mono">${e.userId}</td>
-        <td class="mono">${(e.amount||0).toFixed(2)}</td>
-        <td><span class="status ${e.type}">${e.type||'-'}</span></td>
-        <td class="truncate" style="max-width:200px">${e.description||'-'}</td>
-        <td><span class="status ${e.status}">${e.status||'-'}</span></td>
-        <td class="mono">${e.createdAt ? new Date(e.createdAt).toLocaleDateString() : '-'}</td>
-      </tr>`;
-    }).join('');
-    $('incomeBody').innerHTML = h || '<tr><td colspan="6" class="empty">No entries</td></tr>';
-    renderPagination('incomePages', d.pagination, p => { pages.income = p; loadIncome(); });
-  } catch(e){ $('incomeBody').innerHTML = '<tr><td colspan="6" class="empty">Error loading income</td></tr>' }
-}
-
-function renderPagination(elId, pg, cb){
-  const el = $(elId);
-  if(!pg || pg.totalPages <= 1){ el.innerHTML = ''; return }
-  let html = '';
-  html += `<button ${pg.page<=1?'disabled':''} onclick="cb(${pg.page-1})"><i class="fa-solid fa-chevron-left"></i></button>`;
-  for(let i=Math.max(1,pg.page-2); i<=Math.min(pg.totalPages, pg.page+2); i++){
-    html += `<button class="${i===pg.page?'active':''}" onclick="cb(${i})">${i}</button>`;
-  }
-  html += `<button ${pg.page>=pg.totalPages?'disabled':''} onclick="cb(${pg.page+1})"><i class="fa-solid fa-chevron-right"></i></button>`;
-  el.innerHTML = html;
-}
-
-function toast(msg){ const e=document.createElement('div'); e.style.cssText='position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:999;background:rgba(0,0,0,.97);border:1px solid rgba(0,229,255,.15);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;color:#fff;animation:fadeIn .35s ease forwards;white-space:nowrap'; e.textContent=msg; document.body.appendChild(e); setTimeout(()=>e.remove(),2500) }
-
-async function deleteUser(telegramId){
-  if(!confirm(`Delete user ${telegramId} permanently? This will also delete all their deposits, packages, income, withdrawals, and team data.`)) return;
-  if(!confirm(`ARE YOU SURE? This CANNOT be undone. User: ${telegramId}`)) return;
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/users/delete`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({telegramId}) });
-    const d = await r.json();
-    if(d.success){ loadUsers(); fetchStats(); toast('User deleted'); }
-    else alert('Error: '+(d.error||'unknown'));
-  } catch(e){ alert('Error: '+e.message) }
-}
-
-async function approveWD(id){
-  if(!confirm('Approve this withdrawal?')) return;
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/withdraw/approve`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-    await r.json();
-    loadWithdrawals();
-    fetchStats();
-  } catch(e){ alert('Error') }
-}
-
-async function rejectWD(id){
-  if(!confirm('Reject this withdrawal? Funds will be returned to user.')) return;
-  try {
-    const r = await fetch(`${BACKEND_URL}/api/admin/withdraw/reject`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id}) });
-    await r.json();
-    loadWithdrawals();
-    fetchStats();
-  } catch(e){ alert('Error') }
-}
-
-function loadTab(tab){
-  switch(tab){
-    case 'users': loadUsers(); break;
-    case 'deposits': loadDeposits(); break;
-    case 'withdrawals': loadWithdrawals(); break;
-    case 'income': loadIncome(); break;
+function loadPage(page){
+  const m=$("mainContent");
+  switch(page){
+    case "dashboard": loadDashboard(); break;
+    case "users": loadUsersPage(); break;
+    case "deposits": loadDepositsPage(); break;
+    case "withdrawals": loadWithdrawalsPage(); break;
+    case "income": loadIncomePage(); break;
+    case "ranks": loadRanksPage(); break;
+    case "airdrop": loadAirdropPage(); break;
+    case "boosters": loadBoostersPage(); break;
+    case "settings": loadSettingsPage(); break;
+    case "admins": loadAdminsPage(); break;
+    default: m.innerHTML="<div class='empty'>Page not found</div>";
   }
 }
 
-// Auto-refresh every 30s
-fetchStats();
-loadAll();
-setInterval(() => { fetchStats(); if(!document.hidden) loadTab(getActiveTab()); }, 30000);
+// ========== DASHBOARD ==========
+async function loadDashboard(){
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-gauge-high"></i> Dashboard</h1><button class="refresh-btn" onclick="loadDashboard()"><i class="fa-solid fa-rotate"></i></button></div><div class="stats-row" id="dashStats"><div class="stat-card"><div class="num">...</div><div class="lbl">Loading</div></div></div><div class="card fade-in" id="dashExtra"><div class="empty">Loading dashboard data...</div></div>';
+  const d=await api("/api/admin/stats");
+  if(!d||!d.success){$("dashStats").innerHTML='<div class="empty">Failed to load stats</div>';return}
+  const s=d.stats;
+  $("dashStats").innerHTML=
+    '<div class="stat-card"><div class="num">'+s.totalUsers+'</div><div class="lbl">Total Users</div></div>'+
+    '<div class="stat-card green"><div class="num">'+s.todayUsers+'</div><div class="lbl">Today Regs</div></div>'+
+    '<div class="stat-card"><div class="num">'+s.totalDeposits+'</div><div class="lbl">Total Deposits</div></div>'+
+    '<div class="stat-card gold"><div class="num">$'+Number(s.totalDepositAmount).toFixed(2)+'</div><div class="lbl">Deposited</div></div>'+
+    '<div class="stat-card"><div class="num">'+s.totalWithdrawals+'</div><div class="lbl">Total WD</div></div>'+
+    '<div class="stat-card pink"><div class="num">$'+Number(s.totalWithdrawalAmount).toFixed(2)+'</div><div class="lbl">Withdrawn</div></div>'+
+    '<div class="stat-card"><div class="num">'+s.totalIncome+'</div><div class="lbl">Income Entries</div></div>'+
+    '<div class="stat-card gold"><div class="num">$'+Number(s.totalIncomeAmount||0).toFixed(2)+'</div><div class="lbl">Income Total</div></div>'+
+    '<div class="stat-card"><div class="num">'+s.totalPackages+'</div><div class="lbl">Packages</div></div>'+
+    '<div class="stat-card gold"><div class="num">'+s.pendingWithdrawals+'</div><div class="lbl">Pending WD</div></div>'+
+    '<div class="stat-card gold"><div class="num">'+s.pendingDeposits+'</div><div class="lbl">Pending Dep</div></div>';
+  const r=await api("/api/admin/ranks-summary");
+  let extraHtml='<div class="card fade-in" style="margin-bottom:12px"><div class="card-title"><i class="fa-solid fa-crown"></i> Rank Summary</div>'+
+    '<div class="stats-row" style="grid-template-columns:repeat(4,1fr)">'+
+    '<div class="stat-card"><div class="num">'+(r?.summary?.totalUsers||0)+'</div><div class="lbl">Total Users</div></div>'+
+    '<div class="stat-card green"><div class="num">'+(r?.summary?.activatedUsers||0)+'</div><div class="lbl">Activated ($10+)</div></div>'+
+    '<div class="stat-card"><div class="num">'+(r?.summary?.activePackage||0)+'</div><div class="lbl">Active Packages</div></div>'+
+    '<div class="stat-card gold"><div class="num">$'+Number(r?.summary?.totalBusiness||0).toFixed(2)+'</div><div class="lbl">Total Business</div></div></div></div>';
+  const bnbLow=s.masterBnbBalance!==undefined&&s.masterBnbBalance<s.gasThreshold;
+  extraHtml+='<div class="card fade-in"><div class="card-title"><i class="fa-solid fa-gas-pump"></i> Master Wallet <span style="font-size:10px;letter-spacing:1px;color:var(--text3)">('+(s.masterAddress||'').slice(0,6)+'...'+(s.masterAddress||'').slice(-4)+')</span></div>'+
+    '<div class="stats-row" style="grid-template-columns:repeat(3,1fr)">'+
+    '<div class="stat-card '+(bnbLow?'pink':'green')+'"><div class="num">'+(s.masterBnbBalance!==undefined?Number(s.masterBnbBalance).toFixed(4):'...')+'</div><div class="lbl">BNB Balance</div></div>'+
+    '<div class="stat-card"><div class="num">'+(s.gasThreshold!==undefined?Number(s.gasThreshold).toFixed(6):'...')+'</div><div class="lbl">Gas per Sweep</div></div>'+
+    '<div class="stat-card '+(bnbLow?'pink':'green')+'"><div class="num">'+(bnbLow?'<span style="color:var(--red)">LOW</span>':'<span style="color:var(--green)">OK</span>')+'</div><div class="lbl">Gas Status</div></div></div></div>';
+  $("dashExtra").innerHTML=extraHtml;
+}
+
+// ========== USERS ==========
+async function loadUsersPage(){
+  const p=PAGES.users;const s=$("userSearch")?.value||"";
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-users"></i> Users</h1><button class="refresh-btn" onclick="loadUsersPage()"><i class="fa-solid fa-rotate"></i></button></div>'+
+    '<div class="search-bar"><input type="text" id="userSearch" placeholder="Search by ID, name, username..." value="'+s+'" onkeydown="if(event.key===\'Enter\'){PAGES.users=1;loadUsersPage()}">'+
+    '<button onclick="{PAGES.users=1;loadUsersPage()}"><i class="fa-solid fa-magnifying-glass"></i></button></div>'+
+    '<div class="card fade-in"><table><thead><tr><th>ID</th><th>Name</th><th>User</th><th>Package</th><th>Balance</th><th>Bits</th><th>Earned</th><th>Referral</th><th>Active</th><th>Action</th></tr></thead><tbody id="usersBody"><tr><td colspan="10" class="empty">Loading...</td></tr></tbody></table><div class="pagination" id="usersPages"></div></div>';
+  const url="/api/admin/users?page="+p+"&limit="+PAGE_LIMIT+(s?"&search="+encodeURIComponent(s):"");
+  const d=await api(url);
+  if(!d||!d.success){$("usersBody").innerHTML='<tr><td colspan="10" class="empty">Error</td></tr>';return}
+  $("usersBody").innerHTML=d.users.map(u=>{
+    const pkg=u.packageStatus==="active"?'<span class="badge green">$'+u.packageAmount+'</span>':'<span class="badge gray">none</span>';
+    const act=u.isActive?'<span class="badge green">Yes</span>':'<span class="badge red">No</span>';
+    return '<tr><td class="mono">'+u.telegramId+'</td><td><strong>'+(u.firstName||'-')+'</strong></td><td>'+(u.username||'-')+'</td><td>'+pkg+'</td><td class="mono">$'+Number(u.depositBalance||0).toFixed(2)+'</td><td class="mono">'+Math.round(u.bits||0)+'</td><td class="mono">'+Math.round(u.totalEarned||0)+'</td><td class="mono">'+(u.referredBy||'-')+'</td><td>'+act+'</td><td style="white-space:nowrap">'+
+      '<button class="btn-s btn-cyan" onclick="viewUser(\''+u.telegramId+'\')"><i class="fa-solid fa-eye"></i></button> '+
+      (ADMIN.role==="SUPER_ADMIN"||ADMIN.role==="ADMIN"? '<button class="btn-s btn-gold" onclick="editUser(\''+u.telegramId+'\')"><i class="fa-solid fa-pen"></i></button> ':'')+
+      (ADMIN.role==="SUPER_ADMIN"? '<button class="btn-s btn-red" onclick="delUser(\''+u.telegramId+'\')"><i class="fa-solid fa-trash-can"></i></button>':'')+
+      '</td></tr>'
+  }).join("")||'<tr><td colspan="10" class="empty">No users found</td></tr>';
+  pagination("usersPages",d.pagination,p=>{PAGES.users=p;loadUsersPage()});
+}
+
+async function viewUser(id){
+  const d=await api("/api/admin/users/"+id);
+  if(!d||!d.success){showToast("Error loading user");return}
+  const u=d.user;
+  let html='<div class="modal-overlay open" id="vuModal" onclick="if(event.target===this)closeModal(\'vuModal\')"><div class="modal-box">'+
+    '<button class="modal-close" onclick="closeModal(\'vuModal\')"><i class="fa-solid fa-xmark"></i></button>'+
+    '<h2><i class="fa-solid fa-user"></i> User #'+u.telegramId+'</h2>'+
+    '<div class="field"><label>Name</label><div class="ro">'+(u.firstName||'-')+'</div></div>'+
+    '<div class="field"><label>Username</label><div class="ro">'+(u.username||'-')+'</div></div>'+
+    '<div class="field"><label>Referred By</label><div class="ro">'+(u.referredBy||'-')+'</div></div>'+
+    '<div class="field"><label>Status</label><div class="ro">'+(u.isActive?'<span class="badge green">Active</span>':'<span class="badge red">Suspended</span>')+'</div></div>'+
+    '<div class="field"><label>Package</label><div class="ro">$'+(u.packageAmount||0).toFixed(2)+' — '+((u.packageStatus||'none'))+' — ROI '+(u.packageROI||0)+'%</div></div>'+
+    '<div class="field"><label>Deposit Balance</label><div class="ro">$'+(u.depositBalance||0).toFixed(2)+'</div></div>'+
+    '<div class="field"><label>Activation USDT</label><div class="ro">$'+(u.activationUSDT||0).toFixed(2)+'</div></div>'+
+    '<div class="field"><label>Bits / Withdrawable</label><div class="ro">'+(u.bits||0).toFixed(2)+' / '+(u.withdrawableBits||0).toFixed(2)+'</div></div>'+
+    '<div class="field"><label>Total Earned / Withdrawn</label><div class="ro">'+(u.totalEarned||0).toFixed(2)+' / '+(u.totalWithdrawn||0).toFixed(2)+'</div></div>'+
+    '<div class="field"><label>Free Bits Balance</label><div class="ro">'+(u.freeBitsBalance||0).toFixed(2)+'</div></div>'+
+    '<div class="field"><label>Booster</label><div class="ro">'+(u.boosterName||'None')+'</div></div>'+
+    '<div class="field"><label>Directs</label><div class="ro">'+u.directCount+'</div></div>'+
+    '<div class="field"><label>Created</label><div class="ro">'+(u.createdAt?new Date(u.createdAt).toLocaleString():'-')+'</div></div>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">'+
+    (ADMIN.role==="SUPER_ADMIN"||ADMIN.role==="ADMIN"? '<button class="btn-s btn-gold" onclick="closeModal(\'vuModal\');editUser(\''+u.telegramId+'\')"><i class="fa-solid fa-pen"></i> Edit</button>':'')+
+    (ADMIN.role==="SUPER_ADMIN"||ADMIN.role==="ADMIN"? '<button class="btn-s btn-'+(u.isActive?'red':'green')+'" onclick="closeModal(\'vuModal\');toggleSuspend(\''+u.telegramId+'\','+u.isActive+')"><i class="fa-solid fa-'+(u.isActive?'ban':'check')+'"></i> '+(u.isActive?'Suspend':'Activate')+'</button>':'')+
+    '<button class="btn-s btn-cyan" onclick="closeModal(\'vuModal\');viewUserIncome(\''+u.telegramId+'\')"><i class="fa-solid fa-chart-line"></i> Income</button>'+
+    '</div></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+
+async function editUser(id){
+  const d=await api("/api/admin/users/"+id);
+  if(!d||!d.success)return;
+  const u=d.user;
+  const fields=["firstName","username","depositBalance","activationUSDT","packageAmount","packageStatus","packageROI","packageCapMultiplier","packageMaxEarnings","packageEarned","bits","withdrawableBits","totalEarned","totalWithdrawn","freeBitsBalance","isActive"];
+  const vals={};
+  fields.forEach(f=>{vals[f]=u[f]!==undefined&&u[f]!==null?u[f]:""});
+  let html='<div class="modal-overlay open" id="euModal" onclick="if(event.target===this)closeModal(\'euModal\')"><div class="modal-box">'+
+    '<button class="modal-close" onclick="closeModal(\'euModal\')"><i class="fa-solid fa-xmark"></i></button>'+
+    '<h2><i class="fa-solid fa-pen"></i> Edit User #'+id+'</h2>';
+  fields.forEach(f=>{
+    const type=f==="isActive"?"select":"text";
+    html+='<div class="field"><label>'+f+'</label>';
+    if(type==="select") html+='<select id="eu_'+f+'"><option value="true"'+(vals[f]?' selected':'')+'>Active</option><option value="false"'+(vals[f]?'':' selected')+'>Suspended</option></select>';
+    else html+='<input type="text" id="eu_'+f+'" value="'+vals[f]+'">';
+    html+='</div>'
+  });
+  html+='<button class="btn-s btn-green" style="padding:10px 20px;width:100%;font-size:13px" onclick="saveEditUser(\''+id+'\')"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+
+async function saveEditUser(id){
+  const fields=["firstName","username","depositBalance","activationUSDT","packageAmount","packageStatus","packageROI","packageCapMultiplier","packageMaxEarnings","packageEarned","bits","withdrawableBits","totalEarned","totalWithdrawn","freeBitsBalance","isActive"];
+  const updates={};
+  fields.forEach(f=>{
+    const el=$("eu_"+f);
+    if(el){
+      const val=f==="isActive"?el.value==="true":Number(el.value)||el.value;
+      updates[f]=val;
+    }
+  });
+  const r=await api("/api/admin/users/edit",{method:"POST",body:JSON.stringify({userId:id,updates})});
+  if(r&&r.success){showToast("User updated");closeModal("euModal");loadUsersPage()}
+  else showToast("Error: "+(r?.error||"unknown"));
+}
+
+async function toggleSuspend(id,currentActive){
+  const r=await api("/api/admin/users/suspend",{method:"POST",body:JSON.stringify({userId:id,suspend:currentActive})});
+  if(r&&r.success){showToast(currentActive?"User suspended":"User activated");loadUsersPage()}
+  else showToast("Error: "+(r?.error||"unknown"));
+}
+
+async function delUser(id){
+  if(!confirm("Delete user "+id+"? This CANNOT be undone."))return;
+  if(!confirm("ARE YOU SURE? All deposits, income, withdrawals will be deleted."))return;
+  const r=await api("/api/admin/users/delete",{method:"POST",body:JSON.stringify({telegramId:id})});
+  if(r&&r.success){showToast("User deleted");loadUsersPage()}
+  else showToast("Error: "+(r?.error||"unknown"));
+}
+
+async function viewUserIncome(id){
+  const d=await api("/api/admin/users/"+id+"/income");
+  if(!d||!d.success)return;
+  const rows=d.entries||[];
+  let html='<div class="modal-overlay open" id="uiModal" onclick="if(event.target===this)closeModal(\'uiModal\')"><div class="modal-box" style="max-width:600px">'+
+    '<button class="modal-close" onclick="closeModal(\'uiModal\')"><i class="fa-solid fa-xmark"></i></button>'+
+    '<h2><i class="fa-solid fa-chart-line"></i> Income — User #'+id+'</h2>'+
+    '<table><thead><tr><th>Amount</th><th>Type</th><th>Description</th><th>Date</th></tr></thead><tbody>';
+  if(rows.length===0)html+='<tr><td colspan="4" class="empty">No income entries</td></tr>';
+  else rows.forEach(e=>{
+    html+='<tr><td class="mono">'+Number(e.amount).toFixed(2)+'</td><td><span class="badge '+(e.type==="roi"?"green":e.type==="referral"?"gold":e.type==="booster"?"purple":"cyan")+'">'+(e.type||'-')+'</span></td><td class="truncate" style="max-width:200px">'+(e.description||'-')+'</td><td class="mono">'+(e.createdAt?new Date(e.createdAt).toLocaleDateString():'-')+'</td></tr>'
+  });
+  html+='</tbody></table></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+
+// ========== DEPOSITS ==========
+async function loadDepositsPage(){
+  const p=PAGES.deposits;
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-circle-dollar"></i> Deposits</h1><button class="refresh-btn" onclick="loadDepositsPage()"><i class="fa-solid fa-rotate"></i></button></div>'+
+    '<div class="card fade-in"><table><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Address</th><th>Status</th><th>Swept</th><th>Date</th></tr></thead><tbody id="depositsBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table><div class="pagination" id="depositsPages"></div></div>';
+  const d=await api("/api/admin/deposits?page="+p+"&limit="+PAGE_LIMIT);
+  if(!d||!d.success){$("depositsBody").innerHTML='<tr><td colspan="7" class="empty">Error</td></tr>';return}
+  $("depositsBody").innerHTML=d.deposits.map(dp=>{
+    const st=dp.status==="confirmed"?"green":dp.status==="pending"?"gold":"red";
+    return '<tr><td class="mono truncate">'+(dp.id||'').slice(0,12)+'</td><td class="mono">'+(dp.userId||'')+'</td><td class="mono">'+Number(dp.amount||0).toFixed(2)+' USDT</td><td class="mono truncate">'+(dp.address||'-')+'</td><td><span class="badge '+st+'">'+(dp.status||'')+'</span></td><td>'+(dp.swept?'<span class="badge green">Yes</span>':'<span class="badge gray">No</span>')+'</td><td class="mono">'+(dp.createdAt?new Date(dp.createdAt).toLocaleDateString():'-')+'</td></tr>'
+  }).join("")||'<tr><td colspan="7" class="empty">No deposits</td></tr>';
+  pagination("depositsPages",d.pagination,p=>{PAGES.deposits=p;loadDepositsPage()});
+}
+
+// ========== WITHDRAWALS ==========
+async function loadWithdrawalsPage(){
+  const p=PAGES.withdrawals;
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-arrow-up-right-from-square"></i> Withdrawals</h1><button class="refresh-btn" onclick="loadWithdrawalsPage()"><i class="fa-solid fa-rotate"></i></button></div>'+
+    '<div class="card fade-in"><table><thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Address</th><th>Network</th><th>Status</th><th>Action</th><th>Date</th></tr></thead><tbody id="wdBody"><tr><td colspan="8" class="empty">Loading...</td></tr></tbody></table><div class="pagination" id="wdPages"></div></div>';
+  const d=await api("/api/admin/withdrawals?page="+p+"&limit="+PAGE_LIMIT);
+  if(!d||!d.success){$("wdBody").innerHTML='<tr><td colspan="8" class="empty">Error</td></tr>';return}
+  const canAct=ADMIN.role==="SUPER_ADMIN"||ADMIN.role==="ADMIN";
+  $("wdBody").innerHTML=d.withdrawals.map(w=>{
+    let act="";
+    if(w.status==="pending"&&canAct)
+      act='<button class="btn-s btn-green" onclick="approveWD(\''+w.id+'\')"><i class="fa-solid fa-check"></i></button><button class="btn-s btn-red" onclick="rejectWD(\''+w.id+'\')"><i class="fa-solid fa-xmark"></i></button>';
+    if(w.status==="approved"&&canAct)
+      act='<button class="btn-s btn-cyan" onclick="markPaid(\''+w.id+'\')"><i class="fa-solid fa-hand-holding-dollar"></i> Paid</button>';
+    const st=w.status==="paid"?"green":w.status==="approved"?"cyan":w.status==="pending"?"gold":w.status==="rejected"?"red":"gray";
+    return '<tr><td class="mono truncate">'+(w.id||'').slice(0,12)+'</td><td>'+(w.firstName||'')+' <span class="mono" style="color:var(--text3)">('+(w.telegramId||'')+')</span></td><td class="mono">'+Number(w.amount||0).toFixed(2)+' bits</td><td class="mono truncate">'+(w.address||'-')+'</td><td>'+(w.network||'BEP20')+'</td><td><span class="badge '+st+'">'+(w.status||'')+'</span></td><td style="white-space:nowrap">'+act+'</td><td class="mono">'+(w.createdAt?new Date(w.createdAt).toLocaleDateString():'-')+'</td></tr>'
+  }).join("")||'<tr><td colspan="8" class="empty">No withdrawals</td></tr>';
+  pagination("wdPages",d.pagination,p=>{PAGES.withdrawals=p;loadWithdrawalsPage()});
+}
+
+async function approveWD(id){if(!confirm("Approve?"))return;const r=await api("/api/admin/withdraw/approve",{method:"POST",body:JSON.stringify({id})});if(r&&r.success){showToast("Approved");loadWithdrawalsPage()}else showToast("Error")}
+async function rejectWD(id){if(!confirm("Reject? Funds returned."))return;const r=await api("/api/admin/withdraw/reject",{method:"POST",body:JSON.stringify({id})});if(r&&r.success){showToast("Rejected");loadWithdrawalsPage()}else showToast("Error")}
+async function markPaid(id){if(!confirm("Mark as paid?"))return;const r=await api("/api/admin/withdraw/mark-paid",{method:"POST",body:JSON.stringify({id})});if(r&&r.success){showToast("Marked paid");loadWithdrawalsPage()}else showToast("Error")}
+
+// ========== INCOME LOGS ==========
+async function loadIncomePage(){
+  const p=PAGES.income;const t=$("incomeType")?.value||"";
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-chart-line"></i> Income Logs</h1><button class="refresh-btn" onclick="loadIncomePage()"><i class="fa-solid fa-rotate"></i></button></div>'+
+    '<div class="search-bar"><select id="incomeType" onchange="{PAGES.income=1;loadIncomePage()}"><option value="">All Types</option><option value="roi"'+(t==="roi"?' selected':'')+'>ROI</option><option value="referral"'+(t==="referral"?' selected':'')+'>Referral</option><option value="booster"'+(t==="booster"?' selected':'')+'>Booster</option><option value="orbit"'+(t==="orbit"?' selected':'')+'>Orbit</option><option value="rank_reward"'+(t==="rank_reward"?' selected':'')+'>Rank</option><option value="differential"'+(t==="differential"?' selected':'')+'>Differential</option><option value="airdrop"'+(t==="airdrop"?' selected':'')+'>Airdrop</option></select></div>'+
+    '<div class="card fade-in"><table><thead><tr><th>User</th><th>Amount</th><th>Type</th><th>Description</th><th>Status</th><th>Date</th></tr></thead><tbody id="incomeBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table><div class="pagination" id="incomePages"></div></div>';
+  let url="/api/admin/income?page="+p+"&limit="+PAGE_LIMIT;
+  if(t)url+="&type="+encodeURIComponent(t);
+  const d=await api(url);
+  if(!d||!d.success){$("incomeBody").innerHTML='<tr><td colspan="6" class="empty">Error</td></tr>';return}
+  $("incomeBody").innerHTML=d.entries.map(e=>{
+    const cls=e.type==="roi"?"green":e.type==="referral"?"gold":e.type==="booster"?"purple":e.type==="orbit"?"cyan":e.type==="rank_reward"?"pink":e.type==="differential"?"orange":"gray";
+    return '<tr><td class="mono">'+(e.userId||'')+'</td><td class="mono">'+Number(e.amount||0).toFixed(2)+'</td><td><span class="badge '+cls+'">'+(e.type||'-')+'</span></td><td class="truncate" style="max-width:250px">'+(e.description||'-')+'</td><td><span class="badge '+(e.status==="completed"?"green":"gold")+'">'+(e.status||'-')+'</span></td><td class="mono">'+(e.createdAt?new Date(e.createdAt).toLocaleDateString():'-')+'</td></tr>'
+  }).join("")||'<tr><td colspan="6" class="empty">No entries</td></tr>';
+  pagination("incomePages",d.pagination,p=>{PAGES.income=p;loadIncomePage()});
+}
+
+// ========== RANKS ==========
+async function loadRanksPage(){
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-crown"></i> Ranks</h1><button class="refresh-btn" onclick="loadRanksPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in"><div class="empty">Loading rank data...</div></div>';
+  const d=await api("/api/admin/ranks-summary");
+  if(!d||!d.success)return;
+  const s=d.summary;
+  $("mainContent").innerHTML='<div class="topbar"><h1><i class="fa-solid fa-crown"></i> Ranks</h1><button class="refresh-btn" onclick="loadRanksPage()"><i class="fa-solid fa-rotate"></i></button></div>'+
+    '<div class="stats-row" style="grid-template-columns:repeat(4,1fr)">'+
+    '<div class="stat-card"><div class="num">'+s.totalUsers+'</div><div class="lbl">Total Users</div></div>'+
+    '<div class="stat-card green"><div class="num">'+s.activatedUsers+'</div><div class="lbl">Activated ($10+)</div></div>'+
+    '<div class="stat-card"><div class="num">'+s.activePackage+'</div><div class="lbl">Active Packages</div></div>'+
+    '<div class="stat-card gold"><div class="num">$'+Number(s.totalBusiness).toFixed(2)+'</div><div class="lbl">Total Business</div></div></div>'+
+    '<div class="card fade-in"><div class="card-title"><i class="fa-solid fa-circle-info"></i> Rank System</div><p style="font-size:13px;color:var(--text2)">10 ranks (R1-R10) with binary qualification (50% from main leg, 50% from other). Rank rewards, orbit rewards, and daily rewards are managed via the user dashboard. Use the Users tab to view individual rank progress.</p></div>'
+}
+
+// ========== AIRDROP ==========
+async function loadAirdropPage(){
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-gift"></i> Airdrop Vault</h1><button class="refresh-btn" onclick="loadAirdropPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in"><div class="empty">Loading...</div></div>';
+  const d=await api("/api/admin/airdrop-summary");
+  if(!d||!d.success)return;
+  const s=d.summary;
+  let html='<div class="stats-row" style="grid-template-columns:repeat(4,1fr)">'+
+    '<div class="stat-card"><div class="num">'+Number(s.totalEarned).toLocaleString()+'</div><div class="lbl">Total Earned</div></div>'+
+    '<div class="stat-card pink"><div class="num">'+Number(s.totalUsed).toLocaleString()+'</div><div class="lbl">Total Used</div></div>'+
+    '<div class="stat-card gold"><div class="num">'+Number(s.currentBalance).toLocaleString()+'</div><div class="lbl">Current Balance</div></div>'+
+    '<div class="stat-card"><div class="num">'+s.expiredUsers+'</div><div class="lbl">Expired Users</div></div></div>'+
+    '<div class="card fade-in"><div class="card-title"><i class="fa-solid fa-chart-simple"></i> Per-Source Breakdown</div><table><thead><tr><th>Source</th><th>Count</th><th>Total Bits</th></tr></thead><tbody>';
+  if(s.rewards&&Object.keys(s.rewards).length)
+    Object.keys(s.rewards).forEach(k=>{html+='<tr><td>'+k+'</td><td>'+s.rewards[k].count+'</td><td class="mono">'+Number(s.rewards[k].total).toLocaleString()+'</td></tr>'});
+  else html+='<tr><td colspan="3" class="empty">No data</td></tr>';
+  html+='</tbody></table></div>';
+  if(ADMIN.role==="SUPER_ADMIN"){
+    html+='<div class="card fade-in"><div class="card-title"><i class="fa-solid fa-sliders"></i> Reward Settings</div><div id="rewardSettings">Loading...</div></div>';
+    $("mainContent").innerHTML=html;
+    const rr=await api("/api/admin/airdrop/rewards");
+    if(rr&&rr.success){
+      const sources=["Signup Bonus","Telegram Join","Instagram Follow","X Follow","YouTube Subscribe","Referral Airdrop"];
+      let rhtml='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px">';
+      sources.forEach(src=>{
+        const cur=rr.rewards[src]||"";
+        rhtml+='<div style="background:var(--bg3);border-radius:var(--rs);padding:12px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">'+src+'</div><div style="display:flex;gap:6px"><input type="number" id="rwd_'+src+'" value="'+cur+'" style="flex:1;padding:6px 10px;border-radius:4px;border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font-size:12px;outline:none"><button class="btn-s btn-green" onclick="updateReward(\''+src+'\')"><i class="fa-solid fa-floppy-disk"></i></button></div></div>'
+      });
+      rhtml+='</div>';
+      $("rewardSettings").innerHTML=rhtml;
+    }
+    return;
+  }
+  $("mainContent").innerHTML=html;
+}
+
+async function updateReward(source){
+  const el=$("rwd_"+source);if(!el)return;
+  const bits=parseInt(el.value);
+  if(bits<0){showToast("Invalid value");return}
+  const r=await api("/api/admin/airdrop/update-reward",{method:"POST",body:JSON.stringify({source,bits})});
+  if(r&&r.success){showToast("Updated "+source+" = "+bits);loadAirdropPage()}
+  else showToast("Error: "+(r?.error||"unknown"));
+}
+
+// ========== BOOSTERS ==========
+async function loadBoostersPage(){
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-jet-fighter"></i> Boosters</h1><button class="refresh-btn" onclick="loadBoostersPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in"><div class="empty">Loading...</div></div>';
+  const d=await api("/api/admin/booster-summary");
+  if(!d||!d.success)return;
+  const s=d.summary;
+  let html='<div class="card fade-in"><div class="card-title"><i class="fa-solid fa-chart-bar"></i> Booster Distribution</div><table><thead><tr><th>Booster</th><th>Status</th><th>Count</th></tr></thead><tbody>';
+  if(s.groups&&s.groups.length)
+    s.groups.forEach(g=>{html+='<tr><td>'+(g.boosterName||g.boosterLevelId||'-')+'</td><td><span class="badge '+(g.boosterStatus==="active"?"green":"gray")+'">'+(g.boosterStatus||'-')+'</span></td><td>'+g.c+'</td></tr>'});
+  else html+='<tr><td colspan="3" class="empty">No boosters</td></tr>';
+  html+='</tbody></table></div><div class="card fade-in"><div class="card-title"><i class="fa-solid fa-users"></i> Active Boosters</div><table><thead><tr><th>ID</th><th>Name</th><th>Booster</th><th>Extra ROI</th><th>Activated</th><th>Expires</th></tr></thead><tbody>';
+  if(s.active&&s.active.length)
+    s.active.forEach(u=>{html+='<tr><td class="mono">'+u.telegramId+'</td><td>'+(u.firstName||'-')+'</td><td>'+(u.boosterName||'-')+'</td><td>+'+(u.boosterExtraROI||0)+'%</td><td class="mono">'+(u.boosterActivatedAt?new Date(u.boosterActivatedAt).toLocaleDateString():'-')+'</td><td class="mono">'+(u.boosterExpiresAt?new Date(u.boosterExpiresAt).toLocaleDateString():'-')+'</td></tr>'});
+  else html+='<tr><td colspan="6" class="empty">No active boosters</td></tr>';
+  html+='</tbody></table></div>';
+  $("mainContent").innerHTML='<div class="topbar"><h1><i class="fa-solid fa-jet-fighter"></i> Boosters</h1><button class="refresh-btn" onclick="loadBoostersPage()"><i class="fa-solid fa-rotate"></i></button></div>'+html;
+}
+
+// ========== SETTINGS ==========
+async function loadSettingsPage(){
+  if(ADMIN.role!=="SUPER_ADMIN"){$("mainContent").innerHTML='<div class="empty">Access denied</div>';return}
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-gear"></i> Settings</h1><button class="refresh-btn" onclick="loadSettingsPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in"><div class="empty">Loading...</div></div>';
+  const d=await api("/api/admin/settings");
+  if(!d||!d.success)return;
+  const s=d.settings;
+  const keys=["maintenance_mode","announcement_banner","min_withdrawal","max_withdrawal","company_wallet"];
+  let html='<div class="card-title"><i class="fa-solid fa-sliders"></i> System Settings</div><div style="display:grid;gap:10px;max-width:500px">';
+  keys.forEach(k=>{
+    const val=s[k]||"";
+    html+='<div class="field"><label>'+(k.replace(/_/g," ").toUpperCase())+'</label><div style="display:flex;gap:6px"><input type="text" id="set_'+k+'" value="'+val+'" style="flex:1;padding:8px 12px;border-radius:4px;border:1px solid var(--card-border);background:rgba(0,0,0,.3);color:var(--text);font-size:13px;outline:none"><button class="btn-s btn-green" onclick="saveSetting(\''+k+'\')"><i class="fa-solid fa-floppy-disk"></i></button></div></div>'
+  });
+  html+='</div>';
+  $("mainContent").innerHTML='<div class="topbar"><h1><i class="fa-solid fa-gear"></i> Settings</h1><button class="refresh-btn" onclick="loadSettingsPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in">'+html+'</div>';
+}
+
+async function saveSetting(key){
+  const el=$("set_"+key);if(!el)return;
+  const r=await api("/api/admin/settings",{method:"POST",body:JSON.stringify({key,value:el.value})});
+  if(r&&r.success){showToast("Saved: "+key)}else showToast("Error: "+(r?.error||"unknown"))
+}
+
+// ========== ADMINS ==========
+async function loadAdminsPage(){
+  if(ADMIN.role!=="SUPER_ADMIN")return;
+  const m=$("mainContent");
+  m.innerHTML='<div class="topbar"><h1><i class="fa-solid fa-shield-halved"></i> Admins</h1><button class="refresh-btn" onclick="loadAdminsPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in"><div class="empty">Loading...</div></div>';
+  const d=await api("/api/admin/admins");
+  if(!d||!d.success)return;
+  let html='<div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn-s btn-green" style="padding:8px 16px;font-size:12px" onclick="showCreateAdmin()"><i class="fa-solid fa-plus"></i> New Admin</button></div>'+
+    '<table><thead><tr><th>Email</th><th>Username</th><th>Role</th><th>Active</th><th>Created</th><th>Last Login</th><th>Action</th></tr></thead><tbody>';
+  d.admins.forEach(a=>{
+    html+='<tr><td>'+(a.email||'-')+'</td><td>'+(a.username||'-')+'</td><td><span class="badge '+(a.role==="SUPER_ADMIN"?"red":a.role==="ADMIN"?"green":"gray")+'">'+(a.role||'-')+'</span></td><td>'+(a.isActive?'<span class="badge green">Active</span>':'<span class="badge red">Suspended</span>')+'</td><td class="mono">'+(a.createdAt?new Date(a.createdAt).toLocaleDateString():'-')+'</td><td class="mono">'+(a.lastLogin?new Date(a.lastLogin).toLocaleDateString():'Never')+'</td><td><button class="btn-s btn-'+(a.isActive?'red':'green')+'" onclick="toggleAdmin(\''+a.id+'\')">'+(a.isActive?'Suspend':'Activate')+'</button></td></tr>'
+  });
+  html+='</tbody></table>';
+  const logs=await api("/api/admin/logs?limit=20");
+  if(logs&&logs.success){
+    html+='<div style="margin-top:20px"><div class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Recent Audit Logs</div><table><thead><tr><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>Date</th></tr></thead><tbody>';
+    (logs.logs||[]).forEach(l=>{
+      html+='<tr><td>'+(l.adminUsername||'-')+'</td><td><span class="badge cyan">'+(l.action||'-')+'</span></td><td>'+(l.targetType||'-')+' #'+(l.targetId||'').slice(0,10)+'</td><td class="truncate" style="max-width:200px">'+(l.details||'-')+'</td><td class="mono">'+(l.createdAt?new Date(l.createdAt).toLocaleString():'-')+'</td></tr>'
+    });
+    html+='</tbody></table></div>'
+  }
+  $("mainContent").innerHTML='<div class="topbar"><h1><i class="fa-solid fa-shield-halved"></i> Admins</h1><button class="refresh-btn" onclick="loadAdminsPage()"><i class="fa-solid fa-rotate"></i></button></div><div class="card fade-in">'+html+'</div>';
+}
+
+function showCreateAdmin(){
+  const html='<div class="modal-overlay open" id="caModal" onclick="if(event.target===this)closeModal(\'caModal\')"><div class="modal-box">'+
+    '<button class="modal-close" onclick="closeModal(\'caModal\')"><i class="fa-solid fa-xmark"></i></button>'+
+    '<h2><i class="fa-solid fa-user-shield"></i> Create Admin</h2>'+
+    '<div class="field"><label>Email *</label><input type="email" id="caEmail" placeholder="admin@example.com"></div>'+
+    '<div class="field"><label>Username (optional)</label><input type="text" id="caUser" placeholder="Display name"></div>'+
+    '<div class="field"><label>Password (min 6 chars)</label><input type="password" id="caPass" placeholder="Password"></div>'+
+    '<div class="field"><label>Role</label><select id="caRole"><option value="ADMIN">Admin</option><option value="MODERATOR">Moderator</option><option value="SUPER_ADMIN">Super Admin</option></select></div>'+
+    '<button class="btn-s btn-green" style="padding:10px 20px;width:100%;font-size:13px" onclick="createAdmin()"><i class="fa-solid fa-plus"></i> Create</button></div></div>';
+  document.body.insertAdjacentHTML("beforeend",html);
+}
+
+async function createAdmin(){
+  const em=$("caEmail")?.value.trim(),u=$("caUser")?.value.trim(),p=$("caPass")?.value,r=$("caRole")?.value;
+  if(!em||!p||p.length<6){showToast("Valid email & password (6+ chars) required");return}
+  const d=await api("/api/admin/admins/create",{method:"POST",body:JSON.stringify({email:em,username:u,password:p,role:r})});
+  if(d&&d.success){showToast("Admin created");closeModal("caModal");loadAdminsPage()}
+  else showToast("Error: "+(d?.error||"unknown"))
+}
+
+async function toggleAdmin(id){
+  const d=await api("/api/admin/admins/toggle",{method:"POST",body:JSON.stringify({id})});
+  if(d&&d.success){showToast("Updated");loadAdminsPage()}else showToast("Error")
+}
+
+function closeModal(id){const el=$(id);if(el)el.remove()}
+
+// INIT ON LOAD
+(function(){
+  const saved=localStorage.getItem("pb_admin_user");
+  const token=localStorage.getItem("pb_admin_token");
+  if(saved&&token){TOKEN=token;initApp()}else{$("loginScreen").style.display="flex"}
+})()
 </script>
 </body>
 </html>

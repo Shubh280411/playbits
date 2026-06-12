@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const { ethers, HDNodeWallet } = require("ethers");
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const db = require("./db");
 
 require("dotenv").config();
@@ -12,6 +14,8 @@ if (!process.env.MNEMONIC) {
 }
 const MNEMONIC = process.env.MNEMONIC;
 const MASTER = HDNodeWallet.fromPhrase(MNEMONIC);
+const JWT_SECRET = process.env.JWT_SECRET || "pb_admin_secret_change_me";
+const ADMIN_SALT_ROUNDS = 10;
 const BSC_RPC = "https://bsc-dataseed.binance.org";
 const PROVIDER = new ethers.JsonRpcProvider(BSC_RPC);
 const USDT_ADDR = "0x55d398326f99059fF775485246999027B3197955";
@@ -1317,10 +1321,142 @@ app.post("/api/claim-follow", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 
-// ===== ADMIN ENDPOINTS =====
+// ===== ADMIN AUTH SYSTEM =====
+
+const JWT_EXPIRY = "24h";
+
+function adminAuth(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith("Bearer ")) {
+    return res.status(401).json({ success: false, error: "No token provided" });
+  }
+  try {
+    req.admin = jwt.verify(auth.split(" ")[1], JWT_SECRET);
+    next();
+  } catch (e) {
+    return res.status(401).json({ success: false, error: "Invalid or expired token" });
+  }
+}
+
+function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!roles.includes(req.admin.role)) {
+      return res.status(403).json({ success: false, error: "Insufficient permissions" });
+    }
+    next();
+  };
+}
+
+async function adminLog(admin, action, targetType, targetId, details) {
+  try {
+    const id = `alog_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+    await db.insert("admin_logs", id, {
+      adminId: admin.id,
+      adminUsername: admin.username,
+      adminEmail: admin.email || "",
+      action,
+      targetType,
+      targetId,
+      details: details || "",
+      ip: "",
+      createdAt: Date.now()
+    });
+  } catch (e) {}
+}
+
+// Admin login (no auth)
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ success: false, error: "Email and password required" });
+    const admin = await db.get("admins", email.toLowerCase().trim(), "email");
+    if (!admin) return res.status(401).json({ success: false, error: "Invalid credentials" });
+    if (!admin.isActive) return res.status(403).json({ success: false, error: "Account suspended" });
+    const valid = await bcrypt.compare(password, admin.passwordHash);
+    if (!valid) return res.status(401).json({ success: false, error: "Invalid credentials" });
+    await db.patch("admins", admin.id, { lastLogin: Date.now() });
+    const token = jwt.sign({ id: admin.id, email: admin.email, username: admin.username, role: admin.role }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+    res.json({ success: true, token, admin: { id: admin.id, email: admin.email, username: admin.username, role: admin.role } });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// Admin: first-time setup (only works if no admins exist)
+app.post("/api/admin/setup", async (req, res) => {
+  try {
+    const { email, username, password, secret } = req.body;
+    if (secret !== "migrate2024") return res.status(403).json({ success: false, error: "Invalid setup secret" });
+    const existing = await db.query('SELECT COUNT(*) as c FROM admins');
+    if (parseInt(existing.rows[0].c) > 0) return res.status(400).json({ success: false, error: "Admins already exist" });
+    if (!email || !password || password.length < 6) return res.status(400).json({ success: false, error: "Valid email and password (min 6 chars) required" });
+    const hash = await bcrypt.hash(password, ADMIN_SALT_ROUNDS);
+    const id = `admin_${Date.now()}`;
+    await db.insert("admins", id, { id, email: email.toLowerCase().trim(), username: (username || email.split('@')[0]).trim(), passwordHash: hash, role: "SUPER_ADMIN", isActive: true, createdAt: Date.now(), lastLogin: 0 });
+    res.json({ success: true, message: "Super admin created" });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// Admin: get current admin info
+app.get("/api/admin/me", adminAuth, async (req, res) => {
+  try {
+    const admin = await db.get("admins", req.admin.id, "id");
+    if (!admin) return res.status(404).json({ success: false, error: "Admin not found" });
+    res.json({ success: true, admin: { id: admin.id, email: admin.email, username: admin.username, role: admin.role, isActive: admin.isActive, createdAt: admin.createdAt, lastLogin: admin.lastLogin } });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// Admin: list all admins (SUPER_ADMIN only)
+app.get("/api/admin/admins", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const rows = await db.query('SELECT "id","email","username","role","isActive","createdAt","lastLogin" FROM admins ORDER BY "createdAt" ASC');
+    res.json({ success: true, admins: rows.rows });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// Admin: create new admin (SUPER_ADMIN only)
+app.post("/api/admin/admins/create", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const { email, username, password, role } = req.body;
+    if (!email || !password || password.length < 6) return res.status(400).json({ success: false, error: "Valid email and password required" });
+    if (!["SUPER_ADMIN","ADMIN","MODERATOR"].includes(role)) return res.status(400).json({ success: false, error: "Invalid role" });
+    const hash = await bcrypt.hash(password, ADMIN_SALT_ROUNDS);
+    const id = `admin_${Date.now()}`;
+    await db.insert("admins", id, { id, email: email.toLowerCase().trim(), username: (username || email.split('@')[0]).trim(), passwordHash: hash, role, isActive: true, createdAt: Date.now(), lastLogin: 0 });
+    adminLog(req.admin, "CREATE_ADMIN", "admin", id, `Created ${role}: ${email}`);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// Admin: toggle admin active status (SUPER_ADMIN only)
+app.post("/api/admin/admins/toggle", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ success: false, error: "Admin ID required" });
+    if (id === req.admin.id) return res.status(400).json({ success: false, error: "Cannot suspend yourself" });
+    const admin = await db.get("admins", id, "id");
+    if (!admin) return res.status(404).json({ success: false, error: "Admin not found" });
+    await db.patch("admins", id, { isActive: !admin.isActive });
+    adminLog(req.admin, "TOGGLE_ADMIN", "admin", id, `Set active=${!admin.isActive}`);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// Admin: get audit logs (SUPER_ADMIN only)
+app.get("/api/admin/logs", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 200);
+    const offset = (page - 1) * limit;
+    const countResult = await db.query('SELECT COUNT(*) as total FROM admin_logs');
+    const total = parseInt(countResult.rows[0].total);
+    const rows = await db.query('SELECT * FROM admin_logs ORDER BY "createdAt" DESC LIMIT $1 OFFSET $2', [limit, offset]);
+    res.json({ success: true, logs: rows.rows, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+// ===== ADMIN ENDPOINTS (protected) =====
 
 // Admin dashboard stats
-app.get("/api/admin/stats", async (req, res) => {
+app.get("/api/admin/stats", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
     const [users, deposits, withdrawals, income, packages, todayUsers] = await Promise.all([
       db.query('SELECT COUNT(*) as c FROM users'),
@@ -1332,6 +1468,16 @@ app.get("/api/admin/stats", async (req, res) => {
     ]);
     const pendingWd = await db.query("SELECT COUNT(*) as c FROM withdrawals WHERE status='pending'");
     const pendingDep = await db.query("SELECT COUNT(*) as c FROM deposits WHERE status='pending'");
+
+    let masterBnbBalance = 0, gasThreshold = 0;
+    try {
+      const masterConnected = MASTER.connect(PROVIDER);
+      const bal = await PROVIDER.getBalance(masterConnected.address);
+      masterBnbBalance = Number(ethers.formatEther(bal));
+      const feeData = await PROVIDER.getFeeData();
+      gasThreshold = Number(ethers.formatEther(feeData.gasPrice * 60000n));
+    } catch (e) { console.error("[BALANCE] BNB fetch error:", e.message) }
+
     res.json({
       success: true,
       stats: {
@@ -1345,14 +1491,17 @@ app.get("/api/admin/stats", async (req, res) => {
         totalIncomeAmount: Number(income.rows[0].t),
         totalPackages: parseInt(packages.rows[0].c),
         pendingWithdrawals: parseInt(pendingWd.rows[0].c),
-        pendingDeposits: parseInt(pendingDep.rows[0].c)
+        pendingDeposits: parseInt(pendingDep.rows[0].c),
+        masterAddress: MASTER.address,
+        masterBnbBalance,
+        gasThreshold
       }
     });
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 
 // Admin: get all users
-app.get("/api/admin/users", async (req, res) => {
+app.get("/api/admin/users", adminAuth, requireRole("SUPER_ADMIN", "ADMIN", "MODERATOR"), async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
@@ -1378,7 +1527,7 @@ app.get("/api/admin/users", async (req, res) => {
 });
 
 // Admin: get all deposits
-app.get("/api/admin/deposits", async (req, res) => {
+app.get("/api/admin/deposits", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
@@ -1393,7 +1542,7 @@ app.get("/api/admin/deposits", async (req, res) => {
 });
 
 // Admin: get all withdrawals with user info
-app.get("/api/admin/withdrawals", async (req, res) => {
+app.get("/api/admin/withdrawals", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
@@ -1410,7 +1559,7 @@ app.get("/api/admin/withdrawals", async (req, res) => {
 });
 
 // Admin: get all income history
-app.get("/api/admin/income", async (req, res) => {
+app.get("/api/admin/income", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(parseInt(req.query.limit) || 50, 200);
@@ -1433,7 +1582,7 @@ app.get("/api/admin/income", async (req, res) => {
 });
 
 // Admin: delete user
-app.post("/api/admin/users/delete", async (req, res) => {
+app.post("/api/admin/users/delete", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
   try {
     const { telegramId } = req.body;
     if (!telegramId) return res.status(400).json({ error: "telegramId required" });
@@ -1453,7 +1602,7 @@ app.post("/api/admin/users/delete", async (req, res) => {
 });
 
 // Admin: approve withdrawal
-app.post("/api/admin/withdraw/approve", async (req, res) => {
+app.post("/api/admin/withdraw/approve", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "id required" });
@@ -1463,7 +1612,7 @@ app.post("/api/admin/withdraw/approve", async (req, res) => {
 });
 
 // Admin: reject withdrawal
-app.post("/api/admin/withdraw/reject", async (req, res) => {
+app.post("/api/admin/withdraw/reject", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
   try {
     const { id } = req.body;
     if (!id) return res.status(400).json({ error: "id required" });
@@ -1480,6 +1629,168 @@ app.post("/api/admin/withdraw/reject", async (req, res) => {
         }, "telegramId");
       }
     }
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: mark withdrawal as paid
+app.post("/api/admin/withdraw/mark-paid", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: "id required" });
+    await db.patch("withdrawals", id, { status: "paid", updatedAt: Date.now() });
+    adminLog(req.admin, "MARK_PAID_WITHDRAWAL", "withdrawal", id, `Marked as paid`);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get single user detail
+app.get("/api/admin/users/:userId", adminAuth, requireRole("SUPER_ADMIN", "ADMIN", "MODERATOR"), async (req, res) => {
+  try {
+    const userId = String(req.params.userId);
+    const user = await db.get("users", userId, "telegramId");
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    const income = await db.query('SELECT COUNT(*) as c, COALESCE(SUM(amount),0) as t FROM income_history WHERE "userId"=$1', [userId]);
+    const deposits = await db.query('SELECT COUNT(*) as c, COALESCE(SUM(amount),0) as t FROM deposits WHERE "userId"=$1', [userId]);
+    const wds = await db.query('SELECT COUNT(*) as c, COALESCE(SUM(amount),0) as t FROM withdrawals WHERE "telegramId"=$1', [userId]);
+    const directs = await db.query('SELECT COUNT(*) as c FROM users WHERE "referredBy"=$1', [userId]);
+    res.json({ success: true, user: { ...user, incomeCount: parseInt(income.rows[0].c), incomeTotal: Number(income.rows[0].t), depositCount: parseInt(deposits.rows[0].c), depositTotal: Number(deposits.rows[0].t), withdrawalCount: parseInt(wds.rows[0].c), withdrawalTotal: Number(wds.rows[0].t), directCount: parseInt(directs.rows[0].c) } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: suspend / activate user
+app.post("/api/admin/users/suspend", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const { userId, suspend } = req.body;
+    if (!userId) return res.status(400).json({ error: "userId required" });
+    if (userId === "1001") return res.status(400).json({ error: "Cannot suspend seed user" });
+    await db.patch("users", String(userId), { isActive: !suspend, updatedAt: Date.now() }, "telegramId");
+    adminLog(req.admin, suspend ? "SUSPEND_USER" : "ACTIVATE_USER", "user", userId, `Set active=${!suspend}`);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: edit user fields
+app.post("/api/admin/users/edit", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const { userId, updates } = req.body;
+    if (!userId || !updates) return res.status(400).json({ error: "userId and updates required" });
+    const allowed = ["firstName","username","depositBalance","activationUSDT","packageAmount","packageStatus","packageROI","packageCapMultiplier","packageMaxEarnings","packageEarned","bits","withdrawableBits","totalEarned","totalWithdrawn","freeBitsBalance","isActive"];
+    const safe = {};
+    Object.keys(updates).forEach(k => { if (allowed.includes(k)) safe[k] = updates[k]; });
+    if (Object.keys(safe).length === 0) return res.status(400).json({ error: "No valid fields to update" });
+    safe.updatedAt = Date.now();
+    await db.patch("users", String(userId), safe, "telegramId");
+    adminLog(req.admin, "EDIT_USER", "user", userId, `Updated: ${Object.keys(safe).join(", ")}`);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get user's network tree
+app.get("/api/admin/users/:userId/network", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const userId = String(req.params.userId);
+    const user = await db.get("users", userId, "telegramId");
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    const leftLeg = await db.query('SELECT "telegramId","firstName","username","packageAmount","packageStatus","activationUSDT","totalEarned","createdAt" FROM users ORDER BY "createdAt" ASC');
+    const allUsers = leftLeg.rows;
+    const team = allUsers.filter(u => u.referredBy === userId);
+    const L = user.leftLegBusiness || 0, R = user.rightLegBusiness || 0;
+    res.json({ success: true, network: { user, team, leftBusiness: L, rightBusiness: R, totalTeam: team.length } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get user income
+app.get("/api/admin/users/:userId/income", adminAuth, requireRole("SUPER_ADMIN", "ADMIN", "MODERATOR"), async (req, res) => {
+  try {
+    const userId = String(req.params.userId);
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(parseInt(req.query.limit) || 50, 100);
+    const offset = (page - 1) * limit;
+    const type = req.query.type || "";
+    let where = '"userId"=$1';
+    const params = [userId];
+    if (type) { where += ' AND "type"=$2'; params.push(type); }
+    const countResult = await db.query(`SELECT COUNT(*) as total FROM income_history WHERE ${where}`, params);
+    const total = parseInt(countResult.rows[0].total);
+    const rows = await db.query(`SELECT * FROM income_history WHERE ${where} ORDER BY "createdAt" DESC LIMIT $${params.length+1} OFFSET $${params.length+2}`, [...params, limit, offset]);
+    res.json({ success: true, entries: rows.rows, pagination: { page, limit, total, totalPages: Math.ceil(total/limit) } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: ranks summary
+app.get("/api/admin/ranks-summary", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const allUsers = await db.query('SELECT "telegramId","firstName","username","referredBy","activationUSDT","packageAmount","packageStatus","leftLegBusiness","rightLegBusiness","totalEarned","createdAt" FROM users');
+    const total = allUsers.rows.length;
+    const activated = allUsers.rows.filter(u => (u.activationUSDT||0) >= 10).length;
+    const withPkg = allUsers.rows.filter(u => u.packageStatus === "active").length;
+    const bizTotal = allUsers.rows.reduce((s,u) => s + Number(u.activationUSDT||0), 0);
+    res.json({ success: true, summary: { totalUsers: total, activatedUsers: activated, activePackage: withPkg, totalBusiness: bizTotal } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: airdrop summary
+app.get("/api/admin/airdrop-summary", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const totalBits = await db.query('SELECT COALESCE(SUM("freeBitsEarned"),0) as e, COALESCE(SUM("freeBitsUsed"),0) as u, COALESCE(SUM("freeBitsBalance"),0) as b FROM users');
+    const history = await db.query('SELECT "source", COUNT(*) as c, COALESCE(SUM(bits),0) as t FROM airdrop_history GROUP BY "source"');
+    const expired = await db.query('SELECT COUNT(*) as c FROM users WHERE "freeBitsExpiry" > 0 AND "freeBitsExpiry" < $1 AND "freeBitsBalance" > 0', [Date.now()]);
+    const totals = totalBits.rows[0];
+    const rewards = {};
+    history.rows.forEach(r => { rewards[r.source] = { count: parseInt(r.c), total: Number(r.t) }; });
+    res.json({ success: true, summary: { totalEarned: Number(totals.e), totalUsed: Number(totals.u), currentBalance: Number(totals.b), expiredUsers: parseInt(expired.rows[0].c), rewards } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: update airdrop reward values (SUPER_ADMIN only)
+app.post("/api/admin/airdrop/update-reward", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const { source, bits } = req.body;
+    const allowed = ["Signup Bonus","Telegram Join","Instagram Follow","X Follow","YouTube Subscribe","Referral Airdrop"];
+    if (!allowed.includes(source) || !bits || bits < 0) return res.status(400).json({ error: "Invalid source or bits" });
+    await db.query('INSERT INTO settings ("key","value","updatedAt","updatedBy") VALUES ($1,$2,$3,$4) ON CONFLICT ("key") DO UPDATE SET "value"=$2,"updatedAt"=$3,"updatedBy"=$4', [`airdrop_${source}`, String(bits), Date.now(), req.admin.username]);
+    adminLog(req.admin, "UPDATE_AIRDROP_REWARD", "settings", source, `Set ${source}=${bits}`);
+    res.json({ success: true });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get current airdrop reward settings
+app.get("/api/admin/airdrop/rewards", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const rows = await db.query('SELECT * FROM settings WHERE "key" LIKE \'airdrop_%\'');
+    const rewards = {};
+    rows.rows.forEach(r => { rewards[r.key.replace("airdrop_","")] = r.value; });
+    res.json({ success: true, rewards });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: booster summary
+app.get("/api/admin/booster-summary", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const rows = await db.query('SELECT "boosterLevelId","boosterName","boosterStatus",COUNT(*) as c FROM users WHERE "boosterLevelId" != \'none\' GROUP BY "boosterLevelId","boosterName","boosterStatus"');
+    const allActive = await db.query('SELECT "telegramId","firstName","username","boosterLevelId","boosterName","boosterExtraROI","boosterActivatedAt","boosterExpiresAt" FROM users WHERE "boosterStatus"=\'active\' ORDER BY "boosterActivatedAt" DESC');
+    res.json({ success: true, summary: { groups: rows.rows, active: allActive.rows } });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: get settings (SUPER_ADMIN only)
+app.get("/api/admin/settings", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const rows = await db.query('SELECT * FROM settings ORDER BY "key"');
+    const s = {};
+    rows.rows.forEach(r => { s[r.key] = r.value; });
+    res.json({ success: true, settings: s });
+  } catch (e) { res.status(500).json({ error: e.message }) }
+});
+
+// Admin: update settings (SUPER_ADMIN only)
+app.post("/api/admin/settings", adminAuth, requireRole("SUPER_ADMIN"), async (req, res) => {
+  try {
+    const { key, value } = req.body;
+    if (!key) return res.status(400).json({ error: "key required" });
+    await db.query('INSERT INTO settings ("key","value","updatedAt","updatedBy") VALUES ($1,$2,$3,$4) ON CONFLICT ("key") DO UPDATE SET "value"=$2,"updatedAt"=$3,"updatedBy"=$4', [key, String(value), Date.now(), req.admin.username]);
+    adminLog(req.admin, "UPDATE_SETTING", "settings", key, `Set ${key}=${value}`);
     res.json({ success: true });
   } catch (e) { res.status(500).json({ error: e.message }) }
 });

@@ -60,6 +60,8 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS "freeBitsBalance" DOUBLE PRECISION DE
 ALTER TABLE users ADD COLUMN IF NOT EXISTS "freeBitsEarned" DOUBLE PRECISION DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS "freeBitsUsed" DOUBLE PRECISION DEFAULT 0;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS "freeBitsExpiry" BIGINT DEFAULT 0;
+ALTER TABLE admins ADD COLUMN IF NOT EXISTS "email" TEXT DEFAULT '';
+ALTER TABLE admin_logs ADD COLUMN IF NOT EXISTS "adminEmail" TEXT DEFAULT '';
 
 CREATE TABLE IF NOT EXISTS airdrop_history (
   "id" TEXT PRIMARY KEY,
@@ -178,3 +180,36 @@ CREATE TABLE IF NOT EXISTS withdrawals (
   "updatedAt" BIGINT DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_withdrawals_userId ON withdrawals("telegramId");
+
+CREATE TABLE IF NOT EXISTS admins (
+  "id" TEXT PRIMARY KEY,
+  "username" TEXT UNIQUE NOT NULL,
+  "email" TEXT DEFAULT '',
+  "passwordHash" TEXT NOT NULL,
+  "role" TEXT DEFAULT 'ADMIN' CHECK("role" IN ('SUPER_ADMIN','ADMIN','MODERATOR')),
+  "isActive" BOOLEAN DEFAULT true,
+  "createdAt" BIGINT DEFAULT 0,
+  "lastLogin" BIGINT DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS admin_logs (
+  "id" TEXT PRIMARY KEY,
+  "adminId" TEXT NOT NULL,
+  "adminEmail" TEXT DEFAULT '',
+  "adminUsername" TEXT DEFAULT '',
+  "action" TEXT NOT NULL,
+  "targetType" TEXT DEFAULT '',
+  "targetId" TEXT DEFAULT '',
+  "details" TEXT DEFAULT '',
+  "ip" TEXT DEFAULT '',
+  "createdAt" BIGINT DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_admin_logs_adminId ON admin_logs("adminId");
+CREATE INDEX IF NOT EXISTS idx_admin_logs_createdAt ON admin_logs("createdAt");
+
+CREATE TABLE IF NOT EXISTS settings (
+  "key" TEXT PRIMARY KEY,
+  "value" TEXT DEFAULT '',
+  "updatedAt" BIGINT DEFAULT 0,
+  "updatedBy" TEXT DEFAULT ''
+);

@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Reactor Ecosystem</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--vt:rgba(0,0,0,.2);--toast-bg:rgba(0,0,0,.98);--toast-text:#ffffff;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--card-glow:rgba(0,150,255,.06);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--vt:transparent;--toast-bg:rgba(255,255,255,.96);--toast-text:#0f172a}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition);scroll-behavior:smooth}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1;transition:background var(--transition)}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg);transition:background var(--transition)}
+#ptc{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.12}
+#gridOverlay{position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.012)1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.012)1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+@keyframes rp{0%,100%{transform:scale(1);opacity:.3}50%{transform:scale(1.04);opacity:.6}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+@keyframes ef{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes mine-pulse{0%{transform:scale(1)}50%{transform:scale(1.01)}100%{transform:scale(1)}}
+@keyframes breathe{0%,100%{transform:scale(1);box-shadow:inset 0 0 25px rgba(0,229,255,.08),0 0 35px rgba(0,229,255,.05)}50%{transform:scale(1.08);box-shadow:inset 0 0 45px rgba(0,229,255,.15),0 0 60px rgba(0,229,255,.1),0 0 80px rgba(168,85,247,.08)}}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--toast-bg);color:var(--toast-text);padding:12px 24px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:99999;pointer-events:none;animation:toast-up .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+
+/* HAMBURGER OVERLAY */
+.hamburger-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+.hamburger-overlay.open{opacity:1;pointer-events:auto}
+.hamburger-menu{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--bg2);border-right:1px solid var(--card-border);z-index:9999;transform:translateX(-100%);transition:transform var(--transition);overflow-y:auto;padding:16px 0}
+.hamburger-menu.open{transform:translateX(0)}
+.hamburger-menu .menu-header{padding:10px 24px 18px;border-bottom:1px solid var(--card-border);margin-bottom:10px}
+.hamburger-menu .menu-header .hm-logo{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.hamburger-menu .menu-header .hm-logo img{width:26px;height:26px;object-fit:contain}
+.hamburger-menu .menu-header .hm-logo .play{font:800 22px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px}
+.hamburger-menu .menu-header .hm-logo .bits{font:800 22px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:2px}
+.hamburger-menu .menu-header .tagline{font-size:10px;color:var(--text3);letter-spacing:3px;text-transform:uppercase;margin-top:3px;font-weight:600}
+.hamburger-menu .menu-header .hm-lang{display:flex;align-items:center;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--card-border);cursor:pointer;position:relative;user-select:none;font-size:16px}
+.hamburger-menu .menu-header .hm-lang i{font-size:11px;color:var(--text3);width:14px;text-align:center}
+.hamburger-menu .menu-header .hm-lang .lang-popup{position:absolute;top:100%;left:0;background:var(--bg2);border:1px solid var(--card-border);border-radius:var(--rs);padding:4px 0;z-index:100;min-width:140px;display:none}
+.hamburger-menu .menu-header .hm-lang .lang-popup.show{display:block}
+.hamburger-menu .menu-header .hm-lang .lang-opt{padding:8px 14px;font-size:13px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .2s}
+.hamburger-menu .menu-header .hm-lang .lang-opt:hover{background:rgba(0,229,255,.05);color:var(--text)}
+.hamburger-menu .menu-header .hm-lang .lang-opt.active{color:var(--cyan);font-weight:700}
+.hamburger-menu .menu-item{display:flex;align-items:center;gap:14px;padding:14px 24px;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;transition:all .3s;border-left:3px solid transparent;letter-spacing:.5px;text-decoration:none}
+.hamburger-menu .menu-item:hover{color:var(--text);background:rgba(0,229,255,.05);border-left-color:var(--cyan)}
+.hamburger-menu .menu-item i,.hamburger-menu .menu-item svg{width:22px;text-align:center;font-size:16px;color:var(--cyan);flex-shrink:0}
+.hamburger-menu .menu-item svg{width:20px;height:20px}
+.hamburger-menu .menu-item.logout{color:var(--pink);margin-top:auto}
+.hamburger-menu .menu-item.logout i{color:var(--pink)}
+.hamburger-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:14px}
+.lang-select{display:flex;align-items:center;gap:6px;padding:6px 16px 10px;font-size:11px;color:var(--text3)}
+.lang-select i{font-size:12px;color:var(--text3)}
+.lang-select select{background:transparent;border:none;color:var(--text);font:600 12px 'Rajdhani',sans-serif;cursor:pointer;outline:none;flex:1}
+.lang-select select option{background:var(--bg2);color:var(--text)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);transition:background var(--transition)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-hamburger{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;transition:all .3s}
+.topbar-hamburger:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-theme{width:38px;height:38px;border-radius:50%;border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:14px;transition:all .3s}
+.topbar-theme:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;transition:all .3s;flex-shrink:0}
+.topbar-user:hover{border-color:var(--card-glow);background:rgba(0,229,255,.03)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+
+/* VIEWSTACK */
+.view-stack{display:flex;flex-direction:column;gap:18px}
+
+/* REACTOR CORE */
+.reactor{display:flex;flex-direction:column;align-items:center;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:24px 20px;position:relative;overflow:hidden;min-height:380px;transition:all var(--transition)}
+.reactor::before{content:'';position:absolute;top:50%;left:50%;width:340px;height:340px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(0,229,255,.04),rgba(168,85,247,.015),transparent 65%);border-radius:50%;animation:rp 4s ease-in-out infinite;pointer-events:none}
+.reactor::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(0,229,255,.004)4px,rgba(0,229,255,.004)8px);pointer-events:none}
+.reactor-title{font:800 14px 'Orbitron',sans-serif;color:var(--text2);letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;position:relative;z-index:1}
+.reactor-core{position:relative;width:200px;height:200px;margin-bottom:12px}
+.reactor-ring-svg{position:absolute;inset:0;transform:rotate(-90deg);width:100%;height:100%}
+.reactor-ring-svg circle{fill:none;stroke-width:4;cx:100;cy:100;r:88}
+.reactor-ring-svg .rrs-bg{stroke:rgba(0,229,255,.06)}
+.reactor-ring-svg .rrs-fill{stroke:var(--cyan);stroke-linecap:round;stroke-dasharray:553;stroke-dashoffset:553;filter:drop-shadow(0 0 6px rgba(0,229,255,.2));transition:stroke-dashoffset 1s linear}
+.reactor-ring-glow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.4}
+.reactor-ring-glow circle{fill:none;stroke-width:10;cx:100;cy:100;r:88;stroke:var(--cyan);stroke-dasharray:553;stroke-dashoffset:553;filter:blur(8px);transition:stroke-dashoffset 1s linear}
+.reactor-center{position:absolute;inset:42px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.06),rgba(168,85,247,.03));display:grid;place-items:center;box-shadow:inset 0 0 15px rgba(0,229,255,.03),0 0 20px rgba(0,229,255,.02);border:1px solid rgba(0,229,255,.05);animation:breathe 4s ease-in-out infinite;transition:box-shadow .5s}
+.reactor-center .rb{font:900 32px 'Orbitron',sans-serif;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;animation:mine-pulse 2s ease-in-out infinite}
+.reactor-center .rl{font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.reactor-center .rm{font-size:13px;color:var(--green);font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:4px}
+.reactor-status{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:10px}
+.reactor-status .rs-line{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);font-weight:600}
+.reactor-status .rs-line i{font-size:12px}
+.reactor-status .rs-line .dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite}
+.reactor-status .rs-line b{color:var(--cyan);font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.5px;font-weight:800}
+.claim-timer{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%;position:relative;z-index:1}
+.claim-timer-box{background:rgba(0,0,0,.3);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px 8px;text-align:center}
+.claim-timer-box .ctn{display:block;font:700 26px 'JetBrains Mono',monospace;color:var(--cyan)}
+.claim-timer-box .ctl{display:block;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-top:3px;font-weight:600}
+
+/* CLAIM PANEL */
+.claim-panel{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;text-align:center;transition:all var(--transition)}
+.claim-btn{border:none;border-radius:var(--r);padding:16px 24px;width:100%;font:800 16px 'Orbitron',sans-serif;color:#fff;background:linear-gradient(135deg,var(--cyan),var(--purple));cursor:pointer;position:relative;overflow:hidden;text-transform:uppercase;letter-spacing:2px;box-shadow:0 2px 16px rgba(0,229,255,.12);transition:all .3s}
+.claim-btn:hover{transform:translateY(-2px);box-shadow:0 4px 24px rgba(0,229,255,.2)}
+.claim-btn[disabled]{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.claim-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);animation:ef 2s ease-in-out infinite}
+.claim-info{display:flex;justify-content:center;gap:24px;margin-top:14px;font-size:14px;color:var(--text2);font-weight:600}
+.claim-info b{color:var(--text);font-weight:800}
+
+/* FUSION */
+.fusion-panel{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.fusion-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.fusion-header i{color:var(--gold)}
+.fusion-balance{margin-bottom:12px}
+.fusion-balance .fb-l{font-size:12px;color:var(--text2);margin-bottom:3px;font-weight:600;letter-spacing:.5px}
+.fusion-balance .fb-v{font:900 36px 'Orbitron',sans-serif;color:var(--gold)}
+.fusion-timer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.fusion-timer-box{background:rgba(0,0,0,.3);border:1px solid var(--card-border);border-radius:var(--rs);padding:10px 6px;text-align:center}
+.fusion-timer-box .ftn{display:block;font:700 18px 'JetBrains Mono',monospace;color:var(--gold)}
+.fusion-timer-box .ftl{display:block;font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;font-weight:600}
+.fusion-bar{height:6px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-bottom:10px}
+.fusion-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan));border-radius:999px;transition:width 1s}
+.fusion-progress{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500}
+.fusion-status{display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 14px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);border-radius:var(--rs);font-size:12px;color:var(--green);font-weight:700;letter-spacing:1px}
+.fs-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite}
+
+/* STAT CARDS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all var(--transition)}
+.stat-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.stat-card:nth-child(5)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-card:nth-child(6)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.stat-card .sc-icon{width:36px;height:36px;border-radius:var(--rs);display:grid;place-items:center;font-size:16px;margin-bottom:10px}
+.stat-card:nth-child(1) .sc-icon{background:rgba(0,229,255,.06);color:var(--cyan)}
+.stat-card:nth-child(2) .sc-icon{background:rgba(168,85,247,.06);color:var(--purple)}
+.stat-card:nth-child(3) .sc-icon{background:rgba(0,255,136,.06);color:var(--green)}
+.stat-card:nth-child(4) .sc-icon{background:rgba(255,215,0,.06);color:var(--gold)}
+.stat-card:nth-child(5) .sc-icon{background:rgba(0,255,136,.06);color:var(--green)}
+.stat-card:nth-child(6) .sc-icon{background:rgba(0,229,255,.06);color:var(--cyan)}
+.stat-card .sc-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-weight:700}
+.stat-card .sc-value{font:700 20px 'Orbitron',sans-serif;margin-bottom:8px}
+.stat-card:nth-child(1) .sc-value{color:var(--cyan)}
+.stat-card:nth-child(2) .sc-value{color:var(--purple)}
+.stat-card:nth-child(3) .sc-value{color:var(--green)}
+.stat-card:nth-child(4) .sc-value{color:var(--gold)}
+.stat-card:nth-child(5) .sc-value{color:var(--green)}
+.stat-card:nth-child(6) .sc-value{color:var(--cyan)}
+.stat-card .sc-bar{height:4px;background:rgba(255,255,255,.03);border-radius:999px;overflow:hidden}
+.stat-card .sc-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.stat-card .sc-sub b{color:var(--green);font-weight:700}
+.stat-card .sc-fill{height:100%;width:0%;border-radius:999px}
+.stat-card:nth-child(1) .sc-fill{background:var(--cyan)}
+.stat-card:nth-child(2) .sc-fill{background:var(--purple)}
+.stat-card:nth-child(3) .sc-fill{background:var(--green)}
+.stat-card:nth-child(4) .sc-fill{background:var(--gold)}
+.stat-card:nth-child(5) .sc-fill{background:var(--green)}
+.stat-card:nth-child(6) .sc-fill{background:var(--cyan)}
+
+/* AIRDROP NETWORK */
+.airdrop-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.airdrop-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.airdrop-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.airdrop-header i{color:var(--green)}
+.airdrop-tier{display:flex;align-items:center;padding:10px 14px;background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:6px;gap:10px}
+.airdrop-tier .at-lvl{font:700 13px 'Orbitron',sans-serif;color:var(--green);min-width:28px}
+.airdrop-tier .at-bits{font-size:12px;color:var(--text2);flex:1}
+.airdrop-tier .at-bits b{color:var(--green)}
+.airdrop-tier .at-users{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:48px;text-align:right}
+.airdrop-tier .at-status{font-size:13px;width:18px;text-align:center}
+.airdrop-current-level{padding:8px 14px;background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.08);border-radius:var(--rs);font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:600}
+.airdrop-current-level b{color:var(--green);font-family:'JetBrains Mono',monospace}
+.airdrop-stats{display:flex;justify-content:space-between;padding:10px 14px;margin-top:10px;background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.1);border-radius:var(--rs);font-size:12px;color:var(--text2)}
+.airdrop-stats b{color:var(--green);font-weight:700}
+
+/* ORBIT NETWORK */
+.orbit-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.orbit-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.orbit-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.orbit-header i{color:var(--purple)}
+.orbit-tier{display:flex;align-items:center;padding:10px 14px;background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:6px;gap:10px}
+.orbit-tier .ot-lvl{font:700 13px 'Orbitron',sans-serif;color:var(--purple);min-width:28px}
+.orbit-tier .ot-pct{font-size:11px;color:var(--text2);min-width:32px}
+.orbit-tier .ot-pct b{color:var(--purple)}
+.orbit-tier .ot-earn{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace;flex:1;text-align:right}
+.orbit-tier .ot-users{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;min-width:48px;text-align:right}
+.orbit-tier .ot-status{font-size:13px;width:18px;text-align:center}
+.orbit-stats{display:flex;justify-content:space-between;padding:10px 14px;margin-top:10px;background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.1);border-radius:var(--rs);font-size:12px;color:var(--text2)}
+.orbit-stats b{color:var(--purple);font-weight:700}
+
+/* LIVE FEED */
+.feed-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.feed-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.feed-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.feed-header i{color:var(--cyan)}
+.feed-list{display:flex;flex-direction:column;gap:7px}
+.feed-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(0,0,0,.18);border-radius:var(--rs);animation:slide-up .3s ease;border:1px solid transparent;transition:border-color .3s}
+.feed-item:hover{border-color:var(--card-border)}
+.feed-item .fi-icon{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10px;color:#fff;flex-shrink:0}
+.feed-item .fi-icon.join{background:linear-gradient(135deg,var(--cyan),var(--purple))}
+.feed-item .fi-icon.reactor{background:linear-gradient(135deg,var(--gold),var(--pink))}
+.feed-item .fi-text{font-size:12px;color:var(--text2);flex:1}
+.feed-item .fi-text b{color:var(--text);font-weight:700}
+.feed-item .fi-time{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
+/* BOOSTER PROGRESS */
+.booster-progress-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden;transition:all var(--transition)}
+.booster-progress-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.booster-progress-header{font:800 13px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.booster-progress-header i{color:var(--gold)}
+.bp-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.02)}
+.bp-label{color:var(--text3);font-weight:600}
+.bp-value{color:var(--text);font-weight:700;font-family:'JetBrains Mono',monospace}
+.bp-value.cyan{color:var(--cyan)}
+.bp-value.gold{color:var(--gold)}
+.bp-progress-bar{height:6px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin:10px 0 6px}
+.bp-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--cyan));border-radius:999px;transition:width .8s}
+.bp-progress-label{font-size:10px;color:var(--text3);text-align:center;font-weight:600}
+
+/* TIER CARD */
+.tier-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.tier-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.tier-header i{color:var(--gold)}
+.tier-body{display:flex;flex-direction:column;gap:10px}
+.tier-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,.15);border-radius:var(--rs);border:1px solid rgba(255,255,255,.02)}
+.tier-row .tr-l{font-size:13px;color:var(--text2);font-weight:600}
+.tier-row .tr-v{font-size:14px;color:var(--cyan);font-weight:800;font-family:'JetBrains Mono',monospace}
+.tier-cta{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font:700 13px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:1px;text-decoration:none;transition:all .3s}
+.tier-cta:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,229,255,.2)}
+.tier-progress{height:6px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-top:10px}
+.tier-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--pink));border-radius:999px;transition:width .5s}
+
+/* LEADERBOARD */
+.lb-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.lb-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.lb-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.lb-header i{color:var(--gold)}
+.lb-list{display:flex;flex-direction:column;gap:7px}
+.lb-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);transition:all .3s}
+.lb-item:hover{border-color:rgba(0,229,255,.12)}
+.lb-item .lb-rank{width:28px;font:700 16px 'Orbitron',sans-serif;color:var(--text3);text-align:center}
+.lb-item:nth-child(1) .lb-rank{color:var(--gold)}
+.lb-item:nth-child(2) .lb-rank{color:var(--text2)}
+.lb-item:nth-child(3) .lb-rank{color:var(--text3)}
+.lb-item .lb-avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
+.lb-item:nth-child(1) .lb-avatar{background:linear-gradient(135deg,var(--gold),#f59e0b)}
+.lb-item:nth-child(2) .lb-avatar{background:linear-gradient(135deg,var(--text2),#64748b)}
+.lb-item:nth-child(3) .lb-avatar{background:linear-gradient(135deg,var(--text3),#94a3b8)}
+.lb-item .lb-name{font-size:14px;color:var(--text);font-weight:800;flex:1}
+.lb-item .lb-bits{font:800 15px 'JetBrains Mono',monospace;color:var(--cyan)}
+.lb-view-all{display:block;text-align:center;margin-top:12px;padding:10px;border-radius:var(--rs);background:rgba(0,229,255,.06);border:1px solid var(--card-border);color:var(--cyan);font:700 12px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:1px;text-decoration:none;transition:all .3s}
+.lb-view-all:hover{background:rgba(0,229,255,.12)}
+
+/* REFERRAL */
+.ref-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.ref-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.ref-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ref-header i{color:var(--cyan)}
+.ref-box{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px 14px;margin-bottom:10px}
+.ref-box code{flex:1;font-size:12px;color:var(--cyan);word-break:break-all;font-family:'JetBrains Mono',monospace}
+.ref-box button{background:rgba(0,229,255,.1);border:none;border-radius:8px;padding:8px 16px;color:var(--cyan);font-weight:700;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .3s}
+.ref-box button:hover{background:rgba(0,229,255,.2);transform:scale(1.05)}
+.ref-info{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);font-weight:500}
+.ref-info b{color:var(--text2);font-weight:700}
+
+/* SOCIAL FOLLOW */
+.follow-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:all var(--transition)}
+.follow-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.follow-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.follow-header i{color:var(--gold)}
+.follow-body{display:flex;flex-direction:column;gap:8px}
+.follow-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.02);border-radius:var(--rs);font-size:13px;color:var(--text2);font-weight:600}
+.follow-row .follow-check{font-size:16px;color:var(--text3)}
+.follow-row .follow-check.done{color:var(--green)}
+.follow-claim-btn{width:100%;border:none;border-radius:var(--rs);padding:14px;font:700 14px 'Orbitron',sans-serif;color:#fff;background:linear-gradient(135deg,var(--gold),var(--pink));cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:all .3s;text-decoration:none;display:inline-block;text-align:center;box-sizing:border-box}
+.follow-claim-btn:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,215,0,.15)}
+.follow-claim-btn[disabled]{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.follow-info{display:flex;align-items:center;justify-content:center;gap:6px;font-size:10px;color:var(--text3);padding:6px 0 0}
+
+/* CHARACTER LOGS */
+.energy-flow{display:flex;flex-direction:column;gap:6px}
+.flow-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,.12);border:1px solid var(--card-border);border-radius:var(--rs)}
+.flow-row .fr-l{font-size:11px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.flow-row .fr-l i{color:var(--cyan);font-size:11px}
+.flow-row .fr-v{font:600 12px 'JetBrains Mono',monospace;color:var(--cyan)}
+
+/* BLOCKED */
+.ss{min-height:100vh;display:none;align-items:center;justify-content:center;padding:20px;text-align:center;position:relative;z-index:2}
+.sb2{max-width:320px;width:100%;margin:0 auto}
+.hint{font-size:12px;color:var(--text3);margin-top:12px}
+.hint b{color:var(--cyan)}
+.ss.s{display:flex}
+.ls-spinner{font-size:48px;color:var(--cyan);margin:0 auto 16px;display:flex;justify-content:center}
+::-webkit-scrollbar{width:0}
+
+.bottom-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:2px solid var(--card-border);display:flex;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:50;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.dock-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-size:9px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.5px;text-transform:uppercase;padding:4px 12px;border-radius:var(--rs);border:none;background:transparent;font-family:'Rajdhani',sans-serif}
+.dock-item i,.dock-item svg{font-size:18px;transition:all .3s;color:inherit}
+.dock-item:hover,.dock-item.active{color:var(--cyan)}
+.dock-item:hover i,.dock-item.active i,.dock-item:hover svg,.dock-item.active svg{color:var(--cyan);filter:drop-shadow(0 0 6px rgba(0,229,255,.15))}
+</style>
+</head>
+<body>
+
+<canvas id="ptc"></canvas>
+<div id="gridOverlay"></div>
+
+<div class="ss s" id="ssBlocked">
+  <div class="sb2" id="blkLoader">
+    <div class="ls-spinner"><i class="fa-solid fa-atom fa-spin"></i></div>
+    <h2 id="blkTitle">Loading...</h2>
+    <p id="blkText">Please wait while we connect</p>
+  </div>
+  <div class="sb2" id="blkError" style="display:none">
+    <i class="fa-solid fa-lock"></i>
+    <h2 id="blkErrTitle">Access Restricted</h2>
+    <p id="blkErrText">Entry allowed via referral link only.</p>
+    <p class="hint">Use: <b>https://t.me/PBTESTING2BOT/app?startapp=REF_ID</b></p>
+  </div>
+</div>
+
+<!-- HAMBURGER -->
+<div class="hamburger-overlay" id="hamOverlay"></div>
+<nav class="hamburger-menu" id="hamMenu">
+  <button class="hamburger-close" onclick="toggleHam()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="menu-header">
+    <div class="hm-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    <div class="tagline">Power - Play - Evolve</div>
+    <div class="hm-lang" id="langBtn"><i class="fa-solid fa-globe"></i><span id="langFlag">🇬🇧</span></div>
+  </div>
+  <a class="menu-item" href="#dash"><i class="fa-solid fa-gauge-high"></i><span data-lang="dash">Dashboard</span></a>
+  <a class="menu-item" href="ranks.html"><i class="fa-solid fa-crown"></i><span>Ranks</span></a>
+  <a class="menu-item" href="packages.html"><i class="fa-solid fa-rocket"></i><span>Packages</span></a>
+  <a class="menu-item" href="income.html"><i class="fa-solid fa-clock-rotate-left"></i><span data-lang="history">History</span></a>
+  <a class="menu-item" href="differential-roi.html"><i class="fa-solid fa-chart-simple"></i><span>Differential ROI</span></a>
+  <a class="menu-item" href="booster.html"><i class="fa-solid fa-jet-fighter"></i><span>Booster</span></a>
+  <a class="menu-item" href="airdrop.html"><i class="fa-solid fa-gift"></i><span>Airdrop Vault</span></a>
+  <a class="menu-item" href="task.html"><i class="fa-brands fa-twitter"></i><span>Tasks</span></a>
+  <a class="menu-item" href="network.html?uid=UID"><i class="fa-solid fa-sitemap"></i><span>My Team</span></a>
+  <a class="menu-item" href="deposit.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Deposits</span></a>
+  <a class="menu-item" href="withdraw.html"><i class="fa-solid fa-arrow-up-right-dots"></i><span data-lang="withdraw">Withdraw</span></a>
+  <a class="menu-item" href="leaderboard.html"><i class="fa-solid fa-ranking-star"></i><span data-lang="lb">Leaderboard</span></a>
+  <a class="menu-item" href="profile.html?uid=UID"><i class="fa-solid fa-gear"></i><span data-lang="settings">Settings</span></a>
+  <div class="menu-item logout"><i class="fa-solid fa-right-from-bracket"></i><span data-lang="logout">Logout</span></div>
+</nav>
+
+<div class="app-container" id="appWrap" style="display:none">
+  
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-hamburger" onclick="toggleHam()"><i class="fa-solid fa-bars"></i></button>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <button class="topbar-theme" id="themeToggle" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
+      <div class="topbar-user" onclick="goProfile()">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="view-stack" id="dash">
+    
+    <div class="reactor" id="reactor">
+      <div class="reactor-title"><i class="fa-solid fa-atom"></i> <span data-lang="reactor">Reactor Core</span></div>
+      <div class="reactor-core">
+        <svg class="reactor-ring-svg" viewBox="0 0 200 200">
+          <circle class="rrs-bg"/>
+          <circle class="rrs-fill" id="progressRing"/>
+        </svg>
+        <svg class="reactor-ring-glow" viewBox="0 0 200 200">
+          <circle id="progressGlow"/>
+        </svg>
+        <div class="reactor-center">
+            <div>
+            <div class="rb" id="miningBits">0</div>
+            <div class="rl" data-lang="miningBits">Bits Mining</div>
+            <div class="rm" id="miningRate">+0.0000/s</div>
+          </div>
+        </div>
+      </div>
+      <div class="reactor-status">
+        <div class="rs-line"><span class="dot"></span><b data-lang="liveMining">Live Mining Active</b></div>
+      </div>
+      <div class="claim-timer">
+        <div class="claim-timer-box"><span class="ctn" id="h">00</span><span class="ctl" data-lang="hrs">Hrs</span></div>
+        <div class="claim-timer-box"><span class="ctn" id="m">00</span><span class="ctl" data-lang="min">Min</span></div>
+        <div class="claim-timer-box"><span class="ctn" id="s">00</span><span class="ctl" data-lang="sec">Sec</span></div>
+      </div>
+    </div>
+
+    <div class="claim-panel">
+      <button class="claim-btn" id="claimBtn"><i class="fa-solid fa-bolt"></i> CLAIM BITS</button>
+      <div class="claim-info">
+        <span>Package: <b id="curPkg">$0</b></span>
+        <span>Daily: <b id="dailyAmount">0 Bits</b></span>
+      </div>
+    </div>
+
+    <div class="fusion-panel" id="fusion">
+      <div class="fusion-header"><i class="fa-solid fa-fire-flame-curved"></i> <span data-lang="fusion">Fusion Vault</span></div>
+      <div class="fusion-balance">
+        <div class="fb-l">Free Bits</div>
+        <div class="fb-v" id="fusionBalance">20</div>
+      </div>
+      <div class="fusion-timer">
+        <div class="fusion-timer-box"><span class="ftn" id="fd">00</span><span class="ftl">Days</span></div>
+        <div class="fusion-timer-box"><span class="ftn" id="fh">00</span><span class="ftl">Hrs</span></div>
+        <div class="fusion-timer-box"><span class="ftn" id="fm">00</span><span class="ftl">Min</span></div>
+        <div class="fusion-timer-box"><span class="ftn" id="fs">00</span><span class="ftl">Sec</span></div>
+      </div>
+      <div class="fusion-progress"><span>Progress</span><span id="fusionPct">0%</span></div>
+      <div class="fusion-bar"><div class="fusion-fill" id="fusionFill"></div></div>
+      <div class="fusion-status"><span class="fs-dot"></span><span id="fusionStatus">FUSION ACTIVE</span></div>
+    </div>
+
+    <div class="fusion-panel" id="airdropWidget" onclick="window.location.href='airdrop.html'" style="cursor:pointer">
+      <div class="fusion-header" style="background:linear-gradient(90deg,var(--orange),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent"><i class="fa-solid fa-gift" style="-webkit-text-fill-color:var(--gold)"></i> FREE AIRDROP VAULT</div>
+      <div class="fusion-balance">
+        <div class="fb-l" style="font-size:11px">Free Bits</div>
+        <div class="fb-v" id="freeBitsWidget">0</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px">
+        <span>Utility: <b id="freeUtilityWidget" style="color:var(--gold)">$0.00</b></span>
+        <span>Validity: <b id="freeDaysWidget">0d</b></span>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text3)">Total Earned: <b id="freeTotalWidget" style="color:var(--green)">0</b> Bits</div>
+      <div style="margin-top:8px;text-align:center"><span style="display:inline-block;padding:6px 16px;border-radius:999px;background:linear-gradient(135deg,var(--orange),var(--gold));color:#000;font-size:11px;font-weight:800;letter-spacing:1px">OPEN VAULT <i class="fa-solid fa-arrow-right"></i></span></div>
+    </div>
+
+    <div class="stat-grid" id="booster">
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-bolt"></i></div><div class="sc-label" data-lang="activation">Activation</div><div class="sc-value" id="activationEnergy">$0</div><div class="sc-bar"><div class="sc-fill" id="activationBar"></div></div></div>
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-jet-fighter"></i></div><div class="sc-label" data-lang="booster">Booster</div><div class="sc-value" id="boosterLevel">Lv.1</div><div class="sc-bar"><div class="sc-fill" id="boosterBar"></div></div></div>
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-layer-group"></i></div><div class="sc-label">User Level</div><div class="sc-value" id="userLevelDisplay">L1</div><div class="sc-bar"><div class="sc-fill" id="levelBar"></div></div></div>
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-chart-line"></i></div><div class="sc-label">Cap</div><div class="sc-value" id="rewardProgress">0%</div><div class="sc-bar"><div class="sc-fill" id="rewardBar"></div></div></div>
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-wallet"></i></div><div class="sc-label" data-lang="totalWD">Withdrawable</div><div class="sc-value" id="withdrawableVal">0</div><div class="sc-bar"><div class="sc-fill" id="withdrawableBar"></div></div></div>
+      <div class="stat-card"><div class="sc-icon"><i class="fa-solid fa-users"></i></div><div class="sc-label">Directs</div><div class="sc-value" id="totalDirectsVal">0</div><div class="sc-sub">Active: <b id="activeDirectsVal">0</b></div></div>
+    </div>
+
+    <div class="booster-progress-card" id="boosterProgress" style="display:none">
+      <div class="booster-progress-header"><i class="fa-solid fa-jet-fighter"></i> Booster Status</div>
+      <div class="bp-row"><span class="bp-label">Active Booster</span><span class="bp-value" id="bpName">None</span></div>
+      <div class="bp-row"><span class="bp-label">Extra ROI</span><span class="bp-value cyan" id="bpExtraRoi">+0.00%</span></div>
+      <div class="bp-row"><span class="bp-label">Time Remaining</span><span class="bp-value gold" id="bpRemain">--</span></div>
+      <div class="bp-row"><span class="bp-label">Next Target</span><span class="bp-value" id="bpNext">Ignition (10)</span></div>
+      <div class="bp-progress-bar"><div class="bp-progress-fill" id="bpFill"></div></div>
+      <div class="bp-progress-label"><span id="bpProgressCur">0</span> / <span id="bpProgressTgt">10</span> directs</div>
+    </div>
+
+    <div class="tier-card">
+      <div class="tier-header"><i class="fa-solid fa-layer-group"></i> <span data-lang="pkgTier">Package Tier</span></div>
+      <div class="tier-body">
+        <div class="tier-row"><span class="tr-l" data-lang="currentTier">Current Tier</span><span class="tr-v" id="tierName">None</span></div>
+        <div class="tier-row"><span class="tr-l" data-lang="dailyCap">Daily Cap</span><span class="tr-v" id="dailyCap">0 Bits</span></div>
+        <div class="tier-row"><span class="tr-l" data-lang="activation">Activation</span><span class="tr-v" id="tierAct">$0</span></div>
+        <div class="tier-row"><span class="tr-l" data-lang="speed">Speed</span><span class="tr-v" id="tierSpeed">0%</span></div>
+        <div class="tier-row"><span class="tr-l">Cap Progress</span><span class="tr-v" id="tierCapPct">0%</span></div>
+        <div class="tier-row"><span class="tr-l">Earned</span><span class="tr-v" id="tierCapEarned">0 Bits</span></div>
+      </div>
+      <div class="tier-progress"><div class="tier-progress-fill" id="tierCapBar"></div></div>
+      <a href="packages.html" class="tier-cta" id="tierCta"><i class="fa-solid fa-rocket"></i> <span data-lang="buyPkg">Buy a Package</span></a>
+    </div>
+
+    <div class="ref-card">
+      <div class="ref-header"><i class="fa-solid fa-link"></i> <span data-lang="refLink">Referral Link</span></div>
+      <div class="ref-box">
+        <code id="refLink">Loading...</code>
+        <button onclick="copyRefLink()"><i class="fa-regular fa-copy"></i> <span data-lang="copy">Copy</span></button>
+      </div>
+    </div>
+
+    <div class="follow-card">
+      <div class="follow-header"><i class="fa-brands fa-twitter"></i> <span data-lang="follow">Claim Free Bits</span></div>
+      <div class="follow-body" id="followBody">
+        <div class="follow-row"><span>Follow <b>@playbits</b> on X</span><span class="follow-check" id="followCheck1"><i class="fa-regular fa-circle"></i></span></div>
+        <div class="follow-row"><span>Join <b>PlayBits</b> Telegram</span><span class="follow-check" id="followCheck2"><i class="fa-regular fa-circle"></i></span></div>
+        <div class="follow-row"><span>Subscribe on <b>YouTube</b></span><span class="follow-check" id="followCheck3"><i class="fa-regular fa-circle"></i></span></div>
+        <a href="task.html" class="follow-claim-btn" id="followClaimBtn"><i class="fa-solid fa-gift"></i> <span data-lang="claimFree">Claim 10 Free Bits</span></a>
+        <div class="follow-info"><i class="fa-regular fa-clock"></i> <span data-lang="followInfo">7-day lock • 45-day validity • ROI per package</span></div>
+      </div>
+    </div>
+
+    <div class="airdrop-card" id="airdrop">
+      <div class="airdrop-header"><i class="fa-solid fa-gift"></i> <span data-lang="airdrop">Airdrop Network</span></div>
+      <div class="airdrop-current-level" id="adCurrentLevel">Your Level: <b>L1</b></div>
+      <div class="airdrop-tiers" id="airdropTiers"></div>
+      <div class="airdrop-stats"><span>Total Users: <b id="adTotal">0</b></span><span>Free Bits Earned: <b id="adEarned">0</b></span></div>
+    </div>
+
+    <div class="orbit-card" id="orbit">
+      <div class="orbit-header"><i class="fa-solid fa-satellite-dish"></i> <span data-lang="orbit">Orbit Network</span></div>
+      <div class="airdrop-current-level" id="orbitCurrentLevel" style="border-color:rgba(168,85,247,.08);background:rgba(168,85,247,.04)">Your Orbit: <b style="color:var(--purple)">O1</b></div>
+      <div class="orbit-tiers" id="orbitTiers"></div>
+      <div class="orbit-stats"><span>Total Orbits: <b id="orbTotal">0</b></span><span>Orbit Earnings: <b id="orbEarned">0</b></span></div>
+    </div>
+
+    <div class="feed-card">
+      <div class="feed-header"><i class="fa-solid fa-rss"></i> <span data-lang="liveFeed">Live Feed</span></div>
+      <div class="feed-list" id="feedList">
+        <div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Loading activity...</div>
+      </div>
+    </div>
+
+    <div class="lb-card" id="lb">
+      <div class="lb-header"><i class="fa-solid fa-trophy"></i> <span data-lang="topMiners">Top Miners</span></div>
+      <div class="lb-list" id="lbList">
+        <div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Loading leaderboard...</div>
+      </div>
+      <a href="leaderboard.html" class="lb-view-all"><i class="fa-solid fa-eye"></i> <span data-lang="viewAll">View All</span></a>
+    </div>
+
+  </div>
+
+  <nav class="bottom-dock">
+    <a class="dock-item active" href="#dash"><i class="fa-solid fa-gauge-high"></i><span>Home</span></a>
+    <a class="dock-item" href="network.html?uid=UID"><i class="fa-solid fa-sitemap"></i><span>My Team</span></a>
+    <a class="dock-item" href="income.html"><i class="fa-solid fa-clock-rotate-left"></i><span>Income</span></a>
+    <a class="dock-item" href="deposit.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg><span>Deposits</span></a>
+    <a class="dock-item" href="withdraw.html"><i class="fa-solid fa-arrow-up-right-dots"></i><span>Withdrawal</span></a>
+  </nav>
+</div>
+
+<script>
+try{
+  var $c=localStorage.getItem("pb_cache");
+  if($c){
+    var $d=JSON.parse($c);
+    if($d.u){
+      document.getElementById("ssBlocked").classList.remove("s");
+      document.getElementById("appWrap").style.display="block";
+      window.__pb_cu=$d.u;window.__pb_cr=1;
+    }
+  }
+}catch(e){}
+</script>
+<script src="api.js"></script>
+<script type="module">
+const TG=window.Telegram?.WebApp;if(TG){TG.ready();TG.expand()}
+
+const TIERS=[
+  {min:10,max:49,roi:.5,cap:2,label:"Spark"},{min:50,max:199,roi:.8,cap:2.25,label:"Ignite"},
+  {min:200,max:499,roi:1,cap:2.5,label:"Nitro"},{min:500,max:999,roi:1.25,cap:3,label:"Apex"}
+];
+const RANKS=[
+  {n:"Spark",m:0,x:20000},{n:"Flame",m:20000,x:100000},
+  {n:"Blaze",m:100000,x:300000},{n:"Inferno",m:300000,x:1e6},
+  {n:"Nova",m:1e6,x:null}
+];
+const LEVELS = [
+  {lvl:1,label:"L1",cond:"No Condition",directs:0,airdropBits:5},
+  {lvl:2,label:"L2",cond:"3 Directs",directs:3,airdropBits:3},
+  {lvl:3,label:"L3",cond:"4 Directs",directs:4,airdropBits:2},
+];
+const ORBIT_LEVELS = [
+  {lvl:1,label:"O1",cond:"No Condition",directs:0,selfPkg:0,orbitPct:8},
+  {lvl:2,label:"O2",cond:"3 Directs",directs:3,selfPkg:0,orbitPct:4},
+  {lvl:3,label:"O3",cond:"4 Direct + Self $50",directs:4,selfPkg:50,orbitPct:3},
+  {lvl:4,label:"O4",cond:"5 Direct + Self $200",directs:5,selfPkg:200,orbitPct:2},
+  {lvl:5,label:"O5",cond:"5 Direct + Self $500",directs:5,selfPkg:500,orbitPct:2},
+];
+
+const BACKEND_URL = "https://playbits-backend-132h.onrender.com";
+const S={uid:null,user:null,ref:null,today:ud(),canClaim:false,miningDisplay:0,miningRate:0,boosterExtraROI:0,boosterStatus:"locked",boosterName:"None",boosterExpiresAt:0};
+
+const LANGS={
+  en:{name:"English",native:"English",flag:"🇬🇧",t:{lang:"Language",theme:"Theme",dash:"Dashboard",reactor:"Reactor",fusion:"Fusion Vault",airdrop:"Airdrop",orbit:"Orbit",booster:"Booster",withdraw:"Withdraw",history:"History",lb:"Leaderboard",settings:"Settings",logout:"Logout",refLink:"Referral Link",copy:"Copy",directs:"Directs",bonus:"Bonus",topMiners:"Top Miners",liveFeed:"Live Feed",noActivity:"No activity yet",noJoins:"No new joins yet",joined:"joined PlayBits",pkgTier:"Package Tier",currentTier:"Current Tier",dailyCap:"Daily Cap",activation:"Activation",speed:"Speed",none:"None",bits:"Bits",daily:"Daily",claim:"CLAIM",claimed:"CLAIMED",activatePkg:"Activate a package first",liveMining:"Live Mining Active",claimIn:"Claim Available In",hrs:"Hrs",min:"Min",sec:"Sec",loading:"Loading Ecosystem...",powered:"Power - Play - Evolve",miningBits:"Bits Mining",totalWD:"Withdrawable",follow:"Claim Free Bits",claimFree:"Claim 10 Free Bits",followInfo:"7-day lock • 45-day validity • ROI per package",buyPkg:"Buy a Package",viewAll:"View All"}},
+  hi:{name:"Hindi",native:"हिन्दी",flag:"🇮🇳",t:{lang:"भाषा",theme:"थीम",dash:"डैशबोर्ड",reactor:"रिएक्टर",fusion:"फ्यूज़न वॉल्ट",airdrop:"एयरड्रॉप",orbit:"ऑर्बिट",booster:"बूस्टर",withdraw:"निकासी",history:"हिस्ट्री",lb:"लीडरबोर्ड",settings:"सेटिंग्स",logout:"लॉगआउट",refLink:"रेफरल लिंक",copy:"कॉपी",directs:"डायरेक्ट",bonus:"बोनस",topMiners:"टॉप माइनर्स",liveFeed:"लाइव फीड",noActivity:"अभी तक कोई गतिविधि नहीं",noJoins:"अभी तक कोई नया जॉइन नहीं",joined:"PlayBits में शामिल हुए",pkgTier:"पैकेज टियर",currentTier:"मौजूदा टियर",dailyCap:"दैनिक सीमा",activation:"एक्टिवेशन",speed:"स्पीड",none:"कोई नहीं",bits:"बिट्स",daily:"दैनिक",claim:"क्लेम",claimed:"क्लेम हो गया",activatePkg:"पहले पैकेज एक्टिवेट करें",liveMining:"लाइव माइनिंग एक्टिव",claimIn:"क्लेम उपलब्ध होगा",hrs:"घंटे",min:"मिनट",sec:"सेकंड",loading:"इकोसिस्टम लोड हो रहा है...",powered:"पावर - प्ले - इवॉल्व",miningBits:"बिट्स माइनिंग",totalWD:"निकासी योग्य"}},
+  es:{name:"Spanish",native:"Español",flag:"🇪🇸",t:{lang:"Idioma",theme:"Tema",dash:"Panel",reactor:"Reactor",fusion:"Bóveda de Fusión",airdrop:"Red Airdrop",orbit:"Red Orbit",booster:"Impulsor",withdraw:"Retirar",history:"Historial",lb:"Clasificación",settings:"Ajustes",logout:"Cerrar sesión",refLink:"Enlace de Referido",copy:"Copiar",directs:"Directos",bonus:"Bono",topMiners:"Mejores Mineros",liveFeed:"Feed en Vivo",noActivity:"Sin actividad aún",noJoins:"Sin nuevas uniones",joined:"se unió a PlayBits",pkgTier:"Nivel de Paquete",currentTier:"Nivel Actual",dailyCap:"Límite Diario",activation:"Activación",speed:"Velocidad",none:"Ninguno",bits:"Bits",daily:"Diario",claim:"RECLAMAR",claimed:"RECLAMADO",activatePkg:"Activa un paquete primero",liveMining:"Minería en Vivo Activa",claimIn:"Reclamo Disponible En",hrs:"Horas",min:"Min",sec:"Seg",loading:"Cargando Ecosistema...",powered:"Poder - Jugar - Evolucionar",miningBits:"Minando Bits",totalWD:"Retirable"}},
+  fr:{name:"French",native:"Français",flag:"🇫🇷",t:{lang:"Langue",theme:"Thème",dash:"Tableau de bord",reactor:"Réacteur",fusion:"Coffre de Fusion",airdrop:"Réseau Airdrop",orbit:"Réseau Orbit",booster:"Boosteur",withdraw:"Retirer",history:"Historique",lb:"Classement",settings:"Paramètres",logout:"Déconnexion",refLink:"Lien de Parrainage",copy:"Copier",directs:"Directs",bonus:"Bonus",topMiners:"Meilleurs Mineurs",liveFeed:"Flux en Direct",noActivity:"Aucune activité",noJoins:"Aucune nouvelle inscription",joined:"a rejoint PlayBits",pkgTier:"Palier du Pack",currentTier:"Palier Actuel",dailyCap:"Plafond Quotidien",activation:"Activation",speed:"Vitesse",none:"Aucun",bits:"Bits",daily:"Quotidien",claim:"RÉCLAMER",claimed:"RÉCLAMÉ",activatePkg:"Activez d'abord un pack",liveMining:"Minage Actif en Direct",claimIn:"Réclamation Disponible Dans",hrs:"Heures",min:"Min",sec:"Sec",loading:"Chargement de l'Écosystème...",powered:"Puissance - Jouer - Évoluer",miningBits:"Minage de Bits",totalWD:"Retirable"}},
+  pt:{name:"Portuguese",native:"Português",flag:"🇵🇹",t:{lang:"Idioma",theme:"Tema",dash:"Painel",reactor:"Reator",fusion:"Cofre de Fusão",airdrop:"Rede Airdrop",orbit:"Rede Orbit",booster:"Impulsionador",withdraw:"Sacar",history:"Histórico",lb:"Classificação",settings:"Configurações",logout:"Sair",refLink:"Link de Indicação",copy:"Copiar",directs:"Diretos",bonus:"Bônus",topMiners:"Melhores Mineradores",liveFeed:"Feed ao Vivo",noActivity:"Nenhuma atividade ainda",noJoins:"Nenhuma nova entrada",joined:"entrou no PlayBits",pkgTier:"Nível do Pacote",currentTier:"Nível Atual",dailyCap:"Limite Diário",activation:"Ativação",speed:"Velocidade",none:"Nenhum",bits:"Bits",daily:"Diário",claim:"RECLAMAR",claimed:"RECLAMADO",activatePkg:"Ative um pacote primeiro",liveMining:"Mineração ao Vivo Ativa",claimIn:"Reclamação Disponível Em",hrs:"Horas",min:"Min",sec:"Seg",loading:"Carregando Ecossistema...",powered:"Poder - Jogar - Evoluir",miningBits:"Mineração de Bits",totalWD:"Sacável"}},
+  ru:{name:"Russian",native:"Русский",flag:"🇷🇺",t:{lang:"Язык",theme:"Тема",dash:"Панель",reactor:"Реактор",fusion:"Хранилище Fusion",airdrop:"Airdrop",orbit:"Orbit",booster:"Ускоритель",withdraw:"Вывод",history:"История",lb:"Таблица лидеров",settings:"Настройки",logout:"Выйти",refLink:"Реферальная ссылка",copy:"Копировать",directs:"Прямые",bonus:"Бонус",topMiners:"Лучшие майнеры",liveFeed:"Лента",noActivity:"Пока нет активности",noJoins:"Пока нет новых",joined:"присоединился к PlayBits",pkgTier:"Уровень пакета",currentTier:"Текущий уровень",dailyCap:"Дневной лимит",activation:"Активация",speed:"Скорость",none:"Нет",bits:"Биты",daily:"Ежедневно",claim:"ЗАБРАТЬ",claimed:"ЗАБРАНО",activatePkg:"Сначала активируйте пакет",liveMining:"Майнинг активен",claimIn:"Доступно через",hrs:"Час",min:"Мин",sec:"Сек",loading:"Загрузка экосистемы...",powered:"Сила - Игра - Развитие",miningBits:"Майнинг битов",totalWD:"К выводу"}},
+  zh:{name:"Chinese",native:"中文",flag:"🇨🇳",t:{lang:"语言",theme:"主题",dash:"仪表盘",reactor:"反应堆",fusion:"聚变金库",airdrop:"空投",orbit:"轨道",booster:"助推器",withdraw:"提现",history:"历史",lb:"排行榜",settings:"设置",logout:"退出",refLink:"推荐链接",copy:"复制",directs:"直属",bonus:"奖金",topMiners:"顶级矿工",liveFeed:"实时动态",noActivity:"暂无活动",noJoins:"暂无新加入",joined:"加入了PlayBits",pkgTier:"套餐等级",currentTier:"当前等级",dailyCap:"每日上限",activation:"激活",speed:"速度",none:"无",bits:"比特",daily:"每日",claim:"领取",claimed:"已领取",activatePkg:"请先激活套餐",liveMining:"挖矿已激活",claimIn:"可领取时间",hrs:"时",min:"分",sec:"秒",loading:"生态系统加载中...",powered:"力量 - 游戏 - 进化",miningBits:"比特挖矿",totalWD:"可提现"}},
+  ar:{name:"Arabic",native:"العربية",flag:"🇸🇦",t:{lang:"اللغة",theme:"المظهر",dash:"لوحة التحكم",reactor:"المفاعل",fusion:"خزنة الاندماج",airdrop:"الإسقاط الجوي",orbit:"المدار",booster:"المعزز",withdraw:"السحب",history:"السجل",lb:"المتصدرون",settings:"الإعدادات",logout:"تسجيل الخروج",refLink:"رابط الإحالة",copy:"نسخ",directs:"المباشرون",bonus:"المكافأة",topMiners:"أفضل المعدنين",liveFeed:"التغذية المباشرة",noActivity:"لا توجد نشاطات بعد",noJoins:"لا توجد انضمامات جديدة",joined:"انضم إلى PlayBits",pkgTier:"مستوى الباقة",currentTier:"المستوى الحالي",dailyCap:"الحد اليومي",activation:"التفعيل",speed:"السرعة",none:"لا يوجد",bits:"بتات",daily:"يومي",claim:"المطالبة",claimed:"تمت المطالبة",activatePkg:"قم بتفعيل باقة أولاً",liveMining:"التعدين نشط",claimIn:"المطالبة متاحة خلال",hrs:"ساعة",min:"دقيقة",sec:"ثانية",loading:"جاري تحميل النظام البيئي...",powered:"القوة - اللعب - التطور",miningBits:"تعدين البتات",totalWD:"قابل للسحب"}},
+  ja:{name:"Japanese",native:"日本語",flag:"🇯🇵",t:{lang:"言語",theme:"テーマ",dash:"ダッシュボード",reactor:"リアクター",fusion:"フュージョンボールト",airdrop:"エアドロップ",orbit:"オービット",booster:"ブースター",withdraw:"出金",history:"履歴",lb:"リーダーボード",settings:"設定",logout:"ログアウト",refLink:"紹介リンク",copy:"コピー",directs:"ダイレクト",bonus:"ボーナス",topMiners:"トップマイナー",liveFeed:"ライブフィード",noActivity:"まだアクティビティはありません",noJoins:"まだ新規参加はいません",joined:"がPlayBitsに参加しました",pkgTier:"パッケージティア",currentTier:"現在のティア",dailyCap:"デイリー上限",activation:"アクティベーション",speed:"スピード",none:"なし",bits:"ビット",daily:"毎日",claim:"受け取る",claimed:"受け取り済み",activatePkg:"最初にパッケージをアクティベートしてください",liveMining:"マイニングアクティブ",claimIn:"受け取り可能まで",hrs:"時間",min:"分",sec:"秒",loading:"エコシステムを読み込み中...",powered:"パワー - プレイ - エボルブ",miningBits:"ビットマイニング",totalWD:"出金可能"}},
+  de:{name:"German",native:"Deutsch",flag:"🇩🇪",t:{lang:"Sprache",theme:"Design",dash:"Dashboard",reactor:"Reaktor",fusion:"Fusionstruhe",airdrop:"Airdrop",orbit:"Orbit",booster:"Booster",withdraw:"Abheben",history:"Verlauf",lb:"Rangliste",settings:"Einstellungen",logout:"Abmelden",refLink:"Empfehlungslink",copy:"Kopieren",directs:"Direkte",bonus:"Bonus",topMiners:"Top Miner",liveFeed:"Live-Feed",noActivity:"Noch keine Aktivität",noJoins:"Noch keine neuen Beitritte",joined:"ist PlayBits beigetreten",pkgTier:"Paketstufe",currentTier:"Aktuelle Stufe",dailyCap:"Tageslimit",activation:"Aktivierung",speed:"Geschwindigkeit",none:"Keine",bits:"Bits",daily:"Täglich",claim:"EINFORDREN",claimed:"EINGEFORDERT",activatePkg:"Aktivieren Sie zuerst ein Paket",liveMining:"Live-Mining aktiv",claimIn:"Verfügbar in",hrs:"Std",min:"Min",sec:"Sek",loading:"Ökosystem wird geladen...",powered:"Kraft - Spielen - Entwickeln",miningBits:"Bits Mining",totalWD:"Abhebbar"}}
+};
+let __=key=>{const l=localStorage.getItem("pb_lang")||"en";return LANGS[l]?.t?.[key]||LANGS.en.t[key]||key};
+
+function ud(d){const n=d||new Date();return n.getUTCFullYear()+"-"+String(n.getUTCMonth()+1).padStart(2,"0")+"-"+String(n.getUTCDate()).padStart(2,"0")}
+
+// Toast
+function t(m){const e=document.createElement("div");e.className="toast";e.innerHTML=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+
+// Hamburger
+window.toggleHam=function(){
+  document.getElementById("hamOverlay").classList.toggle("open");
+  document.getElementById("hamMenu").classList.toggle("open")
+};
+document.getElementById("hamOverlay").addEventListener("click",toggleHam);
+// Close ham on link click
+document.querySelectorAll(".menu-item").forEach(el=>{if(el.tagName==="A")el.addEventListener("click",()=>{document.getElementById("hamOverlay").classList.remove("open");document.getElementById("hamMenu").classList.remove("open")})});
+window.goProfile=function(){const u=S.uid||"guest";window.location.href="profile.html?uid="+u};
+
+// Theme
+const body=document.body;
+const saved=localStorage.getItem("pb_theme");
+if(saved==="light"){body.classList.add("light");document.getElementById("themeToggle").innerHTML='<i class="fa-solid fa-sun"></i>'}
+window.toggleTheme=function(){
+  body.classList.toggle("light");
+  const isLight=body.classList.contains("light");
+  document.getElementById("themeToggle").innerHTML=isLight?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
+  localStorage.setItem("pb_theme",isLight?"light":"dark")
+};
+
+window.switchLang=function(l){localStorage.setItem("pb_lang",l);location.reload()};
+(function initLang(){const btn=document.getElementById("langBtn");if(!btn)return;const cur=localStorage.getItem("pb_lang")||"en";const flag=document.getElementById("langFlag");if(flag)flag.textContent=LANGS[cur].flag;const popup=document.createElement("div");popup.className="lang-popup";Object.keys(LANGS).forEach(k=>{const o=document.createElement("div");o.className="lang-opt"+(k===cur?" active":"");o.textContent=LANGS[k].flag+" "+LANGS[k].native;o.onclick=()=>switchLang(k);popup.appendChild(o)});btn.appendChild(popup);btn.onclick=function(e){e.stopPropagation();popup.classList.toggle("show")};document.addEventListener("click",function(){popup.classList.remove("show")});popup.onclick=function(e){e.stopPropagation()}})();
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const key=el.getAttribute("data-lang");if(key)el.textContent=__(key)})}
+
+function calcPkg(user){
+  const amt=user.packageAmount||0;
+  const roi=user.packageROI||0;
+  const capMult=user.packageCapMultiplier||0;
+  const maxEarn=user.packageMaxEarnings||0;
+  const earned=user.packageEarned||0;
+  const status=user.packageStatus||"none";
+  const boostRoi = Number(S.boosterExtraROI||0);
+  const daily=amt*(roi+boostRoi);
+  const cap=amt*capMult*100;
+  const exhausted=status==="exhausted"||(cap>0&&earned>=cap);
+  return{
+    amount:amt,roi,boostRoi,capMult,maxEarnings:cap,earned,status,
+    daily,round:Math.round(daily*100)/100,exhausted,
+    w:amt
+  }
+}
+function rankInfo(te){
+  let c=RANKS[0];
+  for(const r of RANKS){if(te>=r.m)c=r}
+  if(!c.x)return{n:c.n,p:100};
+  return{n:c.n,p:Math.round(Math.max(0,Math.min(100,(te-c.m)/(c.x-c.m)*100)))}
+}
+function calcUserLevel(u){
+  const dc=u.totalDirects||0;
+  let lvl=0;
+  for(let i=LEVELS.length-1;i>=0;i--){
+    if(dc>=LEVELS[i].directs){lvl=i;break}
+  }
+  return lvl;
+}
+function calcOrbitLevel(u){
+  const dc=u.totalDirects||0,sp=u.packageAmount||u.activationUSDT||0;
+  let lvl=0;
+  for(let i=ORBIT_LEVELS.length-1;i>=0;i--){
+    const L=ORBIT_LEVELS[i];
+    if(dc>=L.directs&&sp>=L.selfPkg){lvl=i;break}
+  }
+  return lvl;
+}
+function showBlocked(t,t2){
+  document.getElementById("blkLoader").style.display="none";
+  const e=document.getElementById("blkError");e.style.display="";
+  document.getElementById("blkErrTitle").textContent=t;
+  document.getElementById("blkErrText").textContent=t2;
+  document.getElementById("ssBlocked").classList.add("s");
+  document.getElementById("appWrap").style.display="none"
+}
+function showApp(){
+  document.getElementById("ssBlocked").classList.remove("s");
+  document.getElementById("appWrap").style.display="block"
+}
+
+// MINING
+function startMining(){
+  if(!S.user)return;
+  const pkg=calcPkg(S.user);
+  S.miningRate=pkg.round/86400;
+  S.miningDisplay=S.user.withdrawableBits||0;
+  const el=document.getElementById("miningBits");
+  const mr=document.getElementById("miningRate");
+  setInterval(()=>{
+    if(!S.user)return;
+    S.miningDisplay+=S.miningRate;
+    if(el)el.textContent=Math.floor(S.miningDisplay).toLocaleString();
+    if(mr)mr.textContent="+"+S.miningRate.toFixed(4)+"/s"
+  },1000)
+}
+
+// CLAIM TIMER (24h cooldown)
+function startClaimTimer(){
+  setInterval(()=>{
+    if(!S.user)return;
+    const lastAt=Number(S.user.lastClaimAt)||0;
+    const claimed=lastAt>0&&(Date.now()-lastAt)<86400000;
+    // Countdown to 24h from last claim
+    const rem=Math.max(0,86400000-(Date.now()-lastAt));
+    const hh=Math.floor(rem/3600000),mm=Math.floor(rem%3600000/60000),ss=Math.floor(rem%60000/1000);
+    ["h","m","s"].forEach((id,i)=>{
+      const el=document.getElementById(id);
+      if(el)el.textContent=[String(hh).padStart(2,"0"),String(mm).padStart(2,"0"),String(ss).padStart(2,"0")][i]
+    });
+    const pr=document.getElementById("progressRing");const pg=document.getElementById("progressGlow");
+    if(pr){const pct=claimed?0:Math.max(0,Math.min(1,rem/86400000));const off=553*pct;pr.style.strokeDashoffset=off;if(pg)pg.style.strokeDashoffset=off}
+  },1000)
+}
+
+// LIVE FEED
+async function loadFeed(){
+  const el=document.getElementById("feedList");if(!el)return;
+  const update=async()=>{
+    try{
+      const r=await API.getRecentUsers(5);
+      const users=r?.users||[];
+      if(!users.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No activity yet</div>';return}
+      let html="";
+      users.forEach(u=>{
+        if(u.telegramId===S.uid)return;
+        const ago=timeAgo(u.createdAt);
+        const name=u.firstName||"Player_"+String(u.telegramId).slice(-4);
+        html+='<div class="feed-item"><div class="fi-icon join"><i class="fa-solid fa-user-plus"></i></div><span class="fi-text"><b>'+name+'</b> joined PlayBits</span><span class="fi-time">'+ago+'</span></div>'
+      });
+      el.innerHTML=html||'<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No new joins yet</div>'
+    }catch(e){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'}
+  };
+  await update();
+  setInterval(update,30000)
+}
+function timeAgo(ts){
+  if(!ts)return"now";
+  const t=typeof ts==="number"?ts:Number(ts);
+  if(!t||t<1)return"now";
+  const s=Math.floor((Date.now()-t)/1000);
+  if(s<5)return"just now";
+  if(s<60)return s+"s ago";
+  if(s<3600)return Math.floor(s/60)+"m ago";
+  if(s<86400)return Math.floor(s/3600)+"h ago";
+  const d=Math.floor(s/86400);
+  return d+"d ago"
+}
+
+// LEADERBOARD
+async function loadLeaderboard(){
+  const el=document.getElementById("lbList");if(!el)return;
+  try{
+    const r=await API.getLeaderboard(3);
+    const l=r?.leaderboard||[];
+    if(!l.length){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">No miners yet</div>';return}
+    let html="";
+    l.forEach((d2,i)=>{const n=d2.firstName||"Player";html+='<div class="lb-item"><span class="lb-rank">#'+(i+1)+'</span><div class="lb-avatar">'+(n.slice(0,2).toUpperCase())+'</div><span class="lb-name">'+n+'</span><span class="lb-bits">'+(d2.totalEarned||0).toLocaleString()+'</span></div>'});
+    el.innerHTML=html
+  }catch(e){el.innerHTML='<div style="text-align:center;padding:12px;font-size:11px;color:var(--text3)">Could not load</div>'}
+}
+
+// AIRDROP + ORBIT NETWORK
+function renderLevelCards(d){
+  const ulvl=d.userLevel||0, olvl=d.orbitLevel||0;
+  // Airdrop
+  const atEl=document.getElementById("airdropTiers");
+  if(atEl){
+    let ah="";
+    LEVELS.forEach((L,i)=>{
+      const unlocked=i<=ulvl;
+      ah+='<div class="airdrop-tier">'
+        +'<span class="at-lvl">'+L.label+'</span>'
+        +'<span class="at-bits">'+(unlocked?'<b>'+L.airdropBits+' Bits</b>/ref':'<span style="color:var(--text3)">'+L.cond+'</span>')+'</span>'
+        +'<span class="at-users">'+(d.adCounts[i]||0)+' users</span>'
+        +'<span class="at-status">'+(unlocked?'<i class="fa-solid fa-circle-check" style="color:var(--green)"></i>':'<i class="fa-solid fa-lock" style="color:var(--text3)"></i>')+'</span>'
+        +'</div>';
+    });
+    atEl.innerHTML=ah;
+  }
+  // Orbit
+  const otEl=document.getElementById("orbitTiers");
+  if(otEl){
+    let oh="";
+    ORBIT_LEVELS.forEach((L,i)=>{
+      const unlocked=i<=olvl;
+      const earn=Math.floor((d.orbEarnings[i]||0)*L.orbitPct/100);
+      oh+='<div class="orbit-tier">'
+        +'<span class="ot-lvl">'+L.label+'</span>'
+        +'<span class="ot-pct">'+(unlocked?'<b>'+L.orbitPct+'%</b>':'<span style="color:var(--text3)">'+L.orbitPct+'%</span>')+'</span>'
+        +'<span class="ot-earn">'+(unlocked?earn.toLocaleString()+' B':'<span style="color:var(--text3)">---</span>')+'</span>'
+        +'<span class="ot-users">'+(d.orbCounts[i]||0)+' users</span>'
+        +'<span class="ot-status">'+(unlocked?'<i class="fa-solid fa-circle-check" style="color:var(--purple)"></i>':'<i class="fa-solid fa-lock" style="color:var(--text3)"></i>')+'</span>'
+        +'</div>';
+    });
+    otEl.innerHTML=oh;
+  }
+  document.getElementById("adTotal").textContent=d.adTotal;
+  document.getElementById("adEarned").textContent=(d.adEarned||0).toLocaleString();
+  document.getElementById("activeDirectsVal").textContent=d.activeCount;
+  document.getElementById("orbTotal").textContent=d.orbTotal;
+  let oe=0;
+  for(let i=0;i<ORBIT_LEVELS.length;i++)oe+=Math.floor((d.orbEarnings[i]||0)*(ORBIT_LEVELS[i].orbitPct/100));
+  document.getElementById("orbEarned").textContent=oe.toLocaleString();
+  document.getElementById("adCurrentLevel").innerHTML='Your Level: <b>'+LEVELS[ulvl].label+'</b>';
+  const ocl=document.getElementById("orbitCurrentLevel");
+  if(ocl)ocl.innerHTML='Your Orbit: <b style="color:var(--purple)">'+ORBIT_LEVELS[olvl].label+'</b>';
+}
+async function loadAirdropWidget(){
+  try{
+    const r=await API.getAirdrop(S.uid);
+    if(!r||!r.success)return;
+    const bal=r.expired?0:(r.balance||0);
+    document.getElementById("freeBitsWidget").textContent=Math.floor(bal).toLocaleString();
+    document.getElementById("freeUtilityWidget").textContent="$"+(bal/100).toFixed(2);
+    document.getElementById("freeDaysWidget").textContent=(r.daysLeft||0)+"d";
+    document.getElementById("freeTotalWidget").textContent=Math.floor(r.totalEarned||0).toLocaleString();
+  }catch(e){}
+}
+
+async function loadNetworkStats(){
+  try{
+    const cacheKey = "pb_netstats_" + S.uid;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      const d = JSON.parse(cached);
+      d.userLevel=calcUserLevel(S.user||{});
+      renderLevelCards(d);
+      if (Date.now() - d.ts < 120000) return;
+    }
+    const allLevels=[];
+    const earningsByLevel=[];
+    let adTotal=0;
+
+    for(let depth=1;depth<=5;depth++){
+      const netRes=await API.getNetwork(S.uid,depth)||{};
+      const users=netRes.members||[];
+      allLevels.push(users);
+      const earn=users.reduce((s,u)=>s+(u.totalEarned||0),0);
+      earningsByLevel.push(earn);
+      adTotal+=users.length;
+    }
+
+    const level1=allLevels[0]||[];
+    const activeCount=level1.filter(u=>u.isActivated10||(u.activationUSDT||0)>=10).length;
+
+    const ulvl=calcUserLevel(S.user||{}), olvl=calcOrbitLevel(S.user||{});
+    let adEarned=0;
+    for(let i=0;i<LEVELS.length;i++){
+      if(i<=ulvl)adEarned+=(allLevels[i]?.length||0)*LEVELS[i].airdropBits;
+    }
+    const orbEarnArr=ORBIT_LEVELS.map((_,i)=>Math.floor((earningsByLevel[i]||0)*ORBIT_LEVELS[i].orbitPct/100));
+    const oeTotal=orbEarnArr.reduce((s,v)=>s+v,0);
+
+    if(S.user && adEarned>0 && S.user.lastAirdropDate!==S.today){
+      try{
+        await API.addIncome({userId:S.uid,amount:adEarned,description:"Level airdrop",type:"airdrop",createdAt:Date.now()});
+        S.user.withdrawableBits=(S.user.withdrawableBits||0)+adEarned;
+        S.user.bits=(S.user.bits||0)+adEarned;
+        S.user.totalEarned=(S.user.totalEarned||0)+adEarned;
+        S.user.lastAirdropDate=S.today;
+        setUI(S.user);
+      }catch(e){console.warn("Airdrop credit failed:",e)}
+    }
+
+    const data={
+      adTotal,adEarned,activeCount,orbTotal:adTotal,
+      adCounts:LEVELS.map((_,i)=>allLevels[i]?.length||0),
+      orbCounts:ORBIT_LEVELS.map((_,i)=>allLevels[i]?.length||0),
+      orbEarnings:earningsByLevel,ts:Date.now(),
+      userLevel:ulvl,orbitLevel:olvl,orbEarnedTotal:oeTotal
+    };
+    try{sessionStorage.setItem(cacheKey,JSON.stringify(data))}catch(e){}
+    renderLevelCards(data);
+  }catch(e){console.error("Network stats error:",e)}
+}
+
+// REFERRAL COPY
+window.copyRefLink=function(){
+  const el=document.getElementById("refLink");
+  if(el){navigator.clipboard.writeText(el.textContent);t("Referral link copied")}
+};
+
+function setUI(u){
+  const total=(u.withdrawableBits||0)+(u.unlockingBits||0)+(u.lockedBits||0);
+  const e=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=typeof v=="number"?v.toLocaleString():v};
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.style.width=v};
+  const tu=window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const dn=(tu?.username||tu?.first_name||u.firstName||"Player");
+  document.getElementById("avatar").textContent=dn.slice(0,2).toUpperCase();
+  const pkg=calcPkg(u);
+  const isExhausted=pkg.exhausted||pkg.status==="exhausted";
+  e("curPkg",isExhausted?"Exhausted":"$"+pkg.w);
+  e("dailyAmount",pkg.round>0?pkg.round+" Bits":"0 Bits");
+  e("activationEnergy","$"+pkg.w);
+  s("activationBar",Math.min(100,(pkg.w/1000)*100)+"%");
+  const bLabel=S.boosterStatus==="active"?(S.boosterName+" +"+Number(S.boosterExtraROI||0)+"%"):(S.boosterStatus==="expired"?"Expired":"Locked");
+  e("boosterLevel",bLabel);
+  const bp=S.boosterStatus==="active"?100:0;
+  s("boosterBar",bp+"%");
+  const ulIdx=calcUserLevel(u);
+  e("userLevelDisplay",LEVELS[ulIdx].label);
+  s("levelBar",((ulIdx+1)/LEVELS.length*100)+"%");
+  const cpPct=pkg.maxEarnings>0?Math.min(100,Math.round((pkg.earned/pkg.maxEarnings)*100)):0;
+  e("rewardProgress",cpPct+"%");
+  s("rewardBar",cpPct+"%");
+  e("fusionBalance",Math.min(10,(u.unlockedFromSignup||0)+(u.unlockingBits||0))+(u.followBits||0));
+  updateFusion(u);
+  if(u.followClaimed){
+    ["followCheck1","followCheck2","followCheck3"].forEach(id=>{
+      const el=document.getElementById(id);if(el){el.innerHTML='<i class="fa-regular fa-circle-check"></i>';el.className='follow-check done'}
+    })
+  }
+  e("withdrawableVal",(u.withdrawableBits||0).toLocaleString());
+  s("withdrawableBar",Math.min(100,((u.withdrawableBits||0)/1e6)*100)+"%");
+  const tierLabel=pkg.exhausted?"Exhausted":(pkg.w>0?"$"+pkg.w+" Pkg":"None");
+  e("tierName",tierLabel);
+  e("dailyCap",pkg.roi>0?(pkg.roi+pkg.boostRoi).toFixed(2)+"% ROI ("+pkg.round+" Bits)":"0 Bits");
+  e("tierAct","$"+pkg.w);
+  e("tierSpeed",pkg.roi+"%");
+  const tcp=pkg.maxEarnings>0?Math.min(100,(pkg.earned/pkg.maxEarnings)*100):0;
+  e("tierCapPct",tcp.toFixed(0)+"%");
+  e("tierCapEarned",pkg.earned.toFixed(2)+" / "+pkg.maxEarnings.toFixed(0));
+  const cb=document.getElementById("tierCapBar");if(cb)cb.style.width=tcp+"%";
+  const cta=document.getElementById("tierCta");if(cta)cta.style.display=(pkg.w<=0||pkg.exhausted)?"block":"none";
+  e("totalDirectsVal",u.totalDirects||0);
+  e("activeDirectsVal",u.activeDirects||0);
+  document.getElementById("refLink").textContent="https://t.me/PBTESTING2BOT/app?startapp="+S.uid;
+  updateBoosterUI();
+}
+
+async function refreshBooster(){
+  if(!S.uid) return;
+  try{
+    const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),10000);
+    const r=await fetch(BACKEND_URL+"/api/booster/"+encodeURIComponent(S.uid),{signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok) return;
+    const d=await r.json();
+    if(!d||!d.success) return;
+    S.boosterExtraROI=Number(d.currentBooster?.extraRoi||0);
+    S.boosterStatus=d.boosterStatus||"locked";
+    S.boosterName=d.currentBooster?.name||"None";
+    S.boosterExpiresAt=Number(d.currentBooster?.expiresAt||0);
+    S.boosterRemainingMs=Number(d.remainingMs||0);
+    S.boosterNext=d.nextBooster||null;
+    S.boosterProgress=d.progress||{current:0,target:10,pct:0};
+    S.boosterActiveDirects=d.activeDirectCount||0;
+    if(S.user){
+      S.user.boosterExtraROI=S.boosterExtraROI;
+      S.user.boosterStatus=S.boosterStatus;
+      S.user.boosterName=S.boosterName;
+      S.user.boosterExpiresAt=S.boosterExpiresAt;
+      S.user.activeDirects=d.activeDirectCount||S.user.activeDirects||0;
+      setUI(S.user);
+    }
+  }catch(e){console.warn("Booster refresh failed",e)}
+}
+
+function updateBoosterUI(){
+  const el=document.getElementById("boosterProgress");
+  if(!el)return;
+  const isActive=S.boosterStatus==="active";
+  const hasNext=S.boosterNext||(S.boosterProgress?.current>0);
+  el.style.display=(isActive||hasNext)?"block":"none";
+  document.getElementById("bpName").textContent=S.boosterName||"None";
+  document.getElementById("bpExtraRoi").textContent="+"+Number(S.boosterExtraROI||0).toFixed(2)+"%";
+  const remain=S.boosterRemainingMs||0;
+  if(isActive&&remain>0){
+    const d=Math.floor(remain/86400000),h=Math.floor((remain%86400000)/3600000);
+    document.getElementById("bpRemain").textContent=d+"d "+h+"h";
+  }else{
+    document.getElementById("bpRemain").textContent=isActive?"Expiring...":"--";
+  }
+  const nxt=S.boosterNext;
+  document.getElementById("bpNext").textContent=nxt?nxt.name+" ("+nxt.targetDirects+" direct)":"Max Level";
+  document.getElementById("bpProgressCur").textContent=S.boosterProgress?.current||0;
+  document.getElementById("bpProgressTgt").textContent=S.boosterProgress?.target||10;
+  document.getElementById("bpFill").style.width=(S.boosterProgress?.pct||0)+"%";
+}
+
+// Booster countdown timer (updates remaining every 10s)
+function startBoosterTimer(){
+  setInterval(()=>{
+    if(S.boosterStatus==="active"&&S.boosterExpiresAt>0){
+      S.boosterRemainingMs=Math.max(0,S.boosterExpiresAt-Date.now());
+      if(S.boosterRemainingMs<=0){
+        S.boosterStatus="expired";
+        S.boosterExtraROI=0;
+        if(S.user){S.user.boosterStatus="expired";S.user.boosterExtraROI=0;setUI(S.user)}
+      }
+    }
+    updateBoosterUI();
+  },10000);
+}
+
+function updateFusion(u){
+  const ts=typeof u.createdAt==="number"?u.createdAt:Date.now();
+  const end=ts+45*24*60*60*1000;
+  const rem=Math.max(0,end-Date.now());
+  const dd=Math.floor(rem/86400000),hh=Math.floor(rem%86400000/3600000),mm=Math.floor(rem%3600000/60000),ss=Math.floor(rem%60000/1000);
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+  set("fd",String(dd).padStart(2,"0"));set("fh",String(hh).padStart(2,"0"));set("fm",String(mm).padStart(2,"0"));set("fs",String(ss).padStart(2,"0"));
+  const signupUnlocked=Math.min(10,(u.unlockedFromSignup||0)+(u.unlockingBits||0));
+  const followTotal=(u.followBits||0);
+  const totalFusion=signupUnlocked+followTotal;
+  const maxFusion=10+(u.followClaimed?10:0);
+  const pct=Math.round((totalFusion/maxFusion)*100);
+  set("fusionPct",pct+"%");
+  const f=document.getElementById("fusionFill");if(f)f.style.width=pct+"%";
+  const st=document.getElementById("fusionStatus");if(st)st.textContent=pct>=100?"FUSION COMPLETE":"FUSION ACTIVE"
+}
+
+function drawParticles(){
+  const c=document.getElementById("ptc"),x=c.getContext("2d");let p=[];
+  const init=()=>{c.width=innerWidth;c.height=innerHeight;p=Array.from({length:30},()=>({x:Math.random()*c.width,y:Math.random()*c.height,s:Math.random()*2+1,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,o:Math.random()*.06+.02,c:Math.random()>.5?"#00e5ff":"#a855f7"}))};
+  const dr=()=>{x.clearRect(0,0,c.width,c.height);p.forEach(e=>{e.x+=e.vx;e.y+=e.vy;if(e.x<0||e.x>c.width)e.vx*=-1;if(e.y<0||e.y>c.height)e.vy*=-1;x.globalAlpha=e.o;x.fillStyle=e.c;x.fillRect(e.x,e.y,e.s,e.s)});requestAnimationFrame(dr)};
+  addEventListener("resize",init);init();dr()
+}
+
+async function ensureSeed(){}
+
+async function bootstrap(){
+  const tg=window.Telegram?.WebApp;
+  const tUser=tg?.initDataUnsafe?.user;
+  const p=new URLSearchParams(location.search);
+
+  let ref=p.get("ref")||p.get("start")||p.get("tgWebAppStartParam")||tg?.initDataUnsafe?.start_param||null;
+  console.log("🔗 URL ref:", p.get("ref")||p.get("start"), "| tgWebAppStartParam:", p.get("tgWebAppStartParam"), "| Telegram start_param:", tg?.initDataUnsafe?.start_param, "| Final:", ref);
+  if(!ref)ref="1001";
+  S.ref=ref;
+
+  function getStoredId(){
+    try{const v=localStorage.getItem("pb_uid");if(v)return v}catch(e){}
+    try{const v=sessionStorage.getItem("pb_uid");if(v)return v}catch(e){}
+    try{const m=document.cookie.match(/(?:^|;\s*)pb_uid=([^;]+)/);if(m)return m[1]}catch(e){}
+    return null
+  }
+  function setStoredId(id){
+    try{localStorage.setItem("pb_uid",id)}catch(e){}
+    try{sessionStorage.setItem("pb_uid",id)}catch(e){}
+    try{document.cookie="pb_uid="+id+";path=/;max-age=31536000"}catch(e){}
+  }
+  let uid=tUser?.id?String(tUser.id):(p.get("uid")||null);
+  if(!uid){
+    const stored=getStoredId();
+    if(stored){uid=stored}
+    else{uid="test_"+Math.floor(Math.random()*9000+1000);setStoredId(uid)}
+  }
+  S.uid=uid;
+  setStoredId(uid);
+  console.log("👤 User ID:", uid);
+  console.log("🔗 Final referral:", S.ref);
+
+  const r=await API.getUser(uid);
+  if(!r||r.error||!r.user){
+    if(String(S.ref)===uid){
+      S.ref="1001";
+      console.log("⚠️ Self-referral detected, reset to seed");
+    }
+    const firstName=(tUser?.username||tUser?.first_name)||("Player_"+uid.slice(-4));
+    const username=tUser?.username||"";
+    const signupRes=await API.signup({userId:uid,firstName,username,referredBy:String(S.ref)});
+    console.log("✅ User created with referredBy:", S.ref, signupRes);
+    if(signupRes&&signupRes.user)S.user=signupRes.user;
+    else S.user={telegramId:uid,username,firstName,referredBy:String(S.ref),bits:0,withdrawableBits:0,unlockingBits:0,lockedBits:10,unlockedFromSignup:0}
+  }else{
+    S.user=r.user;
+    S.ref=S.user.referredBy||"1001";
+    console.log("🔄 Existing user, stored referredBy:", S.user.referredBy);
+    if((S.user.activationUSDT||0)>0&&!S.user.packageAmount){
+      const a=S.user.activationUSDT;
+      let t=TIERS.find(t=>a>=t.min&&a<=t.max)||TIERS[TIERS.length-1];
+      const mf={packageAmount:a,packageROI:t.roi,packageCapMultiplier:t.cap,packageMaxEarnings:a*t.cap*100,packageEarned:0,packageStatus:"active",isActivated10:a>=10?true:(S.user.isActivated10||false)};
+      try{
+        await API.updateProfile(S.uid,mf);
+        Object.assign(S.user,mf);
+        console.log("✅ Migrated old package:",mf)
+      }catch(e){console.warn("Migration failed:",e)}
+    }
+  }
+}
+
+async function runUnlock(){
+  if(!S.user)return;
+  try{
+    const r=await API.runUnlock(S.uid);
+    if(r&&r.user)S.user=r.user;
+  }catch(e){console.warn("runUnlock failed:",e)}
+}
+
+async function checkClaim(){
+  const b=document.getElementById("claimBtn");
+  const p=calcPkg(S.user||{});
+  const exhausted=p.exhausted||p.status==="exhausted"||p.status==="none";
+  const lastAt=Number(S.user?.lastClaimAt)||0;
+  S.canClaim=lastAt===0||(Date.now()-lastAt)>=86400000;
+  if(exhausted||p.round<=0){
+    b.disabled=true;
+    b.innerHTML='<i class="fa-solid fa-circle-exclamation"></i> '+(p.status==="none"?'ACTIVATE PACKAGE FIRST':'PACKAGE EXHAUSTED');
+    S.canClaim=false;
+    return
+  }
+  b.disabled=!S.canClaim;
+  b.innerHTML=S.canClaim?'<i class="fa-solid fa-bolt"></i> CLAIM '+p.round+' BITS':'<i class="fa-regular fa-circle-check"></i> CLAIMED'
+}
+
+async function addIncomeEntry(type, amount, extra){
+  try{
+    await API.addIncome({userId:S.uid,type,amount,...extra,createdAt:Date.now()})
+  }catch(e){console.warn("Income entry failed:",e)}
+}
+
+async function doClaim(){
+  if(!S.canClaim)return;
+  S.canClaim=false;
+  const claimBtn=document.getElementById("claimBtn");
+  if(claimBtn){
+    claimBtn.disabled=true;
+    claimBtn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> CLAIMING...';
+  }
+  const p=calcPkg(S.user||{});
+  if(p.exhausted||p.round<=0){t("Package exhausted or inactive");checkClaim();return}
+  try{
+    const r=await API.claimDaily(S.uid);
+    if(r&&r.error){
+      if(r.error==="already_claimed"||r.error==="Already claimed today"||r.error==="Already claimed in last 24 hours"){S.user.lastClaimDateUTC=new Date().toISOString().split("T")[0];S.user.lastClaimAt=Date.now();setUI(S.user);checkClaim();return}
+      t(r.error);checkClaim();return
+    }
+    if(r&&r.user)S.user=r.user;
+    else{
+      S.user.withdrawableBits=(S.user.withdrawableBits||0)+p.round;
+      S.user.bits=(S.user.bits||0)+p.round;
+      S.user.totalEarned=(S.user.totalEarned||0)+p.round;
+      S.user.packageEarned=(S.user.packageEarned||0)+p.round;
+    }
+    S.user.lastClaimDateUTC=new Date().toISOString().split("T")[0];
+    S.user.lastClaimAt=Date.now();
+    setUI(S.user);checkClaim();
+    const cb2=document.getElementById("claimBtn");
+    if(cb2){cb2.disabled=true;cb2.innerHTML='<i class="fa-regular fa-circle-check"></i> CLAIMED'}
+    t("Claimed "+p.round+" bits");
+  }catch(e){
+    console.error("Claim error:",e);
+    S.canClaim=true;
+    checkClaim();
+  }
+}
+
+document.getElementById("claimBtn").addEventListener("click",doClaim);
+
+const initTimer=setTimeout(()=>showBlocked("Taking too long","Server might be sleeping. Please refresh."),20000);
+(async function(){
+  try{
+    // Restore cached session for instant UI (back-navigation)
+    if(window.__pb_cr&&window.__pb_cu){
+      S.user=window.__pb_cu;S.uid=S.user.telegramId||localStorage.getItem("pb_uid")||"";S.today=ud();
+      if(S.user){try{setUI(S.user);checkClaim();showApp();applyLang();clearTimeout(initTimer)}catch(e){}}
+    }
+
+    const wasCached=window.__pb_cr?1:0;
+    await ensureSeed();await bootstrap();
+    if(!S.user)return;
+    document.querySelectorAll("[href*='UID']").forEach(el=>{el.setAttribute("href",el.getAttribute("href").replace("UID",S.uid||"guest"))});
+    await runUnlock();
+    // Quick background refresh if restored from cache
+    if(!wasCached){await refreshBooster();setUI(S.user);await checkClaim()}
+    else{refreshBooster();checkClaim();setUI(S.user)}
+    drawParticles();
+    startMining();startClaimTimer();startBoosterTimer();
+    await Promise.allSettled([loadFeed(),loadLeaderboard(),loadNetworkStats(),loadAirdropWidget()]);
+    clearTimeout(initTimer);showApp();applyLang();
+    setInterval(()=>{refreshBooster();checkClaim()},60000)
+    try{localStorage.setItem("pb_cache",JSON.stringify({u:S.user,ts:Date.now()}));localStorage.setItem("pb_uid",S.uid)}catch(e){}
+  }catch(e){console.error(e);clearTimeout(initTimer);showBlocked("Error","Check console for details.")}
+})()
+</script>
+</body>
+</html>

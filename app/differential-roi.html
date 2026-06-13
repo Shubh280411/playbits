@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Differential ROI</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--orange:#ff9500;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--orange:#e67e22;--vt:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 80px;box-sizing:border-box;position:relative;background:var(--bg)}
+::-webkit-scrollbar{width:0}
+@keyframes ef{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.98);color:#fff;padding:12px 24px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:99999;pointer-events:none;animation:toast-up .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center;border:1px solid var(--card-border)}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+
+.card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;margin-bottom:14px}
+.card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px}
+.card-title{font:800 13px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+.hero-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:24px 18px;position:relative;overflow:hidden;margin-bottom:14px;text-align:center}
+.hero-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),var(--cyan),transparent)}
+.hero-icon{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,rgba(168,85,247,.12),rgba(0,229,255,.12));border:2px solid rgba(168,85,247,.25);display:grid;place-items:center;margin:0 auto 12px;font-size:24px;color:var(--purple)}
+.hero-title{font:800 20px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-bottom:6px}
+.hero-title span{color:var(--purple)}
+.hero-sub{font-size:13px;color:var(--text3);line-height:1.5}
+
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px 8px;text-align:center}
+.stat-card .num{font:800 16px 'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:2px}
+.stat-card .lbl{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.stat-card.gold .num{color:var(--gold)}
+.stat-card.pink .num{color:var(--pink)}
+.stat-card.green .num{color:var(--green)}
+.stat-card.purple .num{color:var(--purple)}
+
+.section-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;margin-bottom:14px}
+.section-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px}
+.section-card.purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.section-card.cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.section-card.gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.section-card.green::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.section-card.pink::before{background:linear-gradient(90deg,transparent,var(--pink),transparent)}
+.sc-title{font:800 12px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sc-title i{font-size:14px}
+.sc-title .ic-purple{color:var(--purple)}
+.sc-title .ic-cyan{color:var(--cyan)}
+.sc-title .ic-gold{color:var(--gold)}
+.sc-title .ic-green{color:var(--green)}
+.sc-title .ic-pink{color:var(--pink)}
+.sc-text{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:6px}
+
+.rank-table{width:100%;border-collapse:collapse;font-size:13px}
+.rank-table th{padding:10px 12px;background:rgba(168,85,247,.08);font:700 11px 'Orbitron',sans-serif;color:var(--purple);text-transform:uppercase;letter-spacing:1px;text-align:left;border-bottom:2px solid rgba(168,85,247,.15)}
+.rank-table td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2);font-weight:600}
+.rank-table tr:last-child td{border-bottom:none}
+.rank-table td:last-child{font:700 13px 'JetBrains Mono',monospace;color:var(--green);text-align:right}
+
+.example-box{background:rgba(0,0,0,.15);border:1px solid var(--card-border);border-radius:var(--rs);padding:14px;margin-bottom:10px}
+.example-box:last-child{margin-bottom:0}
+.eg-label{font:700 10px 'Orbitron',sans-serif;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.eg-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.02)}
+.eg-row:last-child{border-bottom:none}
+.eg-row .eg-key{color:var(--text3);font-weight:600}
+.eg-row .eg-val{font:700 14px 'JetBrains Mono',monospace;color:var(--text)}
+.eg-row .eg-val.green{color:var(--green)}
+.eg-row .eg-val.gold{color:var(--gold)}
+.eg-row .eg-val.cyan{color:var(--cyan)}
+.eg-gap{font:700 16px 'JetBrains Mono',monospace;color:var(--gold);text-align:center;padding:6px 0}
+
+.emperor-highlight{background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(168,85,247,.05));border:2px solid rgba(255,215,0,.2);border-radius:var(--rs);padding:14px;margin-top:10px}
+.emperor-highlight .eg-row .eg-key{color:var(--gold);font-weight:700}
+.emperor-highlight .eg-val{color:var(--gold)}
+
+.coming-soon{text-align:center;padding:30px 18px}
+.coming-soon i{font-size:40px;color:var(--text3);opacity:.3;margin-bottom:12px}
+.coming-soon p{font:800 16px 'Orbitron',sans-serif;color:var(--text3);letter-spacing:2px;text-transform:uppercase}
+.coming-soon span{display:block;font-size:12px;color:var(--text3);margin-top:6px;opacity:.6}
+
+.step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.step:last-child{border-bottom:none;padding-bottom:0}
+.step-num{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan));display:grid;place-items:center;font:800 13px 'Orbitron',sans-serif;color:#fff;flex-shrink:0;margin-top:2px}
+.step-content{flex:1}
+.step-content .step-title{font:700 14px 'Rajdhani',sans-serif;color:var(--text);margin-bottom:2px}
+.step-content .step-desc{font-size:12px;color:var(--text3);line-height:1.5}
+
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--card-border),transparent);margin:12px 0}
+
+.team-table{width:100%;border-collapse:collapse;font-size:12px}
+.team-table th{padding:8px 6px;background:rgba(0,229,255,.06);font:700 9px 'Orbitron',sans-serif;color:var(--cyan);text-transform:uppercase;letter-spacing:.5px;text-align:left;border-bottom:2px solid rgba(0,229,255,.1)}
+.team-table td{padding:7px 6px;border-bottom:1px solid rgba(255,255,255,.02);color:var(--text2);font-weight:500;vertical-align:middle}
+.team-table tr:last-child td{border-bottom:none}
+.team-table .tt-name{font-weight:700;color:var(--text);font-size:12px}
+.team-table .tt-rank{font-size:10px;color:var(--text3)}
+.team-table .tt-num{font:700 12px 'JetBrains Mono',monospace;color:var(--green)}
+.team-table .tt-gap{font:700 12px 'JetBrains Mono',monospace;color:var(--gold)}
+.team-table .tt-inc{font:700 12px 'JetBrains Mono',monospace;color:var(--cyan)}
+
+.rank-badge{display:inline-block;padding:1px 6px;border-radius:99px;font-size:9px;font-weight:700}.rank-badge.r1{background:rgba(150,150,182,.12);color:var(--text3)}.rank-badge.r2{background:rgba(150,150,182,.15);color:var(--text2)}.rank-badge.r3{background:rgba(0,229,255,.1);color:var(--cyan)}.rank-badge.r4{background:rgba(168,85,247,.1);color:var(--purple)}.rank-badge.r5{background:rgba(168,85,247,.15);color:var(--purple)}.rank-badge.r6{background:rgba(255,45,149,.1);color:var(--pink)}.rank-badge.r7{background:rgba(255,45,149,.15);color:var(--pink)}.rank-badge.r8{background:rgba(255,215,0,.1);color:var(--gold)}.rank-badge.r9{background:rgba(255,215,0,.15);color:var(--gold)}.rank-badge.r10{background:linear-gradient(135deg,rgba(255,215,0,.2),rgba(168,85,247,.2));color:var(--gold);border:1px solid rgba(255,215,0,.3)}
+
+.empty-state{padding:30px;text-align:center;color:var(--text3);font-size:13px}
+.empty-state i{font-size:32px;opacity:.3;margin-bottom:8px;display:block}
+
+.total-bar{background:linear-gradient(135deg,rgba(0,229,255,.05),rgba(168,85,247,.05));border:2px solid rgba(0,229,255,.15);border-radius:var(--r);padding:16px;margin-bottom:14px;text-align:center}
+.total-bar .tb-amt{font:800 24px 'JetBrains Mono',monospace;color:var(--cyan);margin-bottom:2px}
+.total-bar .tb-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;font-weight:700}
+
+.loader{text-align:center;padding:40px 0;color:var(--text3)}
+.loader i{font-size:24px;animation:spin 1s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="profileLink">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <div class="hero-icon"><i class="fa-solid fa-chart-simple"></i></div>
+    <div class="hero-title"><span>Differential</span> ROI</div>
+    <div class="hero-sub">Earn Gap-Based Leadership Income From Lower Rank Teams</div>
+  </div>
+
+  <div class="section-card purple">
+    <div class="sc-title"><i class="fa-solid fa-circle-info ic-purple"></i> What is Differential ROI Income?</div>
+    <div class="sc-text">Differential ROI is a leadership-based reward system where higher rank leaders receive additional percentage income based on the ROI gap between their rank and lower rank teams.</div>
+  </div>
+
+  <div id="liveSection">
+    <div class="loader"><i class="fa-solid fa-spinner"></i><br><span style="font-size:12px;margin-top:8px;display:block">Loading your differential data...</span></div>
+  </div>
+
+
+
+  <div class="section-card purple">
+    <div class="sc-title"><i class="fa-solid fa-table ic-purple"></i> Rank ROI Slabs</div>
+    <table class="rank-table">
+      <thead><tr><th>Rank</th><th>Commission %</th></tr></thead>
+      <tbody>
+        <tr><td>Rank 1 — Titan</td><td>15%</td></tr>
+        <tr><td>Rank 2 — Overlord</td><td>20%</td></tr>
+        <tr><td>Rank 3 — Warlord</td><td>25%</td></tr>
+        <tr><td>Rank 4 — Sentinel</td><td>30%</td></tr>
+        <tr><td>Rank 5 — Paladin</td><td>35%</td></tr>
+        <tr><td>Rank 6 — Champion</td><td>40%</td></tr>
+        <tr><td>Rank 7 — Destroyer</td><td>45%</td></tr>
+        <tr><td>Rank 8 — Legend</td><td>50%</td></tr>
+        <tr><td>Rank 9 — Mythic</td><td>55%</td></tr>
+        <tr><td>Rank 10 — Emperor</td><td>60%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <div class="section-card pink" id="emperorSection" style="display:none">
+    <div class="sc-title"><i class="fa-solid fa-crown ic-pink"></i> Emperor Benefit</div>
+    <div class="sc-text">Rank 10 — Emperor users receive an exclusive additional benefit when another Rank 10 leader exists below their network.</div>
+    <div class="emperor-highlight">
+      <div class="eg-row"><span class="eg-key"><i class="fa-solid fa-crown" style="color:var(--gold);margin-right:6px"></i>Emperor 10% Flat Override</span><span class="eg-val gold">10%</span></div>
+      <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.5">Standard gap income becomes zero when both are Rank 10. Emperor Benefit provides an additional <b style="color:var(--gold)">10% leadership differential reward</b> from qualified Rank 10 organizations.</div>
+    </div>
+  </div>
+
+    <div class="section-card" style="border-color:rgba(255,255,255,.06)">
+    <div class="sc-title"><i class="fa-solid fa-sliders"></i> Settings</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button id="diffThemeBtn" onclick="toggleDiffTheme()" style="flex:1;padding:12px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text);cursor:pointer;font:700 12px 'Orbitron',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:all .3s">
+        <i class="fa-solid" id="diffThemeIcon">&#xf185;</i> <span id="diffThemeLabel">Light</span>
+      </button>
+      <select id="diffLangSelect" onchange="setDiffLang(this.value)" style="flex:2;padding:12px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text);font:700 11px 'Rajdhani',sans-serif;cursor:pointer;letter-spacing:.5px;outline:none;appearance:none;-webkit-appearance:none">
+        <option value="en">🇬🇧 English</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="pt">🇵🇹 Português</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="de">🇩🇪 Deutsch</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;text-align:center">
+    <p style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-weight:600">Power — Play — Evolve</p>
+  </div>
+</div>
+
+<script src="api.js"></script>
+<script>
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+const savedTheme=localStorage.getItem("pb_theme");
+if(savedTheme==="light")document.body.classList.add("light");
+let uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
+if(!uid||uid==="guest"){const p=new URLSearchParams(location.search);uid=p.get("uid")||""}
+try{
+  const tg=window.Telegram?.WebApp;
+  const tu=tg?.initDataUnsafe?.user;
+  document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase();
+}catch(e){}
+(function(){const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}})();
+
+const API_BASE = "https://playbits-backend-132h.onrender.com";
+
+function showToast(m){
+  const e=document.createElement("div");e.className="toast";e.textContent=m;
+  document.body.appendChild(e);setTimeout(()=>e.remove(),2500);
+}
+
+function rankBadgeClass(level){
+  return 'rank-badge r'+Math.min(Math.max(level,1),10);
+}
+
+async function loadDifferential(){
+  if(!uid){document.getElementById("liveSection").innerHTML='<div class="empty-state"><i class="fa-solid fa-user-slash"></i>Please log in to view your differential ROI</div>';return}
+  const ls=document.getElementById("liveSection");
+  try{
+    const r=await fetch(API_BASE+"/api/differential-roi/"+uid);
+    const d=await r.json();
+    if(!d.success){ls.innerHTML='<div class="empty-state"><i class="fa-solid fa-triangle-exclamation"></i>'+(d.error||"Failed to load")+'</div>';return}
+    renderData(d);
+  }catch(e){ls.innerHTML='<div class="empty-state"><i class="fa-solid fa-wifi-slash"></i>Backend unavailable</div>'}
+}
+
+function renderData(d){
+  const ls=document.getElementById("liveSection");
+  let html='';
+
+  // Total earned bar
+  html+='<div class="total-bar"><div class="tb-lbl">Total Differential Earned</div><div class="tb-amt">$'+d.totalEarned.toFixed(2)+'</div></div>';
+
+  // Stats row
+  html+='<div class="stats-row">'+
+    '<div class="stat-card purple"><div class="num">'+d.userRank.split(' — ')[0]+'</div><div class="lbl">Your Rank</div></div>'+
+    '<div class="stat-card gold"><div class="num">'+d.userCommission+'%</div><div class="lbl">Your Rate</div></div>'+
+    '<div class="stat-card cyan"><div class="num">'+d.teamsQualified+'</div><div class="lbl">Teams</div></div>'+
+    '</div>';
+
+  if(d.teams&&d.teams.length>0){
+    // Pending amount
+    html+='<div class="card" style="border-color:rgba(0,255,136,.15)"><div class="card-title"><i class="fa-solid fa-clock" style="color:var(--green)"></i> Pending Differential Income</div>'+
+      '<div style="font:800 28px \'JetBrains Mono\',monospace;color:var(--green);text-align:center;padding:8px 0">$'+d.pendingAmount.toFixed(2)+'</div>'+
+      '<div style="font-size:11px;color:var(--text3);text-align:center">Based on total ROI earned by your qualified teams</div></div>';
+
+    // Multi-team breakdown
+    html+='<div class="section-card cyan"><div class="sc-title"><i class="fa-solid fa-users ic-cyan"></i> Team Breakdown ('+d.teams.length+')</div>'+
+      '<table class="team-table"><thead><tr><th>Team</th><th>Rank</th><th>ROI</th><th>Gap</th><th>Income</th></tr></thead><tbody>';
+    let totalInc=0;
+    d.teams.forEach(t=>{
+      totalInc+=t.income;
+      html+='<tr><td><div class="tt-name">'+(t.name||'Player')+'</div><div class="tt-rank">#'+t.userId.slice(-4)+'</div></td>'+
+        '<td><span class="'+rankBadgeClass(t.theirLevel)+'">'+t.theirRank.split(' — ')[0]+'</span><br><span style="font-size:10px;color:var(--text3)">'+t.theirComm+'%</span></td>'+
+        '<td class="tt-num">$'+t.teamRoi.toFixed(2)+'</td>'+
+        '<td class="tt-gap">'+(t.isEmperor?'<i class="fa-solid fa-crown" style="font-size:10px;color:var(--gold)"></i>':'')+t.gap+'%</td>'+
+        '<td class="tt-inc">$'+t.income.toFixed(2)+'</td></tr>';
+    });
+    html+='</tbody></table>';
+    // Total row
+    html+='<div style="display:flex;justify-content:space-between;padding:10px 6px 0;margin-top:6px;border-top:1px solid rgba(0,229,255,.1);font:700 13px \'JetBrains Mono\',monospace">'+
+      '<span style="color:var(--text2)">Total</span><span style="color:var(--cyan)">$'+totalInc.toFixed(2)+'</span></div>';
+    html+='</div>';
+
+    // Show emperor section if any emperor teams
+    if(d.teams.some(t=>t.isEmperor)){
+      document.getElementById("emperorSection").style.display="block";
+    }
+  } else {
+    html+='<div class="section-card green"><div class="sc-title"><i class="fa-solid fa-empty-set ic-green"></i> No Qualified Teams Yet</div>'+
+      '<div class="empty-state"><i class="fa-solid fa-users"></i><p style="font:700 14px \'Orbitron\',sans-serif;color:var(--text3);margin-bottom:6px">Build Your Team</p>'+
+      '<span style="font-size:12px">Refer and activate team members to start earning differential ROI from their ranks.</span></div></div>';
+  }
+
+  ls.innerHTML=html;
+}
+
+function toggleDiffTheme(){
+  const b=document.body.classList.toggle("light");
+  localStorage.setItem("pb_theme",b?"light":"dark");
+  const ic=document.getElementById("diffThemeIcon");
+  const lb=document.getElementById("diffThemeLabel");
+  if(ic)ic.className="fa-solid "+(b?"fa-moon":"fa-sun");
+  if(lb)lb.textContent=b?"Dark":"Light";
+}
+function setDiffLang(v){
+  localStorage.setItem("pb_lang",v);
+  document.getElementById("diffLangSelect").value=v;
+  location.reload();
+}
+(function(){
+  const curLang=localStorage.getItem("pb_lang")||"en";
+  document.getElementById("diffLangSelect").value=curLang;
+  const isLight=document.body.classList.contains("light");
+  const ic=document.getElementById("diffThemeIcon");
+  const lb=document.getElementById("diffThemeLabel");
+  if(ic)ic.className="fa-solid "+(isLight?"fa-moon":"fa-sun");
+  if(lb)lb.textContent=isLight?"Dark":"Light";
+})();
+loadDifferential();
+</script>
+</body>
+</html>

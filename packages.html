@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Packages</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--card-glow:rgba(0,150,255,.06);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition);scroll-behavior:smooth}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg);transition:background var(--transition)}
+body.light .app-container{background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+.bal-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px 20px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;transition:all var(--transition)}
+.bal-card .bal-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.bal-card .bal-value{font:900 24px 'Orbitron',sans-serif;color:var(--cyan)}
+.section-title{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title i{color:var(--cyan);font-size:13px}
+.pkg-list{display:flex;flex-direction:column;gap:12px}
+.pkg-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;transition:all var(--transition)}
+.pkg-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.pkg-card.exhausted::before{background:linear-gradient(90deg,transparent,var(--pink),transparent)}
+.pkg-card .pkg-name{font:800 16px 'Orbitron',sans-serif;color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.pkg-card .pkg-name svg{flex-shrink:0}
+.pkg-card.exhausted .pkg-name{color:var(--pink)}
+.pkg-card .pkg-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pkg-card .pkg-detail{font-size:12px;color:var(--text2)}
+.pkg-card .pkg-detail b{color:var(--text);font-weight:700}
+.pkg-card .pkg-bar-wrap{height:6px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;margin-bottom:8px}
+.pkg-card .pkg-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:999px;transition:width .5s}
+.pkg-card.exhausted .pkg-bar-fill{background:linear-gradient(90deg,var(--pink),var(--gold))}
+.pkg-card .pkg-progress{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600}
+.pkg-card .pkg-progress b{color:var(--cyan)}
+.pkg-card.exhausted .pkg-progress b{color:var(--pink)}
+.pkg-card .pkg-action{display:block;text-align:center;padding:12px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font:700 13px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:1px;border:none;width:100%;cursor:pointer;transition:all .3s}
+.pkg-card .pkg-action:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,229,255,.2)}
+.pkg-card .pkg-action[disabled]{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.pkg-card .pkg-action.renew{background:linear-gradient(135deg,var(--pink),var(--gold))}
+.pkg-card.owned{box-shadow:0 0 20px rgba(0,229,255,.08)}
+.pkg-card .pkg-active{display:block;text-align:center;padding:12px;border-radius:var(--rs);background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);color:var(--green);font-weight:700;font-size:13px}
+.pkg-card .pkg-exhausted{display:block;text-align:center;padding:12px;border-radius:var(--rs);background:rgba(255,45,149,.06);border:1px solid rgba(255,45,149,.2);color:var(--pink);font-weight:700;font-size:13px}
+
+/* BUY MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9999;display:flex;justify-content:center;align-items:center;padding:20px;visibility:hidden;opacity:0;pointer-events:none;transition:opacity .3s,visibility .3s}
+.modal-overlay.open{visibility:visible;opacity:1;pointer-events:auto}
+.modal-box{background:var(--bg2);border:2px solid var(--card-border);border-radius:var(--r);padding:24px;width:100%;max-width:420px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-box .modal-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:14px;transition:all .3s}
+.modal-box .modal-close:hover{color:var(--cyan);border-color:var(--cyan)}
+.modal-box .modal-title{font:800 18px 'Orbitron',sans-serif;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal-box .modal-title svg{flex-shrink:0}
+.modal-box .modal-info{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.modal-box .modal-info-item{background:rgba(0,0,0,.2);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px;text-align:center}
+.modal-box .modal-info-item .mil{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.modal-box .modal-info-item .miv{font:700 16px 'JetBrains Mono',monospace;color:var(--cyan)}
+.modal-box .modal-input-group{margin-bottom:16px}
+.modal-box .modal-input-group label{font-size:12px;color:var(--text2);display:block;margin-bottom:6px;font-weight:600}
+.modal-box .modal-input-group input{width:100%;padding:14px 16px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(0,0,0,.25);color:var(--text);font:700 20px 'JetBrains Mono',monospace;outline:none;transition:border .3s}
+.modal-box .modal-input-group input:focus{border-color:var(--cyan)}
+.modal-box .modal-input-group input::placeholder{color:var(--text3)}
+.modal-box .modal-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.modal-box .modal-preview-item{background:rgba(0,0,0,.15);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px;text-align:center}
+.modal-box .modal-preview-item .mpi-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.modal-box .modal-preview-item .mpi-v{font:700 16px 'JetBrains Mono',monospace}
+.modal-box .modal-preview-item .mpi-v.green{color:var(--green)}
+.modal-box .modal-preview-item .mpi-v.gold{color:var(--gold)}
+.modal-box .modal-error{font-size:12px;color:var(--pink);text-align:center;margin-bottom:10px;min-height:18px}
+.modal-box .modal-confirm{display:block;text-align:center;padding:14px;border-radius:var(--rs);background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font:700 14px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:1px;border:none;width:100%;cursor:pointer;transition:all .3s}
+.modal-box .modal-confirm:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,229,255,.2)}
+.modal-box .modal-confirm[disabled]{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="profileLink">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
+  </div>
+  <div class="bal-card">
+    <div><div class="bal-label">Your Balance</div><div style="font-size:11px;color:var(--text2);margin-top:2px">Deposit USDT to buy packages</div></div>
+    <div class="bal-value" id="userBalance">$0</div>
+  </div>
+  <div id="activePkgSection" style="display:none">
+    <div class="section-title"><i class="fa-solid fa-atom"></i> Active Package</div>
+    <div class="pkg-card" id="activePkgCard">
+      <div class="pkg-name" id="activePkgName">--</div>
+      <div class="pkg-details">
+        <div class="pkg-detail">Investment: <b id="activePkgAmount">$0</b></div>
+        <div class="pkg-detail">Daily ROI: <b id="activePkgROI">0%</b></div>
+        <div class="pkg-detail">Daily Earnings: <b id="activePkgDaily">0 Bits</b></div>
+        <div class="pkg-detail">Cap: <b id="activePkgCap">0</b></div>
+      </div>
+      <div class="pkg-progress"><span>Progress: <b id="activePkgProgress">0 / 0</b></span><span id="activePkgPct">0%</span></div>
+      <div class="pkg-bar-wrap"><div class="pkg-bar-fill" id="activePkgBar"></div></div>
+      <div id="activePkgStatus"></div>
+    </div>
+  </div>
+  <div class="section-title" style="margin-top:16px"><i class="fa-solid fa-layer-group"></i> Available Tiers</div>
+  <div class="pkg-list" id="pkgList">Loading packages...</div>
+</div>
+
+<!-- BUY MODAL -->
+<div class="modal-overlay" id="buyModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div class="modal-title" id="modalTitle"><span id="modalIcon"></span> Silver Package</div>
+    <div class="modal-info">
+      <div class="modal-info-item"><div class="mil">Min</div><div class="miv" id="modalMin">$0</div></div>
+      <div class="modal-info-item"><div class="mil">Max</div><div class="miv" id="modalMax">$0</div></div>
+      <div class="modal-info-item"><div class="mil">ROI</div><div class="miv" id="modalROI">0%</div></div>
+      <div class="modal-info-item"><div class="mil">Cap</div><div class="miv" id="modalCap">0X</div></div>
+    </div>
+    <div class="modal-input-group">
+      <label>Enter Amount (USDT) — Balance: $<span id="modalBalance">0</span></label>
+      <input type="number" id="modalAmount" placeholder="Enter amount..." min="0" step="any" oninput="updatePreview()">
+    </div>
+    <div class="modal-preview">
+      <div class="modal-preview-item"><div class="mpi-l">Daily Earnings</div><div class="mpi-v green" id="previewDaily">0 Bits</div></div>
+      <div class="modal-preview-item"><div class="mpi-l">Max Cap</div><div class="mpi-v gold" id="previewCap">0 Bits</div></div>
+    </div>
+    <div class="modal-error" id="modalError"></div>
+    <button class="modal-confirm" id="modalConfirm" onclick="confirmBuy()"><i class="fa-solid fa-cart-plus"></i> Confirm Purchase</button>
+  </div>
+</div>
+
+<script>
+const BACKEND_URL = "https://playbits-backend-132h.onrender.com";
+
+const TIERS = [
+  { min: 10, max: 49, roi: 0.5, cap: 2, label: "Spark", color: "var(--cyan)", svg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>' },
+  { min: 50, max: 199, roi: 0.8, cap: 2.25, label: "Ignite", color: "#ff4500", svg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ff4500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>' },
+  { min: 200, max: 499, roi: 1.0, cap: 2.5, label: "Nitro", color: "#a855f7", svg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><polyline points="20 10 12 18 8 14"/><polyline points="20 4 12 12 8 8 4 12"/></svg>' },
+  { min: 500, max: 999, roi: 1.25, cap: 3, label: "Apex", color: "var(--gold)", svg: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>' }
+];
+
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+const savedTheme = localStorage.getItem("pb_theme");
+if (savedTheme === "light") document.body.classList.add("light");
+
+const p=new URLSearchParams(location.search);let uid=p.get("uid")||localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
+
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}
+const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}
+let modalTier = null;
+
+function closeModal() { document.getElementById("buyModal").classList.remove("open"); modalTier = null }
+
+function updatePreview() {
+  if (!modalTier) return;
+  const inp = document.getElementById("modalAmount");
+  const err = document.getElementById("modalError");
+  const btn = document.getElementById("modalConfirm");
+  const val = parseFloat(inp.value);
+  if (!val || val < modalTier.min) {
+    document.getElementById("previewDaily").textContent = "0 Bits";
+    document.getElementById("previewCap").textContent = "0 Bits";
+    err.textContent = "Enter $" + modalTier.min + " – $" + modalTier.max;
+    btn.disabled = true; return
+  }
+  if (val > modalTier.max) {
+    document.getElementById("previewDaily").textContent = (val * modalTier.roi).toFixed(4) + " Bits";
+    document.getElementById("previewCap").textContent = (val * modalTier.cap * 100).toFixed(0) + " Bits";
+    err.textContent = "Maximum: $" + modalTier.max;
+    btn.disabled = true; return
+  }
+  document.getElementById("previewDaily").textContent = (val * modalTier.roi).toFixed(4) + " Bits";
+  document.getElementById("previewCap").textContent = (val * modalTier.cap * 100).toFixed(0) + " Bits";
+  const bal = parseFloat(document.getElementById("modalBalance").textContent);
+  if (val > bal) {
+    err.textContent = "Insufficient Balance";
+    btn.disabled = true; return
+  }
+  err.textContent = "";
+  btn.disabled = false;
+}
+
+function openModal(tier) {
+  try {
+    modalTier = tier;
+    const bal = parseFloat(document.getElementById("userBalance").textContent.replace("$","")) || 0;
+    document.getElementById("modalBalance").textContent = bal.toFixed(2);
+    document.getElementById("modalIcon").innerHTML = tier.svg;
+    document.getElementById("modalTitle").innerHTML = tier.svg + ' ' + tier.label + ' Package';
+    document.getElementById("modalMin").textContent = "$" + tier.min;
+    document.getElementById("modalMax").textContent = "$" + tier.max;
+    document.getElementById("modalROI").textContent = tier.roi + "% daily";
+    document.getElementById("modalCap").textContent = tier.cap + "X";
+    document.getElementById("modalAmount").value = "";
+    document.getElementById("previewDaily").textContent = "0 Bits";
+    document.getElementById("previewCap").textContent = "0 Bits";
+    document.getElementById("modalError").textContent = "";
+    document.getElementById("modalConfirm").disabled = true;
+    document.getElementById("buyModal").classList.add("open");
+    setTimeout(() => document.getElementById("modalAmount").focus(), 300);
+  } catch(e) { console.error("openModal error:", e) }
+}
+
+async function confirmBuy() {
+  const inp = document.getElementById("modalAmount");
+  const btn = document.getElementById("modalConfirm");
+  const val = parseFloat(inp.value);
+  if (!modalTier || !val || val < modalTier.min || val > modalTier.max) return;
+  if (!uid) { alert("Please login first"); closeModal(); return }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+  try {
+    const res = await fetch(BACKEND_URL + "/api/buy-package", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId: uid, amount: val })
+    });
+    const data = await res.json();
+    if (!data.success) { document.getElementById("modalError").textContent = data.error || "Purchase failed"; btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-cart-plus"></i> Confirm Purchase'; return }
+    document.getElementById("modalError").textContent = "";
+    document.getElementById("modalError").innerHTML = '<span style="color:var(--green)"><i class="fa-regular fa-circle-check"></i> Package Activated!</span>';
+    closeModal();
+    location.reload();
+  } catch(e) {
+    document.getElementById("modalError").textContent = "Backend unavailable — " + e.message;
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-cart-plus"></i> Confirm Purchase';
+  }
+}
+
+(async function() {
+  try { uid = localStorage.getItem("pb_uid") || sessionStorage.getItem("pb_uid") || null } catch(e) {}
+  if (!uid) { document.getElementById("pkgList").innerHTML = '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">Please login first</div>'; return }
+
+  let depositBalance = 0;
+  let pkgAmount = 0, pkgROI = 0, pkgCapMultiplier = 0, pkgMaxEarnings = 0, pkgEarned = 0, pkgStatus = "none";
+
+  try {
+    const resp = await fetch(BACKEND_URL + "/api/balance/" + uid);
+    if (resp.ok) {
+      const data = await resp.json();
+      depositBalance = data.depositBalance || 0;
+      pkgAmount = data.packageAmount || 0;
+      pkgROI = data.packageROI || 0;
+      pkgCapMultiplier = data.packageCapMultiplier || 0;
+      pkgMaxEarnings = data.packageMaxEarnings || 0;
+      pkgEarned = data.packageEarned || 0;
+      pkgStatus = data.packageStatus || "none";
+    }
+  } catch (e) { console.warn("Backend unavailable, trying Firebase directly", e) }
+
+  if (!depositBalance) {
+    try {
+      const r2 = await (await fetch(BACKEND_URL + "/api/balance/" + uid)).json();
+      if (r2) {
+        depositBalance = r2.depositBalance || 0;
+        pkgAmount = r2.packageAmount || 0;
+        pkgROI = r2.packageROI || 0;
+        pkgCapMultiplier = r2.packageCapMultiplier || 0;
+        pkgMaxEarnings = r2.packageMaxEarnings || 0;
+        pkgEarned = r2.packageEarned || 0;
+        pkgStatus = r2.packageStatus || "none";
+      }
+    } catch (e) { console.warn("Backend fallback failed", e) }
+  }
+
+  // Migration fallback for old users
+  if (!pkgAmount && depositBalance === 0) {
+    try {
+      const r3 = await (await fetch(BACKEND_URL + "/api/balance/" + uid)).json();
+      const act = r3.activationUSDT || 0;
+      if (act > 0) {
+        let tier = TIERS.find(t => act >= t.min && act <= t.max) || TIERS[TIERS.length - 1];
+        pkgAmount = act; pkgROI = tier.roi; pkgCapMultiplier = tier.cap;
+        pkgMaxEarnings = act * tier.cap * 100; pkgEarned = r3.packageEarned || 0;
+        pkgStatus = r3.packageStatus || "active"; depositBalance = r3.depositBalance || 0;
+      }
+    } catch (e) { console.warn("Migration fallback failed", e) }
+  }
+
+  document.getElementById("userBalance").textContent = "$" + depositBalance.toFixed(2);
+
+  // Active package section
+  if (pkgStatus === "active" || pkgStatus === "exhausted") {
+    document.getElementById("activePkgSection").style.display = "block";
+    const de = pkgAmount * pkgROI;
+    const ex = pkgStatus === "exhausted" || pkgEarned >= pkgMaxEarnings;
+    const pct = pkgMaxEarnings > 0 ? Math.min(100, (pkgEarned / pkgMaxEarnings) * 100) : 0;
+    document.getElementById("activePkgName").textContent = "$" + pkgAmount + " Package";
+    document.getElementById("activePkgAmount").textContent = "$" + pkgAmount;
+    document.getElementById("activePkgROI").textContent = pkgROI + "% daily";
+    document.getElementById("activePkgDaily").textContent = de.toFixed(4) + " Bits";
+    document.getElementById("activePkgCap").textContent = pkgCapMultiplier + "X (" + pkgMaxEarnings.toFixed(0) + " Bits)";
+    document.getElementById("activePkgProgress").textContent = pkgEarned.toFixed(2) + " / " + pkgMaxEarnings.toFixed(0) + " Bits";
+    document.getElementById("activePkgPct").textContent = pct.toFixed(0) + "%";
+    document.getElementById("activePkgBar").style.width = pct + "%";
+    if (ex || pkgStatus === "exhausted") {
+      document.getElementById("activePkgCard").classList.add("exhausted");
+      document.getElementById("activePkgStatus").innerHTML = '<div class="pkg-exhausted"><i class="fa-regular fa-circle-xmark"></i> Cap Reached — Renew Required</div>';
+    } else {
+      document.getElementById("activePkgStatus").innerHTML = '<div class="pkg-active"><i class="fa-regular fa-circle-check"></i> Active — Earning Daily</div>';
+    }
+  }
+
+  // Tier cards
+  const el = document.getElementById("pkgList");
+  let html = "";
+  for (const tier of TIERS) {
+    const isOwned = pkgStatus === "active" && pkgAmount >= tier.min && pkgAmount <= tier.max;
+
+    html += '<div class="pkg-card' + (isOwned ? ' owned' : '') + '" style="border-color:' + tier.color + '33">';
+    html += '<div class="pkg-name" style="color:' + tier.color + '">' + tier.svg + ' ' + tier.label + '</div>';
+    html += '<div class="pkg-details">';
+    html += '<div class="pkg-detail">Range: <b>$' + tier.min + ' – $' + tier.max + '</b></div>';
+    html += '<div class="pkg-detail">Cap: <b style="color:' + tier.color + '">' + tier.cap + 'X</b></div>';
+    html += '</div>';
+
+    html += '<button class="pkg-action' + (isOwned ? ' renew' : '') + '" onclick="openModal(TIERS[' + TIERS.indexOf(tier) + '])"><i class="fa-solid fa-' + (isOwned ? 'arrow-up' : 'cart-plus') + '"></i> ' + (isOwned ? 'Renew' : 'Select') + '</button>';
+
+    html += '</div>';
+  }
+  el.innerHTML = html;
+})();
+</script>
+</body>
+</html>

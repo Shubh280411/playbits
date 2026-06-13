@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayBits | Global Reward Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,700;1,700&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <style>
+        :root { --neon-green: #94e524; --vibrant-pink: #ff007f; }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            background: #050505; color: #fff; font-family: 'Inter', sans-serif;
+            min-height: 100vh; margin: 0; overflow-x: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+        }
+
+        #particle-canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
+
+        .content-wrapper { position: relative; z-index: 10; text-align: center; padding: 40px 20px; width: 100%; max-width: 600px; margin: 0 auto; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+
+        .logo-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo-glow {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, rgba(148, 229, 36, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+        }
+
+        .typewriter-container {
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .typewriter-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            min-width: 280px;
+        }
+
+        .coming-soon-head {
+            font-family: 'Archivo', sans-serif; font-weight: 700; font-style: italic;
+            font-size: clamp(2.5rem, 8vw, 5.5rem); line-height: 1;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .lang-subtitle {
+            font-family: 'Inter', sans-serif; font-weight: 700;
+            font-size: clamp(0.6rem, 1.5vw, 0.85rem);
+            color: var(--neon-green); text-transform: uppercase;
+            letter-spacing: 0.4em; margin-top: 8px;
+            transition: opacity 0.3s ease;
+            min-height: 1.2em;
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: var(--neon-green);
+            margin-left: 4px;
+            animation: blink 0.8s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        .glass-chip {
+            background: rgba(148, 229, 36, 0.05); backdrop-blur: 20px;
+            border: 1px solid rgba(148, 229, 36, 0.15); padding: 8px 20px;
+            border-radius: 100px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-chip:hover { border-color: rgba(148, 229, 36, 0.3); background: rgba(148, 229, 36, 0.08); }
+
+        .blink-dot {
+            width: 8px; height: 8px; background: var(--neon-green); border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-green); animation: softBlink 2s infinite ease-in-out;
+        }
+
+        @keyframes softBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .mega-logo {
+            font-family: 'Archivo', sans-serif; font-weight: 700; font-style: italic;
+            font-size: clamp(3rem, 12vw, 8rem); line-height: 1.1; letter-spacing: -0.04em;
+            margin-bottom: 0.25rem;
+        }
+
+        .play-part { background: linear-gradient(180deg, #FFFFFF 30%, #888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .bits-part { background: linear-gradient(180deg, #ff7eb3 10%, var(--vibrant-pink) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 20px rgba(255, 0, 127, 0.3)); }
+
+        .tagline {
+            font-size: clamp(0.55rem, 1.5vw, 0.85rem);
+            letter-spacing: 0.5em; text-transform: uppercase; margin-bottom: 3rem;
+            background: linear-gradient(90deg, #00b4d8, #7c3aed, #c084fc, #e879f9, #00b4d8);
+            background-size: 200% auto;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: tagline-shimmer 4s linear infinite;
+        }
+
+        @keyframes tagline-shimmer {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .timer-container {
+            display: flex; justify-content: center; gap: 8px; md:gap-16; margin-bottom: 40px;
+        }
+
+        .timer-block {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px; padding: 16px 20px; min-width: 70px;
+            transition: all 0.3s ease;
+        }
+
+        .timer-block:hover { border-color: rgba(1, 5, 238, 0.2); transform: translateY(-2px); }
+
+        .timer-unit { font-family: 'Archivo', sans-serif; font-size: clamp(1.8rem, 5vw, 3.5rem); font-weight: 700; }
+
+        .timer-label { font-size: 9px; color: #00b4d8; font-weight: 700; letter-spacing: 0.15em; margin-top: 4px; }
+
+        .input-group { position: relative; width: 100%; max-width: 400px; margin: 0 auto; }
+
+        .input-email {
+            width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 18px 24px; border-radius: 16px; outline: none;
+            color: #fff; font-size: 14px; text-align: center;
+            transition: all 0.3s ease; backdrop-filter: blur(10px);
+        }
+
+        .input-email::placeholder { color: #444; }
+        .input-email:focus { border-color: var(--vibrant-pink); box-shadow: 0 0 20px rgba(255, 0, 127, 0.15); }
+
+        .btn-launch {
+            background: linear-gradient(90deg, var(--neon-green), #00f094);
+            box-shadow: 0 8px 25px rgba(148, 229, 36, 0.15); font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            cursor: pointer; border: none; width: 100%; padding: 18px;
+            border-radius: 16px; color: #000; text-transform: uppercase;
+            letter-spacing: 0.15em; font-size: 11px; margin-top: 12px;
+        }
+
+        .btn-launch:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(148, 229, 36, 0.3); }
+        .btn-launch:active:not(:disabled) { transform: translateY(-1px); }
+        .btn-launch:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .status-msg { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; min-height: 20px; margin-top: 12px; transition: all 0.3s ease; }
+
+        .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin: 0 auto 40px; }
+
+        footer { position: relative; z-index: 10; padding: 30px 20px; width: 100%; border-top: 1px solid rgba(255,255,255,0.03); }
+        .social-link { font-size: 1.4rem; transition: all 0.3s; color: #2a2a2a; }
+        .social-link:hover { color: var(--neon-green); transform: translateY(-3px); }
+    </style>
+</head>
+<body>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <div class="content-wrapper">
+        <div class="flex justify-center mb-8">
+            <div class="logo-container">
+                <div class="logo-glow"></div>
+                <img src="logo.png" alt="PlayBits Logo" onerror="this.style.display='none'" class="relative z-10 w-28 h-28 md:w-40 md:h-40 object-contain">
+            </div>
+        </div>
+
+        <div class="typewriter-container">
+            <div class="typewriter-inner">
+                <h2 id="typewriter" class="coming-soon-head"></h2>
+                <div id="lang-sub" class="lang-subtitle">ENGLISH</div>
+            </div>
+        </div>
+
+        <h1 class="mega-logo">
+            <span class="play-part">Play</span><span class="bits-part">Bits</span>
+        </h1>
+        <p class="tagline">Play. Progress. Unlock Rewards</p>
+
+        <div class="timer-container">
+            <div class="timer-block"><span id="days" class="timer-unit">00</span><span class="timer-label">DAYS</span></div>
+            <div class="timer-block"><span id="hours" class="timer-unit">00</span><span class="timer-label">HOURS</span></div>
+            <div class="timer-block"><span id="minutes" class="timer-unit">00</span><span class="timer-label">MINS</span></div>
+            <div class="timer-block"><span id="seconds" class="timer-unit text-[var(--vibrant-pink)]">00</span><span class="timer-label">SECS</span></div>
+        </div>
+
+        <div class="w-full max-w-sm mx-auto">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="you@example.com" 
+                       class="input-email" autocomplete="email">
+                <button id="submit" class="btn-launch">Join the Waitlist</button>
+            </div>
+            <p id="status" class="status-msg text-center"></p>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <footer>
+        <div class="flex justify-center gap-8 mb-4">
+            <a href="https://t.me/yourchannel" target="_blank" class="social-link"><i class="fa-brands fa-telegram"></i></a>
+            <a href="https://youtube.com/@yourchannel" target="_blank" class="social-link"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+        <p class="text-[9px] text-gray-700 tracking-[0.3em] text-center uppercase">2026 PlayBits Protocol</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB1luMRbNVxo_x3IRcdLygIbb0yEUoZAjk",
+            authDomain: "playbits-9e671.firebaseapp.com",
+            projectId: "playbits-9e671",
+            storageBucket: "playbits-9e671.firebasestorage.app",
+            messagingSenderId: "308371821857",
+            appId: "1:308371821857:web:20e0a74b6f5d8097639a60"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const submitBtn = document.getElementById('submit');
+        const emailInput = document.getElementById('email');
+        const statusEl = document.getElementById('status');
+
+        function setStatus(msg, color) {
+            statusEl.innerText = msg;
+            statusEl.style.color = color;
+        }
+
+        submitBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim().toLowerCase();
+
+            if (!email || !email.includes('@') || !email.includes('.')) {
+                setStatus("Please enter a valid email", "#ff007f");
+                emailInput.focus();
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "SYNCING...";
+            setStatus("", "");
+
+            try {
+                const safeId = email.replace(/[.#$\[\]]/g, '-');
+                const docRef = doc(db, "waitlist", safeId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    setStatus("Already on the waitlist", "#ff007f");
+                } else {
+                    await setDoc(docRef, {
+                        email: email,
+                        submittedAt: serverTimestamp()
+                    });
+                    setStatus("You're in! Welcome to PlayBits", "#94e524");
+                    emailInput.value = "";
+                }
+            } catch (e) {
+                console.error("Firestore Error:", e);
+                setStatus("Connection failed. Try again.", "#ff007f");
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerText = "JOIN THE WAITLIST";
+        });
+
+        emailInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitBtn.click();
+        });
+    </script>
+
+    <script>
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = Array.from({ length: 50 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                s: Math.random() * 4 + 1,
+                vx: (Math.random() - 0.5) * 0.4,
+                vy: (Math.random() - 0.5) * 0.4,
+                c: Math.random() > 0.5 ? '#94e524' : '#ff007f',
+                o: Math.random() * 0.2 + 0.05
+            }));
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                ctx.globalAlpha = p.o;
+                ctx.fillStyle = p.c;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.s / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.globalAlpha = 0.03;
+            ctx.strokeStyle = '#94e524';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 120) {
+                        ctx.globalAlpha = 0.03 * (1 - dist / 120);
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        window.addEventListener('resize', init);
+        init();
+        draw();
+
+        const texts = [
+            { t: "Coming Soon", l: "ENGLISH" },
+            { t: "Próximamente", l: "SPANISH" },
+            { t: "Demnächst", l: "GERMAN" },
+            { t: "Prochainement", l: "FRENCH" },
+            { t: "即将推出", l: "CHINESE" },
+            { t: "Segera Hadir", l: "INDONESIAN" },
+            { t: "जल्द आ रहा है", l: "HINDI" },
+            { t: "เร็วๆ นี้", l: "THAI" },
+            { t: "Sắp ra mắt", l: "VIETNAMESE" },
+            { t: "قريباً", l: "ARABIC" }
+        ];
+
+        let idx = 0, char = 0, isDeleting = false;
+
+        function type() {
+            const cur = texts[idx];
+            const langEl = document.getElementById('lang-sub');
+            const el = document.getElementById('typewriter');
+
+            langEl.innerText = cur.l;
+            langEl.style.opacity = '1';
+            const currentText = isDeleting ? cur.t.slice(0, char--) : cur.t.slice(0, char++);
+            el.innerText = currentText;
+
+            let speed = isDeleting ? 40 : 80;
+
+            if (!isDeleting && char > cur.t.length) {
+                isDeleting = true;
+                langEl.style.opacity = '0.5';
+                speed = 2500;
+            } else if (isDeleting && char < 0) {
+                isDeleting = false;
+                idx = (idx + 1) % texts.length;
+                langEl.style.opacity = '1';
+                speed = 400;
+            }
+
+            setTimeout(type, speed);
+        }
+
+        function timer() {
+            const target = new Date("May 21, 2026 14:00:00").getTime();
+            const diff = target - new Date().getTime();
+
+            if (diff > 0) {
+                document.getElementById('days').innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
+                document.getElementById('hours').innerText = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+            } else {
+                document.getElementById('days').innerText = "00";
+                document.getElementById('hours').innerText = "00";
+                document.getElementById('minutes').innerText = "00";
+                document.getElementById('seconds').innerText = "00";
+            }
+        }
+
+        setInterval(timer, 1000);
+        timer();
+        type();
+    </script>
+</body>
+</html>

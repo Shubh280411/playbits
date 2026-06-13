@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Profile</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:#00e5ff2e;--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#ffffff;--bg2:#f8fafc;--bg3:#f1f5f9;--card:rgba(255,255,255,.95);--card-border:#00e5ff40;--text:#0f172a;--text2:#475569;--text3:#94a3b8}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.4));pointer-events:none;z-index:1}
+.app{width:100%;max-width:480px;min-height:100vh;padding:20px 16px 40px;position:relative;z-index:2}
+@keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* BACK */
+.back-bar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.back-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:16px;transition:all .3s}
+.back-btn:hover{color:var(--cyan);border-color:var(--cyan)}
+.back-title{font:800 16px 'Orbitron',sans-serif;letter-spacing:1px}
+
+/* AVATAR */
+.avatar-section{display:flex;flex-direction:column;align-items:center;margin-bottom:24px;animation:fadeIn .3s ease}
+.avatar-circle{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple),var(--pink));display:grid;place-items:center;font:800 28px 'Orbitron',sans-serif;color:#fff;margin-bottom:12px;border:2px solid rgba(255,255,255,.08);box-shadow:0 0 30px rgba(0,229,255,.08)}
+.avatar-name{font:800 22px 'Orbitron',sans-serif;margin-bottom:2px;letter-spacing:.5px}
+.avatar-id{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+
+/* CARD */
+.card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:14px;animation:fadeIn .3s ease}
+.card::before{content:'';position:absolute;top:-2px;left:0;right:0;height:2px}
+.card.cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.card.purple::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.card.gold::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.card.green::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.card.pink::before{background:linear-gradient(90deg,transparent,var(--pink),transparent)}
+
+.card-header{font:800 13px 'Orbitron',sans-serif;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+/* STAT ROW */
+.stat-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.stat-row:last-child{border-bottom:none}
+.stat-row .sr-l{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);font-weight:600}
+.stat-row .sr-l i{width:18px;text-align:center;font-size:13px}
+.stat-row .sr-v{font:700 14px 'JetBrains Mono',monospace;color:var(--cyan)}
+
+.avatar-join{font-size:11px;color:var(--text3);margin-top:4px;letter-spacing:.5px}
+
+/* INPUT */
+.input-group{margin-bottom:10px}
+.input-group label{display:block;font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;font-weight:600}
+.input-row{display:flex;gap:8px}
+.input-row input{flex:1;background:rgba(0,0,0,.3);border:2px solid var(--card-border);border-radius:var(--rs);padding:12px 14px;font:600 15px 'Rajdhani',sans-serif;color:var(--text);outline:none;transition:border .3s}
+.input-row input:focus{border-color:var(--cyan)}
+.input-row input:disabled{opacity:.5}
+.input-row button{padding:12px 16px;background:linear-gradient(135deg,var(--cyan),var(--purple));border:none;border-radius:var(--rs);color:#fff;font:700 12px 'Orbitron',sans-serif;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;transition:all .3s}
+.input-row button:hover{transform:scale(1.03)}
+.input-row button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* REF LINK */
+.ref-box{display:flex;align-items:center;gap:8px;background:rgba(0,0,0,.25);border:2px solid var(--card-border);border-radius:var(--rs);padding:10px 12px}
+.ref-box code{flex:1;font-size:10px;color:var(--cyan);word-break:break-all;font-family:'JetBrains Mono',monospace}
+.ref-box button{background:rgba(0,229,255,.1);border:none;border-radius:6px;padding:6px 12px;color:var(--cyan);font-weight:700;font-size:11px;cursor:pointer;white-space:nowrap;transition:all .2s}
+.ref-box button:hover{background:rgba(0,229,255,.2)}
+
+/* GRID STATS */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid-item{background:rgba(0,0,0,.2);border:1px solid var(--card-border);border-radius:var(--rs);padding:14px;text-align:center}
+.grid-item .gi-v{font:800 20px 'Orbitron',sans-serif;color:var(--cyan);margin-bottom:2px}
+.grid-item .gi-l{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;font-weight:600}
+.grid-item.gold .gi-v{color:var(--gold)}
+.grid-item.green .gi-v{color:var(--green)}
+.grid-item.purple .gi-v{color:var(--purple)}
+.grid-item.pink .gi-v{color:var(--pink)}
+
+/* TOAST */
+.toast{position:fixed;bottom:40px;left:50%;z-index:200;background:rgba(0,0,0,.97);border:1px solid rgba(0,229,255,.15);padding:12px 24px;border-radius:24px;font-size:13px;font-weight:700;color:var(--text);animation:toast-up .35s ease forwards;pointer-events:none;white-space:nowrap}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* LOADER */
+.loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10;background:var(--bg)}
+.loader.hide{display:none}
+.loader .spinner{width:40px;height:40px;border:3px solid rgba(0,229,255,.1);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px}
+.loader p{font-size:12px;color:var(--text3);letter-spacing:2px;text-transform:uppercase}</style>
+</head>
+<body>
+
+<div class="loader" id="loader"><div class="spinner"></div><p>Loading profile...</p></div>
+
+<div class="app" id="app" style="display:none">
+
+  <div class="back-bar">
+    <button class="back-btn" onclick="goBack()"><i class="fa-solid fa-arrow-left"></i></button>
+    <div class="back-title" data-lang="profile">Profile</div>
+  </div>
+
+  <div class="avatar-section">
+    <div class="avatar-circle" id="avatarCircle">PW</div>
+    <div class="avatar-name" id="dispName">Player</div>
+    <div class="avatar-id" id="dispUid">ID: --</div>
+    <div class="avatar-join" id="dispJoined"></div>
+  </div>
+
+  <!-- PERSONAL INFO -->
+  <div class="card cyan">
+    <div class="card-header"><i class="fa-solid fa-user"></i> <span data-lang="personalInfo">Personal Info</span></div>
+    <div class="input-group">
+      <label data-lang="displayName">Display Name</label>
+      <div class="input-row">
+        <input type="text" id="nameInput" maxlength="20" placeholder="Your name">
+        <button id="nameSaveBtn" onclick="saveName()" data-lang="save">Save</button>
+      </div>
+    </div>
+    <div class="input-group">
+      <label data-lang="emailAddress">Email Address</label>
+      <div class="input-row">
+        <input type="email" id="emailInput" placeholder="your@email.com">
+        <button id="emailSaveBtn" onclick="saveEmail()" data-lang="save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERRAL -->
+  <div class="card green">
+    <div class="card-header"><i class="fa-solid fa-link"></i> <span data-lang="referral">Referral</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-circle-user"></i> <span data-lang="sponsorId">Sponsor ID</span></span><span class="sr-v" id="sponsorId">--</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-code"></i> <span data-lang="refCode">Referral Code</span></span><span class="sr-v" id="refCode">--</span></div>
+    <div style="margin-top:10px">
+      <div class="ref-box">
+        <code id="refLink">Loading...</code>
+        <button onclick="copyRef()" data-lang="copy"><i class="fa-regular fa-copy"></i> Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PACKAGE -->
+  <div class="card gold">
+    <div class="card-header"><i class="fa-solid fa-atom"></i> <span data-lang="reactorPackage">Reactor Package</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-bolt"></i> <span data-lang="curPackage">Current Package</span></span><span class="sr-v" id="curPackage">$0</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-gauge-high"></i> <span data-lang="activationUsdt">Activation USDT</span></span><span class="sr-v" id="activationUsdt">$0</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-arrow-trend-up"></i> <span data-lang="dailyRate">Daily Rate</span></span><span class="sr-v" id="dailyRate">0 Bits</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-trophy"></i> <span data-lang="rank">Rank</span></span><span class="sr-v" id="rankName">Spark</span></div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="card purple">
+    <div class="card-header"><i class="fa-solid fa-users"></i> <span data-lang="teamStats">Team Stats</span></div>
+    <div class="grid-2">
+      <div class="grid-item"><div class="gi-v" id="tDirects">0</div><div class="gi-l" data-lang="direct">Direct</div></div>
+      <div class="grid-item green"><div class="gi-v" id="tTeam">0</div><div class="gi-l" data-lang="totalTeam">Total Team</div></div>
+      <div class="grid-item gold"><div class="gi-v" id="tAirdrop">0</div><div class="gi-l" data-lang="airdropBits">Airdrop Bits</div></div>
+      <div class="grid-item pink"><div class="gi-v" id="tOrbit">0</div><div class="gi-l" data-lang="orbitEarnings">Orbit Earnings</div></div>
+    </div>
+  </div>
+
+  <!-- EARNINGS -->
+  <div class="card pink">
+    <div class="card-header"><i class="fa-solid fa-coins"></i> <span data-lang="earnings">Earnings</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-wallet"></i> <span data-lang="withdrawable">Withdrawable</span></span><span class="sr-v" id="withdrawable">0</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-lock"></i> <span data-lang="locked">Locked</span></span><span class="sr-v" id="lockedBits">0</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-spinner"></i> <span data-lang="unlocking">Unlocking</span></span><span class="sr-v" id="unlockingBits">0</span></div>
+    <div class="stat-row"><span class="sr-l"><i class="fa-solid fa-clock-rotate-left"></i> <span data-lang="totalEarned">Total Earned</span></span><span class="sr-v" id="totalEarned">0</span></div>
+  </div>
+
+</div>
+
+<script src="api.js"></script>
+<script type="module">
+const BACKEND_URL="https://playbits-backend-132h.onrender.com";
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand()}
+
+const LANGS={
+  en:{name:"English",native:"English",flag:"🇬🇧",t:{profile:"Profile",personalInfo:"Personal Info",displayName:"Display Name",emailAddress:"Email Address",referral:"Referral",sponsorId:"Sponsor ID",refCode:"Referral Code",copy:"Copy",reactorPackage:"Reactor Package",curPackage:"Current Package",activationUsdt:"Activation USDT",dailyRate:"Daily Rate",rank:"Rank",teamStats:"Team Stats",direct:"Direct",totalTeam:"Total Team",airdropBits:"Airdrop Bits",orbitEarnings:"Orbit Earnings",earnings:"Earnings",withdrawable:"Withdrawable",locked:"Locked",unlocking:"Unlocking",totalEarned:"Total Earned",save:"Save",loadingProfile:"Loading profile...",noUserID:"No user ID",userNotFound:"User not found",firebaseError:"Firebase error",noChange:"No change",nameUpdated:"Name updated",failUpdate:"Failed to update",emailSaved:"Email saved",failSave:"Failed to save",refCopied:"Referral link copied"}},
+  hi:{name:"Hindi",native:"हिन्दी",flag:"🇮🇳",t:{profile:"प्रोफ़ाइल",personalInfo:"व्यक्तिगत जानकारी",displayName:"डिस्प्ले नाम",emailAddress:"ईमेल पता",referral:"रेफरल",sponsorId:"स्पॉन्सर आईडी",refCode:"रेफरल कोड",copy:"कॉपी",reactorPackage:"रिएक्टर पैकेज",curPackage:"मौजूदा पैकेज",activationUsdt:"एक्टिवेशन USDT",dailyRate:"दैनिक दर",rank:"रैंक",teamStats:"टीम स्टैट्स",direct:"डायरेक्ट",totalTeam:"कुल टीम",airdropBits:"एयरड्रॉप बिट्स",orbitEarnings:"ऑर्बिट कमाई",earnings:"कमाई",withdrawable:"निकासी योग्य",locked:"लॉक",unlocking:"अनलॉक हो रहा",totalEarned:"कुल कमाई",save:"सेव",loadingProfile:"प्रोफ़ाइल लोड हो रही है...",noUserID:"कोई यूज़र आईडी नहीं",userNotFound:"यूज़र नहीं मिला",firebaseError:"फायरबेस त्रुटि",noChange:"कोई बदलाव नहीं",nameUpdated:"नाम अपडेट हो गया",failUpdate:"अपडेट विफल",emailSaved:"ईमेल सेव हो गया",failSave:"सेव विफल",refCopied:"रेफरल लिंक कॉपी हो गया"}},
+  es:{name:"Spanish",native:"Español",flag:"🇪🇸",t:{profile:"Perfil",personalInfo:"Información Personal",displayName:"Nombre a Mostrar",emailAddress:"Correo Electrónico",referral:"Referido",sponsorId:"ID del Patrocinador",refCode:"Código de Referido",copy:"Copiar",reactorPackage:"Paquete Reactor",curPackage:"Paquete Actual",activationUsdt:"Activación USDT",dailyRate:"Tarifa Diaria",rank:"Rango",teamStats:"Estadísticas del Equipo",direct:"Directo",totalTeam:"Equipo Total",airdropBits:"Bits Airdrop",orbitEarnings:"Ganancias Orbit",earnings:"Ganancias",withdrawable:"Retirable",locked:"Bloqueado",unlocking:"Desbloqueando",totalEarned:"Ganado Total",save:"Guardar",loadingProfile:"Cargando perfil...",noUserID:"Sin ID de usuario",userNotFound:"Usuario no encontrado",firebaseError:"Error de Firebase",noChange:"Sin cambios",nameUpdated:"Nombre actualizado",failUpdate:"Error al actualizar",emailSaved:"Correo guardado",failSave:"Error al guardar",refCopied:"Enlace de referido copiado"}},
+  fr:{name:"French",native:"Français",flag:"🇫🇷",t:{profile:"Profil",personalInfo:"Informations Personnelles",displayName:"Nom d'Affichage",emailAddress:"Adresse Email",referral:"Parrainage",sponsorId:"ID du Parrain",refCode:"Code de Parrainage",copy:"Copier",reactorPackage:"Pack Réacteur",curPackage:"Pack Actuel",activationUsdt:"Activation USDT",dailyRate:"Taux Quotidien",rank:"Rang",teamStats:"Statistiques d'Équipe",direct:"Direct",totalTeam:"Équipe Totale",airdropBits:"Bits Airdrop",orbitEarnings:"Gains Orbit",earnings:"Gains",withdrawable:"Retirable",locked:"Verrouillé",unlocking:"Déverrouillage",totalEarned:"Gagné Total",save:"Enregistrer",loadingProfile:"Chargement du profil...",noUserID:"Aucun ID utilisateur",userNotFound:"Utilisateur introuvable",firebaseError:"Erreur Firebase",noChange:"Aucun changement",nameUpdated:"Nom mis à jour",failUpdate:"Échec de la mise à jour",emailSaved:"Email enregistré",failSave:"Échec de l'enregistrement",refCopied:"Lien de parrainage copié"}},
+  pt:{name:"Portuguese",native:"Português",flag:"🇵🇹",t:{profile:"Perfil",personalInfo:"Informações Pessoais",displayName:"Nome de Exibição",emailAddress:"Endereço de Email",referral:"Indicação",sponsorId:"ID do Patrocinador",refCode:"Código de Indicação",copy:"Copiar",reactorPackage:"Pacote Reator",curPackage:"Pacote Atual",activationUsdt:"Ativação USDT",dailyRate:"Taxa Diária",rank:"Ranking",teamStats:"Estatísticas da Equipe",direct:"Direto",totalTeam:"Equipe Total",airdropBits:"Bits Airdrop",orbitEarnings:"Ganhos Orbit",earnings:"Ganhos",withdrawable:"Sacável",locked:"Bloqueado",unlocking:"Desbloqueando",totalEarned:"Ganho Total",save:"Salvar",loadingProfile:"Carregando perfil...",noUserID:"Sem ID de usuário",userNotFound:"Usuário não encontrado",firebaseError:"Erro do Firebase",noChange:"Sem alterações",nameUpdated:"Nome atualizado",failUpdate:"Falha ao atualizar",emailSaved:"Email salvo",failSave:"Falha ao salvar",refCopied:"Link de indicação copiado"}},
+  ru:{name:"Russian",native:"Русский",flag:"🇷🇺",t:{profile:"Профиль",personalInfo:"Личная информация",displayName:"Отображаемое имя",emailAddress:"Адрес электронной почты",referral:"Реферал",sponsorId:"ID спонсора",refCode:"Реферальный код",copy:"Копировать",reactorPackage:"Пакет реактора",curPackage:"Текущий пакет",activationUsdt:"Активация USDT",dailyRate:"Дневная ставка",rank:"Ранг",teamStats:"Статистика команды",direct:"Прямые",totalTeam:"Вся команда",airdropBits:"Airdrop биты",orbitEarnings:"Orbit заработок",earnings:"Заработок",withdrawable:"К выводу",locked:"Заблокировано",unlocking:"Разблокируется",totalEarned:"Всего заработано",save:"Сохранить",loadingProfile:"Загрузка профиля...",noUserID:"Нет ID пользователя",userNotFound:"Пользователь не найден",firebaseError:"Ошибка Firebase",noChange:"Без изменений",nameUpdated:"Имя обновлено",failUpdate:"Не удалось обновить",emailSaved:"Email сохранен",failSave:"Не удалось сохранить",refCopied:"Реферальная ссылка скопирована"}},
+  zh:{name:"Chinese",native:"中文",flag:"🇨🇳",t:{profile:"个人资料",personalInfo:"个人信息",displayName:"显示名称",emailAddress:"电子邮件地址",referral:"推荐",sponsorId:"赞助人ID",refCode:"推荐代码",copy:"复制",reactorPackage:"反应堆套餐",curPackage:"当前套餐",activationUsdt:"激活USDT",dailyRate:"日利率",rank:"等级",teamStats:"团队统计",direct:"直属",totalTeam:"总团队",airdropBits:"空投比特",orbitEarnings:"轨道收益",earnings:"收益",withdrawable:"可提现",locked:"已锁定",unlocking:"解锁中",totalEarned:"总收入",save:"保存",loadingProfile:"加载个人资料中...",noUserID:"无用户ID",userNotFound:"未找到用户",firebaseError:"Firebase错误",noChange:"无更改",nameUpdated:"名称已更新",failUpdate:"更新失败",emailSaved:"电子邮件已保存",failSave:"保存失败",refCopied:"推荐链接已复制"}},
+  ar:{name:"Arabic",native:"العربية",flag:"🇸🇦",t:{profile:"الملف الشخصي",personalInfo:"المعلومات الشخصية",displayName:"الاسم المعروض",emailAddress:"البريد الإلكتروني",referral:"الإحالة",sponsorId:"معرّف الراعي",refCode:"رمز الإحالة",copy:"نسخ",reactorPackage:"حزمة المفاعل",curPackage:"الحزمة الحالية",activationUsdt:"تفعيل USDT",dailyRate:"المعدل اليومي",rank:"المرتبة",teamStats:"إحصائيات الفريق",direct:"مباشر",totalTeam:"إجمالي الفريق",airdropBits:"بتات Airdrop",orbitEarnings:"أرباح Orbit",earnings:"الأرباح",withdrawable:"قابل للسحب",locked:"مقفل",unlocking:"جارٍ الفتح",totalEarned:"إجمالي الأرباح",save:"حفظ",loadingProfile:"جاري تحميل الملف الشخصي...",noUserID:"لا يوجد معرف مستخدم",userNotFound:"المستخدم غير موجود",firebaseError:"خطأ Firebase",noChange:"لا تغيير",nameUpdated:"تم تحديث الاسم",failUpdate:"فشل التحديث",emailSaved:"تم حفظ البريد الإلكتروني",failSave:"فشل الحفظ",refCopied:"تم نسخ رابط الإحالة"}},
+  ja:{name:"Japanese",native:"日本語",flag:"🇯🇵",t:{profile:"プロフィール",personalInfo:"個人情報",displayName:"表示名",emailAddress:"メールアドレス",referral:"紹介",sponsorId:"スポンサーID",refCode:"紹介コード",copy:"コピー",reactorPackage:"リアクターパッケージ",curPackage:"現在のパッケージ",activationUsdt:"アクティベーションUSDT",dailyRate:"日次レート",rank:"ランク",teamStats:"チーム統計",direct:"ダイレクト",totalTeam:"総チーム",airdropBits:"エアドロップビット",orbitEarnings:"オービット収益",earnings:"収益",withdrawable:"出金可能",locked:"ロック済み",unlocking:"ロック解除中",totalEarned:"総収益",save:"保存",loadingProfile:"プロフィール読み込み中...",noUserID:"ユーザーIDがありません",userNotFound:"ユーザーが見つかりません",firebaseError:"Firebaseエラー",noChange:"変更なし",nameUpdated:"名前を更新しました",failUpdate:"更新に失敗しました",emailSaved:"メールを保存しました",failSave:"保存に失敗しました",refCopied:"紹介リンクをコピーしました"}},
+  de:{name:"German",native:"Deutsch",flag:"🇩🇪",t:{profile:"Profil",personalInfo:"Persönliche Daten",displayName:"Anzeigename",emailAddress:"E-Mail-Adresse",referral:"Empfehlung",sponsorId:"Sponsor-ID",refCode:"Empfehlungscode",copy:"Kopieren",reactorPackage:"Reaktor-Paket",curPackage:"Aktuelles Paket",activationUsdt:"Aktivierung USDT",dailyRate:"Täglicher Satz",rank:"Rang",teamStats:"Team-Statistiken",direct:"Direkt",totalTeam:"Gesamtes Team",airdropBits:"Airdrop-Bits",orbitEarnings:"Orbit-Einnahmen",earnings:"Einnahmen",withdrawable:"Abhebbar",locked:"Gesperrt",unlocking:"Entsperren",totalEarned:"Gesamt verdient",save:"Speichern",loadingProfile:"Profil wird geladen...",noUserID:"Keine Benutzer-ID",userNotFound:"Benutzer nicht gefunden",firebaseError:"Firebase-Fehler",noChange:"Keine Änderung",nameUpdated:"Name aktualisiert",failUpdate:"Aktualisierung fehlgeschlagen",emailSaved:"E-Mail gespeichert",failSave:"Speichern fehlgeschlagen",refCopied:"Empfehlungslink kopiert"}}
+};
+let __=key=>{const l=localStorage.getItem("pb_lang")||"en";return LANGS[l]?.t?.[key]||LANGS.en.t[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const key=el.getAttribute("data-lang");if(key)el.textContent=__(key)})}
+(function initLang(){const cur=localStorage.getItem("pb_lang")||"en";if(document.getElementById("loader")?.querySelector("p"))document.getElementById("loader").querySelector("p").textContent=__("loadingProfile")})();
+// Theme
+if(localStorage.getItem("pb_theme")==="light")document.body.classList.add("light");
+
+const PACKAGES=[
+  {u:1,pw:100,sp:.5},{u:5,pw:500,sp:.5},{u:10,pw:1000,sp:.75},{u:25,pw:2500,sp:.75},{u:50,pw:5000,sp:1},{u:100,pw:10000,sp:1},{u:250,pw:25000,sp:1.25},{u:500,pw:50000,sp:1.5},{u:750,pw:75000,sp:1.75},{u:1000,pw:100000,sp:2}
+];
+const RANKS=[
+  {n:"Spark",m:0,x:20000},{n:"Flame",m:20000,x:100000},{n:"Blaze",m:100000,x:300000},{n:"Inferno",m:300000,x:1e6},{n:"Nova",m:1e6,x:null}
+];
+
+let S={uid:null,user:null};
+
+function $(id){return document.getElementById(id)}
+function t(m){const e=document.createElement("div");e.className="toast";e.innerHTML=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}
+function goBack(){const p=new URLSearchParams();p.set("uid",S.uid);if(S.user?.referredBy)p.set("ref",S.user.referredBy);window.location.href="dashboard.html?"+p.toString()}
+window.goBack=goBack;
+
+function calcPkg(usdt){
+  let r={pw:0,sp:0,w:0};
+  for(const p of PACKAGES){if(p.u<=usdt){r={pw:p.pw,sp:p.sp,w:p.u}}}
+  const d=r.pw*r.sp/100;
+  return{...r,daily:d,round:Math.round(d*100)/100}
+}
+function rankInfo(te){
+  let c=RANKS[0];
+  for(const r of RANKS){if(te>=r.m)c=r}
+  if(!c.x)return{n:c.n,p:100};
+  return{n:c.n,p:Math.round(Math.max(0,Math.min(100,(te-c.m)/(c.x-c.m)*100)))}
+}
+
+function getStoredId(){
+  try{const v=localStorage.getItem("pb_uid");if(v)return v}catch(e){}
+  try{const v=sessionStorage.getItem("pb_uid");if(v)return v}catch(e){}
+  try{const m=document.cookie.match(/(?:^|;\s*)pb_uid=([^;]+)/);if(m)return m[1]}catch(e){}
+  return null
+}
+
+async function countTeam(uid){
+  try{
+    const res=await API.getNetwork(uid,1);
+    if(res&&res.success){
+      let total=0;
+      if(res.levels){res.levels.forEach(l=>{total+=l.length})}
+      return total
+    }
+    return 0
+  }catch(e){return 0}
+}
+
+async function loadProfile(){
+  const p=new URLSearchParams(location.search);
+  const uid=p.get("uid");
+  S.uid=uid||getStoredId();
+  if(!S.uid){$("app").style.display="none";t(__("noUserID"));return}
+
+  try{
+    const res=await fetch(BACKEND_URL+"/api/users/"+S.uid);
+    const data=await res.json();
+    if(!data.success||!data.user){t(__("userNotFound"));return}
+    S.user=data.user;
+  }catch(e){t(__("firebaseError"));return}
+
+  $("loader").classList.add("hide");
+  $("app").style.display="block";
+
+  const u=S.user;
+  const pkg=calcPkg(u.activationUSDT||0);
+  const ri=rankInfo(u.totalEarned||0);
+  const total=(u.withdrawableBits||0)+(u.unlockingBits||0)+(u.lockedBits||0);
+
+  // Avatar
+  const initial=(u.firstName||"PW").slice(0,2).toUpperCase();
+  $("avatarCircle").textContent=initial;
+  $("dispName").textContent=u.firstName||"Player";
+  $("dispUid").textContent="ID: "+S.uid;
+  const joinDate=u.createdAt?new Date(typeof u.createdAt==="number"?u.createdAt:Number(u.createdAt||0)):null;
+  $("dispJoined").textContent=joinDate&&!isNaN(joinDate.getTime())?"Joined "+joinDate.toLocaleDateString([],{year:"numeric",month:"short",day:"numeric"}):"";
+
+  // Name input
+  $("nameInput").value=u.firstName||"";
+  // Email
+  $("emailInput").value=u.email||"";
+
+  // Referral
+  $("sponsorId").textContent=u.referredBy||"N/A";
+  $("refCode").textContent=S.uid;
+  $("refLink").textContent="https://t.me/PBTESTING2BOT/app?startapp="+S.uid;
+
+  // Package
+  $("curPackage").textContent="$"+pkg.w;
+  $("activationUsdt").textContent="$"+(u.activationUSDT||0);
+  $("dailyRate").textContent=pkg.round+" Bits";
+  $("rankName").textContent=ri.n;
+
+  // Team
+  $("tDirects").textContent=u.totalDirects||0;
+  countTeam(S.uid).then(c=>{$("tTeam").textContent=c});
+  $("tAirdrop").textContent=Math.floor((u.totalDirects||0)*5);
+  $("tOrbit").textContent=Math.floor(((u.totalEarned||0)*.08));
+
+  // Earnings
+  $("withdrawable").textContent=Math.floor(u.withdrawableBits||0).toLocaleString();
+  $("lockedBits").textContent=u.lockedBits||0;
+  $("unlockingBits").textContent=u.unlockingBits||0;
+  $("totalEarned").textContent=Math.floor(u.totalEarned||0).toLocaleString();
+
+  applyLang()
+}
+
+window.saveName=async function(){
+  const val=$("nameInput").value.trim();
+  if(!val||val===S.user.firstName){t(__("noChange"));return}
+  const btn=$("nameSaveBtn");btn.disabled=true;
+  try{
+    await API.updateProfile(S.uid,{firstName:val});
+    S.user.firstName=val;
+    $("dispName").textContent=val;
+    $("avatarCircle").textContent=val.slice(0,2).toUpperCase();
+    t(__("nameUpdated"))
+  }catch(e){t(__("failUpdate"))}
+  btn.disabled=false
+};
+
+window.saveEmail=async function(){
+  const val=$("emailInput").value.trim();
+  const btn=$("emailSaveBtn");btn.disabled=true;
+  try{
+    await API.updateProfile(S.uid,{email:val});
+    S.user.email=val;
+    t(__("emailSaved"))
+  }catch(e){t(__("failSave"))}
+  btn.disabled=false
+};
+
+window.copyRef=function(){
+  const el=$("refLink");
+  navigator.clipboard.writeText(el.textContent);
+  t(__("refCopied"))
+};
+
+loadProfile()
+</script>
+</body>
+</html>

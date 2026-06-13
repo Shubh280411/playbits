@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Booster</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--vt:rgba(0,0,0,.2);--boost-ignition:var(--cyan);--boost-quantum:var(--purple);--boost-infinity:var(--gold);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--vt:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 40px;box-sizing:border-box;position:relative;background:var(--bg)}
+::-webkit-scrollbar{width:0}
+@keyframes ef{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.98);color:#fff;padding:12px 24px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:99999;pointer-events:none;animation:toast-up .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center;border:1px solid var(--card-border)}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+
+/* BOOSTER HERO */
+.booster-hero{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;margin-bottom:14px}
+.booster-hero::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.booster-name{font:800 18px 'Orbitron',sans-serif;color:var(--text);display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.booster-name i{color:var(--cyan)}
+.booster-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.booster-item{background:rgba(0,0,0,.15);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px;text-align:center}
+.booster-item .bi-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.booster-item .bi-value{font:700 18px 'JetBrains Mono',monospace}
+.booster-item .bi-value.cyan{color:var(--cyan)}
+.booster-item .bi-value.green{color:var(--green)}
+.booster-item .bi-value.gold{color:var(--gold)}
+.booster-item .bi-value.pink{color:var(--pink)}
+.booster-status{display:block;margin-top:12px;padding:10px;border-radius:var(--rs);font:700 13px 'Orbitron',sans-serif;text-align:center;text-transform:uppercase;letter-spacing:1px}
+.booster-status.active{background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.2);color:var(--green)}
+.booster-status.locked{background:rgba(0,0,0,.12);border:1px solid var(--card-border);color:var(--text3)}
+.booster-status.expired{background:rgba(255,45,149,.06);border:1px solid rgba(255,45,149,.2);color:var(--pink)}
+
+/* PROGRESS SECTION */
+.progress-section{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;margin-bottom:14px}
+.progress-section::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.progress-title{font:800 13px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.progress-title i{color:var(--purple)}
+.progress-target{color:var(--gold);font-weight:700;font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.progress-target i{color:var(--gold)}
+.progress-count{font-size:13px;color:var(--text2);margin-bottom:8px}
+.progress-count b{color:var(--text);font-family:'JetBrains Mono',monospace}
+.progress-bar{height:10px;background:rgba(255,255,255,.04);border-radius:999px;overflow:hidden;position:relative}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--gold));border-radius:999px;transition:width .8s;position:relative}
+.progress-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15));animation:ef 2s ease-in-out infinite}
+
+/* LEVELS LIST */
+.levels-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;margin-bottom:14px}
+.levels-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.levels-title{font:800 13px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.levels-title i{color:var(--gold)}
+.level-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(0,0,0,.12);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:6px;font-size:13px}
+.level-row .lr-icon{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:14px;flex-shrink:0}
+.level-row .lr-icon.ignition{background:rgba(0,229,255,.12);color:var(--cyan)}
+.level-row .lr-icon.quantum{background:rgba(168,85,247,.12);color:var(--purple)}
+.level-row .lr-icon.infinity{background:rgba(255,215,0,.12);color:var(--gold)}
+.level-row .lr-name{flex:1;font-weight:700;color:var(--text)}
+.level-row .lr-detail{font-size:11px;color:var(--text3)}
+.level-row .lr-check{color:var(--text3);font-size:16px}
+.level-row .lr-check.qualified{color:var(--green)}
+.level-row .lr-check.active{color:var(--cyan)}
+
+/* WARNING */
+.warning-card{background:rgba(255,165,0,.05);border:2px solid rgba(255,165,0,.25);border-radius:var(--r);padding:14px;margin-bottom:14px;display:flex;align-items:flex-start;gap:12px;animation:warnPulse 1.8s ease-in-out infinite}
+@keyframes warnPulse{0%,100%{border-color:rgba(255,165,0,.25)}50%{border-color:rgba(255,165,0,.55)}}
+.warn-icon{width:32px;height:32px;border-radius:50%;background:rgba(255,165,0,.15);display:grid;place-items:center;flex-shrink:0;color:#ff9500;font-size:16px}
+.warn-text{font-size:12px;color:var(--text2);line-height:1.5;font-weight:500;margin-top:5px}
+.warn-text b{color:var(--gold);font-weight:700}
+
+/* HISTORY */
+.history-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
+.history-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink),transparent)}
+.history-title{font:800 13px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.history-title i{color:var(--pink)}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.1);border:1px solid rgba(255,255,255,.02);border-radius:var(--rs);margin-bottom:6px;font-size:13px}
+.history-item .hi-name{font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.history-item .hi-status{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.history-item .hi-status.active{color:var(--green)}
+.history-item .hi-status.expired{color:var(--pink)}
+.history-item .hi-date{font-size:11px;color:var(--text3)}
+.history-empty{text-align:center;padding:16px;font-size:12px;color:var(--text3)}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" onclick="window.location.href='profile.html?uid='+uid">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="booster-hero">
+    <div class="booster-name"><i class="fa-solid fa-bolt"></i> <span id="boosterName">Locked</span></div>
+    <div class="booster-grid">
+      <div class="booster-item"><div class="bi-label">Extra ROI</div><div class="bi-value cyan" id="extraRoi">+0.00%</div></div>
+      <div class="booster-item"><div class="bi-label">Remaining Time</div><div class="bi-value" id="remainTime">--</div></div>
+      <div class="booster-item"><div class="bi-label">Total Directs</div><div class="bi-value cyan" id="totalDir">0</div></div>
+      <div class="booster-item"><div class="bi-label">Qualified</div><div class="bi-value" id="qualDir">0</div></div>
+    </div>
+    <div class="booster-status locked" id="boosterStatus">Locked</div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-title"><i class="fa-solid fa-chart-line"></i> Next Booster Target</div>
+    <div class="progress-target" id="nextTarget"><i class="fa-solid fa-bullseye"></i> Ignition Booster (10 Directs)</div>
+    <div class="progress-count">Progress: <b id="progressCurrent">0</b> / <b id="progressTarget">10</b></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="levels-card">
+    <div class="levels-title"><i class="fa-solid fa-layer-group"></i> Booster Levels</div>
+    <div class="level-row">
+      <div class="lr-icon ignition"><i class="fa-solid fa-bolt"></i></div>
+      <div class="lr-name">Ignition Booster</div>
+      <div class="lr-detail">10 Directs · +0.25% · 30 Days</div>
+      <div class="lr-check" id="chkIgnition"><i class="fa-regular fa-circle"></i></div>
+    </div>
+    <div class="level-row">
+      <div class="lr-icon quantum"><i class="fa-solid fa-rocket"></i></div>
+      <div class="lr-name">Quantum Booster</div>
+      <div class="lr-detail">25 Directs · +0.50% · 45 Days</div>
+      <div class="lr-check" id="chkQuantum"><i class="fa-regular fa-circle"></i></div>
+    </div>
+    <div class="level-row">
+      <div class="lr-icon infinity"><i class="fa-solid fa-crown"></i></div>
+      <div class="lr-name">Infinity Booster</div>
+      <div class="lr-detail">50 Directs · +1.00% · 60 Days</div>
+      <div class="lr-check" id="chkInfinity"><i class="fa-regular fa-circle"></i></div>
+    </div>
+  </div>
+
+  <div class="warning-card">
+    <div class="warn-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+    <div class="warn-text">Only directs with an <b>active package</b> of <b>same or higher</b> amount than your package count toward the booster requirement.</div>
+  </div>
+
+  <div class="history-card">
+    <div class="history-title"><i class="fa-solid fa-clock-rotate-left"></i> Booster History</div>
+    <div id="historyList"><div class="history-empty">No history yet</div></div>
+  </div>
+</div>
+<script>
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+const BACKEND_URL="https://playbits-backend-132h.onrender.com";
+const savedTheme=localStorage.getItem("pb_theme");
+if(savedTheme==="light")document.body.classList.add("light");
+let uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
+if(!uid||uid==="guest"){const p=new URLSearchParams(location.search);uid=p.get("uid")||""}
+
+function t(m){const e=document.createElement("div");e.className="toast";e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2500)}
+function setBoosterError(msg){
+  document.getElementById("boosterName").textContent=msg||"No Data";
+  document.getElementById("boosterStatus").textContent="OFFLINE";
+  document.getElementById("boosterStatus").className="booster-status expired";
+  document.getElementById("extraRoi").textContent="+0.00%";
+  document.getElementById("remainTime").textContent="--";
+  document.getElementById("totalDir").textContent="0";
+  document.getElementById("qualDir").textContent="0";
+}
+
+function fmtRemain(ms){
+  if(!ms||ms<=0)return"0d";
+  const d=Math.floor(ms/86400000),h=Math.floor((ms%86400000)/3600000);
+  return d+"d "+h+"h";
+}
+
+async function loadBooster(){
+  if(!uid){setBoosterError("Login Required");return}
+  try{
+    const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),20000);
+    const r=await fetch(BACKEND_URL+"/api/booster/"+encodeURIComponent(uid),{signal:ctrl.signal});
+    clearTimeout(to);
+    const d=await r.json();
+    if(!d.success){setBoosterError("API Error");console.warn("Booster API error:",d);return}
+
+    const cur=d.currentBooster;
+    const s=d.boosterStatus||"locked";
+    document.getElementById("boosterName").textContent=cur?cur.name:"Locked";
+    document.getElementById("extraRoi").textContent="+"+Number(cur?.extraRoi||0).toFixed(2)+"%";
+    document.getElementById("remainTime").textContent=fmtRemain(d.remainingMs||0);
+    document.getElementById("totalDir").textContent=d.totalDirectCount||0;
+    document.getElementById("qualDir").textContent=d.activeDirectCount||0;
+
+    const stEl=document.getElementById("boosterStatus");
+    stEl.textContent=s.toUpperCase();
+    stEl.className="booster-status "+s;
+
+    const n=d.nextBooster;
+    document.getElementById("nextTarget").innerHTML='<i class="fa-solid fa-bullseye"></i> '+(n?n.name+" ("+n.targetDirects+" Directs)":"Max Level Reached");
+    document.getElementById("progressCurrent").textContent=d.progress?.current||0;
+    document.getElementById("progressTarget").textContent=d.progress?.target||0;
+    document.getElementById("progressFill").style.width=(d.progress?.pct||0)+"%";
+
+    // level check marks
+    const lvls=d.levels||[];
+    lvls.forEach((l,i)=>{
+      const id=["ignition","quantum","infinity"][i];
+      const el=document.getElementById("chk"+id.charAt(0).toUpperCase()+id.slice(1))||document.getElementById("chk"+id);
+      if(el){
+        const qualified=d.activeDirectCount>=l.targetDirects;
+        const isActive=cur&&cur.id===l.id;
+        if(isActive){el.innerHTML='<i class="fa-solid fa-circle-check"></i>';el.className="lr-check active"}
+        else if(qualified){el.innerHTML='<i class="fa-solid fa-circle-check"></i>';el.className="lr-check qualified"}
+        else{el.innerHTML='<i class="fa-regular fa-circle"></i>';el.className="lr-check"}
+      }
+    });
+
+    const h=(d.history||[]).slice(0,12);
+    const html=h.map(x=>{
+      const dt=new Date(x.at||x.createdAt||Date.now()).toLocaleString();
+      const st=(x.status||"").toUpperCase();
+      return '<div class="history-item"><div class="hi-name"><span class="hi-status '+x.status+'">'+st+'</span> '+(x.boosterName||"Booster")+'</div><div class="hi-date">'+dt+'</div></div>';
+    }).join("");
+    document.getElementById("historyList").innerHTML=html||'<div class="history-empty">No history yet</div>';
+
+  }catch(e){console.error("Booster load error:",e)}
+}
+
+// Set avatar
+try{
+  const tg=window.Telegram?.WebApp;
+  const tu=tg?.initDataUnsafe?.user;
+  document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase();
+}catch(e){}
+
+loadBooster();
+setInterval(loadBooster,30000);
+</script>
+</body>
+</html>

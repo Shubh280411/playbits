@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Income History</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--orange:#ff8c00;--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--orange:#ea580c}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition)}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 40px;box-sizing:border-box;position:relative;background:var(--bg)}
+::-webkit-scrollbar{width:0}
+@keyframes ef{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+@keyframes toast-up{0%{opacity:0;transform:translateX(-50%) translateY(16px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.98);color:#fff;padding:12px 24px;border-radius:var(--rs);font-size:13px;font-weight:600;z-index:99999;pointer-events:none;animation:toast-up .35s ease forwards;white-space:nowrap;max-width:90%;text-align:center;border:1px solid var(--card-border)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+/* STAT SUMMARY */
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-summary{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:14px;position:relative;overflow:hidden}
+.stat-summary::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px}
+.stat-summary:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.stat-summary:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.stat-summary:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.stat-summary:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.stat-summary .ss-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:4px}
+.stat-summary .ss-value{font:700 18px 'Orbitron',sans-serif;color:var(--cyan)}
+.stat-summary:nth-child(2) .ss-value{color:var(--green)}
+.stat-summary:nth-child(3) .ss-value{color:var(--gold)}
+.stat-summary:nth-child(4) .ss-value{color:var(--purple)}
+/* FILTERS */
+.filters{display:flex;gap:6px;overflow-x:auto;padding:0 0 12px;margin-bottom:4px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-chip{flex-shrink:0;padding:6px 14px;border-radius:999px;border:1px solid var(--card-border);background:transparent;color:var(--text2);font:600 12px 'Rajdhani',sans-serif;cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-chip.active{background:var(--cyan);color:#000;border-color:var(--cyan);font-weight:700}
+.filter-chip:hover{background:rgba(0,229,255,.08);color:var(--text)}
+/* INCOME LIST */
+.income-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:16px;position:relative;overflow:hidden}
+.income-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.income-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.income-header i{color:var(--green)}
+.income-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.income-count{font-size:12px;color:var(--text3)}
+.income-refresh{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px}
+.income-refresh:hover{color:var(--cyan)}
+.income-list{display:flex;flex-direction:column;gap:8px;min-height:60px}
+.income-empty{text-align:center;padding:24px;font-size:13px;color:var(--text3)}
+/* INCOME ITEM */
+.income-item{background:rgba(0,0,0,.15);border:1px solid var(--card-border);border-radius:var(--rs);padding:12px;cursor:pointer;transition:all .2s}
+.income-item:hover{border-color:rgba(0,229,255,.12)}
+.income-item .ii-row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.income-item .ii-type{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text)}
+.income-item .ii-type i{font-size:13px;width:16px;text-align:center}
+.income-item .ii-type .ic-daily{color:var(--cyan)}
+.income-item .ii-type .ic-booster{color:var(--gold)}
+.income-item .ii-type .ic-airdrop{color:var(--green)}
+.income-item .ii-type .ic-orbit{color:var(--purple)}
+.income-item .ii-type .ic-referral{color:var(--pink)}
+.income-item .ii-type .ic-rank{color:var(--gold)}
+.income-item .ii-type .ic-promo{color:var(--orange)}
+.income-item .ii-type .ic-withdrawal{color:var(--pink)}
+.income-item .ii-type .ic-deposit{color:var(--cyan)}
+.income-item .ii-amount{font:700 15px 'JetBrains Mono',monospace}
+.income-item .ii-amount.positive{color:var(--green)}
+.income-item .ii-amount.negative{color:var(--pink)}
+.income-item .ii-row2{display:flex;justify-content:space-between;align-items:center}
+.income-item .ii-desc{font-size:11px;color:var(--text3);flex:1}
+.income-item .ii-date{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap;margin-left:8px}
+/* DETAIL OVERLAY */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9998;opacity:0;pointer-events:none;transition:opacity .3s}
+.detail-overlay.open{opacity:1;pointer-events:auto}
+.detail-panel{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(100%);width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:var(--bg2);border-top:2px solid var(--card-border);border-radius:var(--r) var(--r) 0 0;z-index:9999;padding:20px 18px max(20px,env(safe-area-inset-bottom));transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.detail-panel.open{transform:translateX(-50%) translateY(0)}
+.detail-handle{width:36px;height:4px;border-radius:999px;background:var(--text3);margin:0 auto 16px}
+.detail-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:50%;border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:14px}
+.detail-title{font:800 16px 'Orbitron',sans-serif;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.detail-field{background:rgba(0,0,0,.12);border:1px solid var(--card-border);border-radius:var(--rs);padding:10px 12px}
+.detail-field.full{grid-column:1/-1}
+.detail-field .df-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:700}
+.detail-field .df-value{font-size:13px;color:var(--text);font-weight:600;word-break:break-all}
+.detail-field .df-value.green{color:var(--green)}
+.detail-field .df-value.pink{color:var(--pink)}
+.detail-field .df-value.cyan{color:var(--cyan)}
+.detail-field .df-value.gold{color:var(--gold)}
+.detail-field .df-value.purple{color:var(--purple)}
+.bottom-dock,.dock-item{display:none}
+.ic-daily{color:var(--cyan)}
+.ic-booster{color:var(--gold)}
+.ic-airdrop{color:var(--green)}
+.ic-orbit{color:var(--purple)}
+.ic-referral{color:var(--pink)}
+.ic-rank{color:var(--gold)}
+.ic-promo{color:var(--orange)}
+.ic-withdrawal{color:var(--pink)}
+.ic-deposit{color:var(--cyan)}
+/* LOADING */
+.loader{text-align:center;padding:24px;color:var(--text3)} 
+.bottom-dock{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);border-top:2px solid var(--card-border);display:flex;justify-content:space-around;padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:50;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.dock-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-size:9px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.5px;text-transform:uppercase;padding:4px 12px;border-radius:var(--rs);border:none;background:transparent;font-family:'Rajdhani',sans-serif;text-decoration:none}
+.dock-item i,.dock-item svg{font-size:18px;transition:all .3s;color:inherit}
+.dock-item:hover,.dock-item.active{color:var(--cyan)}
+.dock-item:hover i,.dock-item.active i,.dock-item:hover svg,.dock-item.active svg{color:var(--cyan);filter:drop-shadow(0 0 6px rgba(0,229,255,.15))}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" onclick="window.location.href='profile.html?uid='+uid">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-summary"><div class="ss-label">Lifetime</div><div class="ss-value" id="statLifetime">0</div></div>
+    <div class="stat-summary"><div class="ss-label">Today</div><div class="ss-value" id="statToday">0</div></div>
+    <div class="stat-summary"><div class="ss-label">This Week</div><div class="ss-value" id="statWeek">0</div></div>
+    <div class="stat-summary"><div class="ss-label">This Month</div><div class="ss-value" id="statMonth">0</div></div>
+  </div>
+
+  <div class="filters" id="filters">
+    <button class="filter-chip active" data-type="all">All</button>
+    <button class="filter-chip" data-type="daily_roi"><i class="fa-solid fa-bolt ic-daily"></i> Daily ROI</button>
+    <button class="filter-chip" data-type="booster_bonus"><i class="fa-solid fa-jet-fighter ic-booster"></i> Booster</button>
+    <button class="filter-chip" data-type="airdrop"><i class="fa-solid fa-gift ic-airdrop"></i> Airdrop</button>
+    <button class="filter-chip" data-type="orbit_reward"><i class="fa-solid fa-satellite-dish ic-orbit"></i> Orbit</button>
+    <button class="filter-chip" data-type="referral_commission"><i class="fa-solid fa-users ic-referral"></i> Referral</button>
+    <button class="filter-chip" data-type="rank_reward"><i class="fa-solid fa-crown ic-rank"></i> Rank</button>
+    <button class="filter-chip" data-type="promotional_bonus"><i class="fa-solid fa-gem ic-promo"></i> Promo</button>
+    <button class="filter-chip" data-type="withdrawal"><i class="fa-solid fa-arrow-up-right-dots ic-withdrawal"></i> Withdrawal</button>
+    <button class="filter-chip" data-type="deposit"><i class="fa-solid fa-circle-down ic-deposit"></i> Deposit</button>
+  </div>
+
+  <div class="income-card">
+    <div class="income-top">
+      <div class="income-header"><i class="fa-solid fa-clock-rotate-left"></i> Transaction History</div>
+      <button class="income-refresh" onclick="loadIncome()"><i class="fa-solid fa-rotate"></i></button>
+    </div>
+    <div class="income-list" id="incomeList"><div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div></div>
+    <div id="loadMore" style="display:none;text-align:center;padding:12px">
+      <button onclick="loadMore()" style="background:rgba(0,229,255,.08);border:1px solid var(--card-border);border-radius:var(--rs);padding:10px 24px;color:var(--cyan);font:700 12px 'Orbitron',sans-serif;cursor:pointer;letter-spacing:1px;text-transform:uppercase">Load More</button>
+    </div>
+  </div>
+</div>
+
+<div class="detail-overlay" id="detailOverlay"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-handle"></div>
+  <button class="detail-close" onclick="closeDetail()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="detail-title" id="detailTitle">Detail</div>
+  <div class="detail-grid" id="detailGrid"></div>
+</div>
+
+
+
+<script src="api.js"></script>
+<script>
+const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};
+function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+const savedTheme=localStorage.getItem("pb_theme");
+if(savedTheme==="light")document.body.classList.add("light");
+const BACKEND_URL="https://playbits-backend-132h.onrender.com";
+let uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
+if(!uid||uid==="guest"){const p=new URLSearchParams(location.search);uid=p.get("uid")||""}
+let allEntries=[],displayedEntries=[],pageSize=20,filter="all",page=0,loading=false;
+const TYPE_MAP={
+  daily_roi:{icon:"fa-solid fa-bolt",label:"Daily ROI",cls:"ic-daily"},
+  booster_bonus:{icon:"fa-solid fa-jet-fighter",label:"Dynamic Booster Bonus",cls:"ic-booster"},
+  airdrop:{icon:"fa-solid fa-gift",label:"Airdrop Reward",cls:"ic-airdrop"},
+  orbit_reward:{icon:"fa-solid fa-satellite-dish",label:"Orbit Reward",cls:"ic-orbit"},
+  referral_commission:{icon:"fa-solid fa-users",label:"Referral Commission",cls:"ic-referral"},
+  rank_reward:{icon:"fa-solid fa-crown",label:"Rank Reward",cls:"ic-rank"},
+  promotional_bonus:{icon:"fa-solid fa-gem",label:"Promotional Bonus",cls:"ic-promo"},
+  withdrawal:{icon:"fa-solid fa-arrow-up-right-dots",label:"Withdrawal",cls:"ic-withdrawal"},
+  deposit:{icon:"fa-solid fa-circle-down",label:"Deposit",cls:"ic-deposit"}
+};
+function t(m){const e=document.createElement("div");e.className="toast";e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),2500)}
+
+function fmtDate(ts){
+  if(!ts)return"--";
+  const d=new Date(typeof ts==="number"?ts:(Number(ts)||0));
+  if(isNaN(d.getTime()))return"--";
+  return d.toLocaleDateString()+" "+d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+}
+function fmtDateShort(ts){
+  if(!ts)return"--";
+  const d=new Date(typeof ts==="number"?ts:(Number(ts)||0));
+  if(isNaN(d.getTime()))return"--";
+  const now=new Date();
+  const diff=Math.floor((now-d)/60000);
+  if(diff<1)return"just now";
+  if(diff<60)return diff+"m ago";
+  if(diff<1440)return Math.floor(diff/60)+"h ago";
+  return d.toLocaleDateString([],{month:"short",day:"numeric"});
+}
+
+function getTypeIcon(type){
+  const t=TYPE_MAP[type];
+  return t?'<i class="'+t.icon+' '+t.cls+'"></i> '+t.label:type;
+}
+
+function renderDetail(entry){
+  const t=TYPE_MAP[entry.type]||{label:entry.type,icon:"fa-solid fa-circle"};
+  document.getElementById("detailTitle").innerHTML='<i class="'+t.icon+' '+t.cls+'" style="color:var(--'+t.cls?.replace("ic-","")+',var(--cyan))"></i> '+t.label;
+  const amt=Number(entry.amount)||0;
+  const isNeg=entry.type==="withdrawal"||entry.type==="withdraw";
+  let fields=[
+    {label:"Amount",value:(isNeg?"-":"+")+amt.toLocaleString()+" Bits",cls:isNeg?"pink":"green",full:false},
+    {label:"Status",value:(entry.status||"completed").toUpperCase(),cls:entry.status==="completed"?"green":(entry.status==="pending"?"gold":"pink"),full:false},
+    {label:"Date",value:fmtDate(entry.createdAt),cls:"",full:false}
+  ];
+  if(entry.description)fields.push({label:"Description",value:entry.description,cls:"",full:true});
+  if(entry.sourceUserName)fields.push({label:"From",value:entry.sourceUserName,cls:"cyan",full:false});
+  if(entry.sourceUserId)fields.push({label:"User ID",value:entry.sourceUserId,cls:"",full:false});
+  if(entry.level)fields.push({label:"Level",value:entry.level,cls:"gold",full:false});
+  if(entry.reason)fields.push({label:"Reason",value:entry.reason,cls:"",full:false});
+  if(entry.packageName)fields.push({label:"Package",value:entry.packageName,cls:"gold",full:false});
+  if(entry.roi)fields.push({label:"ROI",value:entry.roi+"%",cls:"cyan",full:false});
+  if(entry.boosterName)fields.push({label:"Booster",value:entry.boosterName,cls:"gold",full:false});
+  if(entry.extraRoi)fields.push({label:"Extra ROI",value:"+"+entry.extraRoi+"%",cls:"cyan",full:false});
+  if(entry.rankName)fields.push({label:"Rank",value:entry.rankName,cls:"gold",full:false});
+  if(entry.rewardCycle)fields.push({label:"Reward Cycle",value:entry.rewardCycle,cls:"",full:false});
+  if(entry.network)fields.push({label:"Network",value:entry.network,cls:"cyan",full:false});
+  if(entry.walletAddress)fields.push({label:"Wallet",value:entry.walletAddress,cls:"",full:true});
+  if(entry.txHash)fields.push({label:"Tx Hash",value:entry.txHash,cls:"",full:true});
+  if(entry.airdropType)fields.push({label:"Airdrop Type",value:entry.airdropType,cls:"",full:false});
+
+  document.getElementById("detailGrid").innerHTML=fields.map(f=>
+    '<div class="detail-field'+(f.full?' full':'')+'"><div class="df-label">'+f.label+'</div><div class="df-value'+(f.cls?' '+f.cls:'')+'">'+f.value+'</div></div>'
+  ).join("");
+  document.getElementById("detailOverlay").classList.add("open");
+  document.getElementById("detailPanel").classList.add("open");
+}
+
+function closeDetail(){
+  document.getElementById("detailOverlay").classList.remove("open");
+  document.getElementById("detailPanel").classList.remove("open");
+}
+document.getElementById("detailOverlay").addEventListener("click",closeDetail);
+
+function renderIncome(){
+  const filtered=filter==="all"?allEntries:allEntries.filter(e=>e.type===filter);
+  displayedEntries=filtered;
+
+  const el=document.getElementById("incomeList");
+  if(filtered.length===0){el.innerHTML='<div class="income-empty"><i class="fa-solid fa-receipt" style="font-size:28px;margin-bottom:10px;color:var(--text3);display:block"></i> No transactions found</div>';return}
+  const items=filtered.slice(0,pageSize);
+  const hasMore=filtered.length>pageSize;
+  document.getElementById("loadMore").style.display=hasMore?"block":"none";
+  el.innerHTML=items.map(e=>{
+    const amt=Number(e.amount)||0;
+    const isNeg=e.type==="withdrawal"||e.type==="withdraw";
+    return '<div class="income-item" onclick="renderDetail('+JSON.stringify(e).replace(/"/g,"&quot;")+')"><div class="ii-row1"><span class="ii-type">'+getTypeIcon(e.type)+'</span><span class="ii-amount '+(isNeg?"negative":"positive")+'">'+(isNeg?"-":"+")+amt.toLocaleString()+'</span></div><div class="ii-row2"><span class="ii-desc">'+(e.description||e.type||"")+'</span><span class="ii-date">'+fmtDateShort(e.createdAt)+'</span></div></div>'
+  }).join("");
+}
+
+async function loadIncome(){
+  if(!uid)return;
+  const el=document.getElementById("incomeList");
+  el.innerHTML='<div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+  try{
+    const url=`/api/income/${uid}?page=1&limit=200${filter!=='all'?'&type='+filter:''}`;
+    const data=await fetch(BACKEND_URL+url).then(r=>r.json());
+    allEntries=(data?.entries||[]).sort((a,b)=>(Number(b.createdAt)||0)-(Number(a.createdAt)||0));
+    const st=data?.stats||{};
+    document.getElementById("statLifetime").textContent=Number(st.lifetime||0).toLocaleString()+" B";
+    document.getElementById("statToday").textContent=Number(st.today||0).toLocaleString()+" B";
+    document.getElementById("statWeek").textContent=Number(st.week||0).toLocaleString()+" B";
+    document.getElementById("statMonth").textContent=Number(st.month||0).toLocaleString()+" B";
+    page=0;renderIncome();
+  }catch(e){
+    console.error("Income load error:",e);
+    el.innerHTML='<div class="income-empty">Could not load. <button onclick="loadIncome()" style="background:rgba(0,229,255,.1);border:none;border-radius:8px;padding:8px 16px;color:var(--cyan);font-weight:700;cursor:pointer;margin-top:8px">Retry</button></div>'
+  }
+}
+
+function loadMore(){
+  pageSize+=20;
+  renderIncome();
+}
+
+// Filter chips
+document.getElementById("filters").addEventListener("click",e=>{
+  const chip=e.target.closest(".filter-chip");
+  if(!chip)return;
+  document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+  chip.classList.add("active");
+  filter=chip.dataset.type;
+  pageSize=20;
+  renderIncome();
+});
+
+// Avatar
+try{
+  const tg=window.Telegram?.WebApp;
+  const tu=tg?.initDataUnsafe?.user;
+  document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase();
+}catch(e){}
+
+document.querySelectorAll("[href*='UID']").forEach(el=>{el.setAttribute("href",el.getAttribute("href").replace("UID",uid||"guest"))});
+loadIncome();
+setInterval(loadIncome,30000);
+</script>
+</body>
+</html>

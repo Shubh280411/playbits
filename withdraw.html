@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Withdraw</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:rgba(0,200,255,.18);--card-glow:rgba(0,200,255,.12);--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--vt:rgba(0,0,0,.2);--r:14px;--rs:8px;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body.light{--bg:#f0f2f5;--bg2:#ffffff;--bg3:#f8fafc;--card:#ffffff;--card-border:rgba(0,150,255,.14);--text:#0f172a;--text2:#475569;--text3:#94a3b8;--cyan:#0099ff;--purple:#8b5cf6;--gold:#d97706;--pink:#db2777;--green:#10b981;--vt:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start;transition:background var(--transition),color var(--transition);scroll-behavior:smooth}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 55%,var(--vt));pointer-events:none;z-index:1}
+.app-container{width:100%;max-width:480px;min-height:100vh;padding:20px 18px 90px;box-sizing:border-box;position:relative;background:var(--bg)}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding:14px 16px;background:var(--card);border:2px solid var(--card-border);border-radius:var(--r)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-back{width:38px;height:38px;border-radius:var(--rs);border:none;background:rgba(255,255,255,.03);color:var(--text2);cursor:pointer;display:grid;place-items:center;font-size:17px;text-decoration:none;transition:all .3s}
+.topbar-back:hover{color:var(--cyan);background:rgba(0,229,255,.05)}
+.topbar-logo{display:flex;align-items:center;gap:4px}
+.topbar-logo img{width:28px;height:28px;object-fit:contain}
+.topbar-logo .play{font:800 18px 'Orbitron',sans-serif;color:var(--text);letter-spacing:1px;margin-right:-4px}
+.topbar-logo .bits{font:800 18px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-user{display:flex;align-items:center;padding:2px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:999px;cursor:pointer;text-decoration:none;transition:all .3s}
+.topbar-user:hover{border-color:rgba(0,200,255,.12)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff}
+.wd-card{background:var(--card);border:2px solid var(--card-border);border-radius:var(--r);padding:20px;margin-bottom:14px;position:relative;overflow:hidden;transition:all var(--transition)}
+.wd-card::before{content:'';position:absolute;top:-1.5px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--pink),transparent)}
+.wd-header{font:800 14px 'Orbitron',sans-serif;color:var(--text);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.wd-header i{color:var(--pink)}
+.wd-balance{text-align:center;padding:20px;background:rgba(0,0,0,.18);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:16px}
+.wd-balance .wdb-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.wd-balance .wdb-value{font:900 32px 'Orbitron',sans-serif;color:var(--cyan)}
+.wd-balance .wdb-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.wd-field{margin-bottom:14px}
+.wd-field label{display:block;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600}
+.wd-field input,.wd-field select{width:100%;padding:12px 14px;border-radius:var(--rs);border:2px solid var(--card-border);background:rgba(0,0,0,.25);color:var(--text);font:600 14px 'Rajdhani',sans-serif;outline:none;box-sizing:border-box;transition:border-color .3s}
+.wd-field input:focus,.wd-field select:focus{border-color:var(--cyan)}
+.wd-field input::placeholder{color:var(--text3)}
+.wd-min{font-size:11px;color:var(--text3);margin-top:4px}
+.wd-submit{width:100%;padding:16px;border:none;border-radius:var(--rs);background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;font:700 14px 'Orbitron',sans-serif;text-transform:uppercase;letter-spacing:2px;cursor:pointer;transition:all .3s}
+.wd-submit:hover{transform:translateY(-2px);box-shadow:0 4px 20px rgba(255,45,149,.2)}
+.wd-submit[disabled]{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.wd-info{font-size:11px;color:var(--text3);text-align:center;margin-top:12px;line-height:1.4}
+.wd-history{margin-top:14px}
+.wd-history-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.12);border:1px solid var(--card-border);border-radius:var(--rs);margin-bottom:6px;font-size:12px}
+.wd-history-item .wdh-status{padding:2px 8px;border-radius:999px;font-size:9px;font-weight:700}
+.wd-history-item .wdh-status.pending{background:rgba(255,215,0,.1);color:var(--gold)}
+.wd-history-item .wdh-status.completed{background:rgba(0,255,136,.1);color:var(--green)}
+.wd-history-item .wdh-status.rejected{background:rgba(255,45,149,.1);color:var(--pink)}
+::-webkit-scrollbar{width:0}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="topbar-back"><i class="fa-solid fa-arrow-left"></i></a>
+      <div class="topbar-logo"><img src="logo.png" alt=""><span><span class="play">PLAY</span><span class="bits">BITS</span></span></div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-user" id="profileLink">
+        <div class="topbar-avatar" id="avatar">PW</div>
+      </div>
+    </div>
+  </div>
+  <div class="wd-card">
+    <div class="wd-header"><i class="fa-solid fa-wallet"></i> Withdraw Funds</div>
+    <div class="wd-balance">
+      <div class="wdb-label">Withdrawable Balance</div>
+      <div class="wdb-value" id="wdBalance">0</div>
+      <div class="wdb-sub">Unlocking: <b id="wdUnlocking">0</b> &middot; Locked: <b id="wdLocked">0</b></div>
+    </div>
+    <div class="wd-field">
+      <label>Network</label>
+      <select id="wdNetwork">
+        <option value="BEP20">BEP20 (BNB Smart Chain)</option>
+        <option value="ERC20">ERC20 (Ethereum)</option>
+        <option value="TRC20">TRC20 (Tron)</option>
+      </select>
+    </div>
+    <div class="wd-field">
+      <label>Wallet Address</label>
+      <input id="wdAddress" type="text" placeholder="Enter your USDT wallet address">
+    </div>
+    <div class="wd-field">
+      <label>Amount (Bits)</label>
+      <input id="wdAmount" type="number" min="10" placeholder="Minimum 10 bits">
+      <div class="wd-min">Balance: <b id="wdMax">0</b> bits &middot; Min: <b>10</b> bits</div>
+    </div>
+    <button class="wd-submit" id="wdSubmit"><i class="fa-solid fa-paper-plane"></i> Submit Withdrawal</button>
+    <div class="wd-info"><i class="fa-regular fa-clock"></i> Withdrawals are processed within 24-48 hours. Network fees may apply.</div>
+  </div>
+  <div class="wd-card">
+    <div class="wd-header"><i class="fa-solid fa-clock-rotate-left"></i> Withdrawal History</div>
+    <div id="wdHistory"><div style="text-align:center;padding:12px;font-size:12px;color:var(--text3)">No withdrawals yet</div></div>
+  </div>
+</div>
+<script>const savedTheme=localStorage.getItem("pb_theme");if(savedTheme==="light")document.body.classList.add("light");const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:{}};return t[lang]?.[key]||t.en[key]||key};function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+try{const tg=window.Telegram?.WebApp;const tu=tg?.initDataUnsafe?.user;document.getElementById("avatar").textContent=((tu?.username||tu?.first_name||"Player")||"").slice(0,2).toUpperCase()}catch(e){}const _uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";const _pl=document.getElementById("profileLink");if(_pl)_pl.onclick=function(e){e.stopPropagation();if(_uid)window.location.href='profile.html?uid='+_uid;else window.location.href='profile.html'}</script>
+<script src="api.js"></script>
+<script type="module">
+const BACKEND_URL="https://playbits-backend-132h.onrender.com";
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand()}
+(async function(){
+  const p=new URLSearchParams(location.search);
+  let uid=p.get("uid");
+  if(!uid){try{uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||null}catch(e){}}
+  if(!uid){document.getElementById("wdBalance").textContent="Login required";return}
+  const res=await fetch(BACKEND_URL+"/api/users/"+uid);
+  const uData=await res.json();
+  if(!uData.success||!uData.user){document.getElementById("wdBalance").textContent="User not found";return}
+  const u=uData.user;
+  const wd=u.withdrawableBits||0;
+  document.getElementById("wdBalance").textContent=wd.toLocaleString();
+  document.getElementById("wdUnlocking").textContent=(u.unlockingBits||0).toLocaleString();
+  document.getElementById("wdLocked").textContent=(u.lockedBits||0).toLocaleString();
+  document.getElementById("wdMax").textContent=wd.toLocaleString();
+  
+  const submitBtn=document.getElementById("wdSubmit");
+  submitBtn.onclick=async()=>{
+    const amt=parseFloat(document.getElementById("wdAmount").value)||0;
+    const addr=document.getElementById("wdAddress").value.trim();
+    const net=document.getElementById("wdNetwork").value;
+    if(!addr){alert("Enter a wallet address");return}
+    if(amt<10){alert("Minimum withdrawal is 10 bits");return}
+    if(amt>wd){alert("Insufficient balance");return}
+    
+    submitBtn.disabled=true;
+    submitBtn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+    try{
+      const now=Date.now();
+      await API.submitWithdraw(uid, amt, addr, net);
+      alert("Withdrawal request submitted! It will be processed automatically.");
+      document.getElementById("wdAmount").value="";
+      document.getElementById("wdAddress").value="";
+      location.reload();
+    }catch(e){
+      console.error(e);
+      alert("Error submitting withdrawal. Try again.");
+      submitBtn.disabled=false;
+      submitBtn.innerHTML='<i class="fa-solid fa-paper-plane"></i> Submit Withdrawal';
+    }
+  }
+  
+  // Load withdrawal history (all statuses)
+  try{
+    const ws=await API.getWithdrawals(20);
+    const hEl=document.getElementById("wdHistory");
+    let html="";let count=0;
+    (ws?.withdrawals||[]).forEach(w=>{
+      if(w.telegramId===uid){
+        count++;
+        let statusClass = w.status === "completed" ? "completed" : (w.status === "rejected" ? "rejected" : "pending");
+        let statusLabel = w.status.charAt(0).toUpperCase() + w.status.slice(1);
+        html+='<div class="wd-history-item"><span><b>'+w.amount+' bits</b><br><span style="font-size:10px;color:var(--text3)">'+(w.network||"BEP20")+'</span></span><span class="wdh-status '+statusClass+'">'+statusLabel+'</span></div>';
+      }
+    });
+    if(count>0)hEl.innerHTML=html;
+  }catch(e){console.error("History load error:",e)}
+})()
+</script>
+</body>
+</html>

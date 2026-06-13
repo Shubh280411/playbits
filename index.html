@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLAYBITS — Enter the Reactor</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#000000;--bg2:#020208;--bg3:#060612;--card:rgba(4,4,16,.95);--card-border:#00e5ff2e;--text:#ffffff;--text2:#9696b6;--text3:#52527a;--cyan:#00e5ff;--purple:#a855f7;--gold:#ffd700;--pink:#ff2d95;--green:#00ff88;--transition:.4s cubic-bezier(.4,0,.2,1)}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow:hidden;display:flex;justify-content:center;align-items:center}
+.loading-screen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:24px}
+.loading-screen-inner{display:flex;flex-direction:column;align-items:center;max-width:380px;text-align:center}
+.ls-reactor{position:relative;width:72px;height:72px;margin-bottom:16px}
+.ls-reactor .ls-ring{position:absolute;inset:0;border-radius:50%;border:2.5px solid #00e5ff;animation:spins 5s linear infinite;filter:drop-shadow(0 0 6px rgba(0,229,255,.15))}
+.ls-reactor .ls-ring:nth-child(2){display:none}
+.ls-reactor .ls-ring:nth-child(3){inset:16px;border-style:solid;border-color:#00e5ff;animation:spins 3s linear infinite;filter:drop-shadow(0 0 6px rgba(0,229,255,.1))}
+.ls-reactor .ls-core{position:absolute;inset:17px;border-radius:50%;background:radial-gradient(circle,rgba(0,229,255,.1),transparent 70%);animation:core-glow 3s ease-in-out infinite}
+.ls-logo{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.ls-logo img{width:36px;height:36px;object-fit:contain}
+.ls-logo .play{font:800 24px 'Orbitron',sans-serif;color:var(--text);letter-spacing:2px}
+.ls-logo .bits{font:800 24px 'Orbitron',sans-serif;color:var(--pink);letter-spacing:2px}
+.ls-title{font:800 18px 'Orbitron',sans-serif;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;margin-bottom:6px}
+.ls-sub{font-size:11px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.ls-desc{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px;max-width:300px}
+.ls-bar{width:160px;height:2px;background:rgba(255,255,255,.05);border-radius:999px;overflow:hidden;margin-top:14px}
+.ls-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--purple));border-radius:999px;animation:load-fill 1.5s ease forwards}
+.ls-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.1);border-radius:999px;font-size:9px;color:var(--cyan);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;font-weight:700}
+@keyframes spins{to{transform:rotate(360deg)}}
+@keyframes spinr{to{transform:rotate(-360deg)}}
+@keyframes core-glow{0%,100%{opacity:.4}50%{opacity:.9}}
+@keyframes load-fill{0%{width:0%}100%{width:100%}}
+
+body.light{--bg:#ffffff;--bg2:#f8fafc;--bg3:#f1f5f9;--card:rgba(255,255,255,.95);--card-border:#00e5ff40;--text:#0f172a;--text2:#475569;--text3:#94a3b8}
+</style>
+</head>
+<body>
+<div class="loading-screen" id="loadingScreen">
+  <div class="loading-screen-inner">
+    <div class="ls-reactor">
+      <div class="ls-ring"></div>
+      <div class="ls-ring"></div>
+      <div class="ls-ring"></div>
+      <div class="ls-core"><i class="fa-solid fa-bolt" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;color:var(--cyan);opacity:1"></i></div>
+    </div>
+    <div class="ls-logo"><img src="logo.png" alt=""><span class="play">PLAY</span><span class="bits">BITS</span></div>
+    <div class="ls-badge"><i class="fa-solid fa-bolt"></i> Reactor Ecosystem</div>
+    <div class="ls-title">Enter the Reactor</div>
+    <div class="ls-desc">Earn <b style="color:var(--cyan)">PLAYBITS</b> tokens, build your <b style="color:var(--purple)">network</b>, and unlock the power of the ecosystem.</div>
+    <div class="ls-sub">Connecting to Ecosystem...</div>
+    <div class="ls-bar"><div class="ls-fill"></div></div>
+  </div>
+</div>
+<script>
+(function(){
+  const tg=window.Telegram?.WebApp;
+  if(tg){tg.ready();tg.expand()}
+
+  // Apply theme
+  if(localStorage.getItem("pb_theme")==="light")document.body.classList.add("light");
+
+  // Apply lang
+  const __=k=>{const l=localStorage.getItem("pb_lang")||"en";const L={en:{t:{connecting:"Connecting to Ecosystem..."}},hi:{t:{connecting:"इकोसिस्टम से कनेक्ट हो रहा है..."}},es:{t:{connecting:"Conectando al Ecosistema..."}},fr:{t:{connecting:"Connexion à l'Écosystème..."}},pt:{t:{connecting:"Conectando ao Ecossistema..."}},ru:{t:{connecting:"Подключение к экосистеме..."}},zh:{t:{connecting:"正在连接生态系统..."}},ar:{t:{connecting:"جاري الاتصال بالنظام..."}},ja:{t:{connecting:"エコシステムに接続中..."}},de:{t:{connecting:"Verbinde zum Ökosystem..."}}};return(L[l]?.t?.[k]||L.en.t[k]||k)};
+  function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
+  const el=document.querySelector(".ls-sub");if(el)el.textContent=__("connecting");
+
+  // DEBUG
+  console.log("🔍 index.html — Telegram WebApp:", tg?.initDataUnsafe);
+
+  // Redirect to dashboard preserving all URL params
+  setTimeout(()=>{window.location.href="dashboard.html"+location.search},600)
+})()
+</script>
+</body>
+</html>

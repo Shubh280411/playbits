@@ -197,6 +197,49 @@ const TIERS = [
   { min: 500, max: 999, roi: 1.25, cap: 3, label: "Apex" }
 ];
 
+const DIFF_RANKS = [
+  { name: "R1 - Titan", commission: 15, level: 1 },
+  { name: "R2 - Overlord", commission: 20, level: 2 },
+  { name: "R3 - Warlord", commission: 25, level: 3 },
+  { name: "R4 - Sentinel", commission: 30, level: 4 },
+  { name: "R5 - Paladin", commission: 35, level: 5 },
+  { name: "R6 - Champion", commission: 40, level: 6 },
+  { name: "R7 - Destroyer", commission: 45, level: 7 },
+  { name: "R8 - Legend", commission: 50, level: 8 },
+  { name: "R9 - Mythic", commission: 55, level: 9 },
+  { name: "R10 - Emperor", commission: 60, level: 10 }
+];
+
+async function getUserDiffRank(userId) {
+  const user = await db.get("users", String(userId), "telegramId");
+  if (!user) return { rank: DIFF_RANKS[0], level: 1, commission: 15 };
+  const directs = await db.runQuery({ table: "users", where: { referredBy: { op: "EQUAL", value: String(userId) } }, limit: 500 });
+  const directCount = directs.length;
+  let teamBusiness = Number(user.activationUSDT) || 0;
+  for (const d of directs) {
+    teamBusiness += Number(d.activationUSDT) || 0;
+    const subs = await db.runQuery({ table: "users", where: { referredBy: { op: "EQUAL", value: d.telegramId } }, limit: 200 });
+    for (const s of subs) teamBusiness += Number(s.activationUSDT) || 0;
+  }
+  let leftLeg = 0, rightLeg = 0;
+  for (let i = 0; i < directs.length; i++) {
+    const b = Number(directs[i].activationUSDT) || 0;
+    if (i === 0) leftLeg += b; else rightLeg += b;
+  }
+  const selfPkg = Number(user.activationUSDT) || 0;
+  for (let i = DIFF_RANKS.length - 1; i >= 0; i--) {
+    const r = DIFF_RANKS[i];
+    const reqBiz = r.level <= 2 ? 0 : r.level <= 4 ? 50 : r.level <= 6 ? 200 : r.level <= 8 ? 1000 : 10000;
+    const reqDirects = r.level <= 2 ? 3 : r.level <= 6 ? 5 : 7;
+    const reqSelf = r.level <= 2 ? 10 : r.level <= 4 ? 50 : r.level <= 6 ? 200 : r.level <= 8 ? 500 : 1000;
+    if ((reqBiz === 0 || teamBusiness >= reqBiz) && directCount >= reqDirects && selfPkg >= reqSelf &&
+        (reqBiz === 0 || (leftLeg >= reqBiz / 2 && rightLeg >= reqBiz / 2))) {
+      return { rank: r, level: r.level, commission: r.commission, teamBusiness, directCount, selfPkg };
+    }
+  }
+  return { rank: DIFF_RANKS[0], level: 1, commission: 15, teamBusiness, directCount, selfPkg };
+}
+
 const BOOSTERS = [
   { id: "ignition", name: "Ignition Booster", icon: "⚡", targetDirects: 10, extraRoi: 0.25, durationDays: 30 },
   { id: "quantum", name: "Quantum Booster", icon: "🚀", targetDirects: 25, extraRoi: 0.5, durationDays: 45 },
@@ -1904,6 +1947,176 @@ app.post("/api/claim-rank-reward", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }) }
 });
 
+// ===== DIFFERENTIAL ROI =====
+
+// Helper: get total differential already credited to a user
+async function getTotalDifferentialCredited(userId) {
+  const r = await db.query(
+    `SELECT COALESCE(SUM(amount),0) as t FROM income_history WHERE "userId"=$1 AND "type"='differential_roi'`,
+    [String(userId)]
+  );
+  return Number(r.rows[0].t);
+}
+
+// Admin: trigger differential ROI processing for all qualified users
+app.post("/api/admin/process-differential-roi", adminAuth, requireRole("SUPER_ADMIN", "ADMIN"), async (req, res) => {
+  try {
+    const users = await db.query('SELECT "telegramId","firstName","packageStatus","packageAmount" FROM users WHERE "packageStatus"=\'active\'');
+    const processed = [];
+    const errors = [];
+    for (const u of users.rows) {
+      try {
+        const uid = String(u.telegramId);
+        const myRank = await getUserDiffRank(uid);
+        const myComm = myRank.commission;
+
+        // Walk downline to find differential earnings
+        let newIncome = 0;
+        const teamDetails = [];
+        const visited = new Set();
+        async function walkDown(refId, depth) {
+          if (depth > 3 || visited.has(refId)) return;
+          visited.add(refId);
+          const members = await db.runQuery({ table: "users", where: { referredBy: { op: "EQUAL", value: refId } }, limit: 300 });
+          for (const m of members) {
+            if (String(m.telegramId) === uid || visited.has(m.telegramId)) continue;
+            visited.add(m.telegramId);
+            if (m.packageStatus !== "active" || !Number(m.packageAmount)) { await walkDown(m.telegramId, depth + 1); continue; }
+            const theirRank = await getUserDiffRank(m.telegramId);
+            const theirComm = theirRank.commission;
+            if (theirComm < myComm || (myComm === 60 && theirComm === 60)) {
+              const roiR = await db.query(`SELECT COALESCE(SUM(amount),0) as t FROM income_history WHERE "userId"=$1 AND "type"='daily_roi'`, [String(m.telegramId)]);
+              const teamRoi = Number(roiR.rows[0].t);
+              const gap = (myComm === 60 && theirComm === 60) ? 10 : myComm - theirComm;
+              const inc = Number((teamRoi * gap / 100).toFixed(2));
+              if (inc > 0) { newIncome += inc; teamDetails.push({ userId: String(m.telegramId), gap, income: inc }); }
+            }
+            await walkDown(m.telegramId, depth + 1);
+          }
+        }
+        await walkDown(uid, 0);
+
+        if (newIncome > 0) {
+          const alreadyCredited = await getTotalDifferentialCredited(uid);
+          const toCredit = Number((newIncome - alreadyCredited).toFixed(2));
+          if (toCredit > 0) {
+            for (const td of teamDetails) {
+              const share = Number((td.income / newIncome * toCredit).toFixed(2));
+              if (share > 0) {
+                await createIncomeEntry({
+                  userId: uid, amount: share, type: "differential_roi",
+                  description: `Differential ROI from team #${td.userId.slice(-4)} (gap ${td.gap}%)`,
+                  sourceUserId: td.userId, status: "completed"
+                });
+              }
+            }
+            await db.query(
+              `UPDATE users SET "totalEarned" = COALESCE("totalEarned",0) + $1, "updatedAt" = $2 WHERE "telegramId" = $3`,
+              [toCredit, Date.now(), uid]
+            );
+            processed.push({ userId: uid, amount: toCredit });
+          }
+        }
+      } catch (e) { errors.push({ userId: u.telegramId, error: e.message }) }
+    }
+    adminLog(req.admin, "PROCESS_DIFFERENTIAL_ROI", "system", "batch", `Processed ${processed.length} users, ${errors.length} errors`);
+    res.json({ success: true, processed: processed.length, totalAmount: processed.reduce((s,x)=>s+x.amount,0), errors: errors.length });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
+app.get("/api/differential-roi/:userId", async (req, res) => {
+  try {
+    const userId = String(req.params.userId);
+    const user = await db.get("users", userId, "telegramId");
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+    const myRank = await getUserDiffRank(userId);
+    const myComm = myRank.commission;
+
+    // Get total differential already earned
+    const pastDiff = await db.query(
+      `SELECT COALESCE(SUM(amount),0) as t FROM income_history WHERE "userId"=$1 AND "type"='differential_roi'`,
+      [userId]
+    );
+    const totalEarned = Number(pastDiff.rows[0].t);
+
+    // Build downline tree (3 levels) and calculate differential
+    const teams = [];
+    let pendingAmount = 0;
+    const processed = new Set();
+
+    async function walkDown(refId, depth) {
+      if (depth > 3 || processed.has(refId)) return;
+      processed.add(refId);
+      const members = await db.runQuery({
+        table: "users",
+        where: { referredBy: { op: "EQUAL", value: refId } },
+        limit: 300
+      });
+      for (const m of members) {
+        if (String(m.telegramId) === userId) continue;
+        if (processed.has(m.telegramId)) continue;
+        processed.add(m.telegramId);
+
+        const pkgActive = m.packageStatus === "active" && Number(m.packageAmount) > 0;
+        if (!pkgActive) { await walkDown(m.telegramId, depth + 1); continue; }
+
+        const theirRank = await getUserDiffRank(m.telegramId);
+        const theirComm = theirRank.commission;
+
+        if (theirComm < myComm || (myComm === 60 && theirComm === 60)) {
+          const roiResult = await db.query(
+            `SELECT COALESCE(SUM(amount),0) as t FROM income_history WHERE "userId"=$1 AND "type"='daily_roi'`,
+            [String(m.telegramId)]
+          );
+          const teamRoi = Number(roiResult.rows[0].t);
+
+          let gap = 0;
+          let isEmperor = false;
+          if (myComm === 60 && theirComm === 60) {
+            gap = 10;
+            isEmperor = true;
+          } else {
+            gap = myComm - theirComm;
+          }
+
+          const income = Number((teamRoi * gap / 100).toFixed(2));
+          if (income > 0) {
+            pendingAmount += income;
+            teams.push({
+              userId: String(m.telegramId),
+              name: m.firstName || `Player_${String(m.telegramId).slice(-4)}`,
+              username: m.username || "",
+              theirRank: theirRank.rank.name,
+              theirLevel: theirRank.level,
+              theirComm,
+              teamRoi,
+              gap,
+              income,
+              isEmperor
+            });
+          }
+        }
+        await walkDown(m.telegramId, depth + 1);
+      }
+    }
+
+    await walkDown(userId, 0);
+    teams.sort((a, b) => b.income - a.income);
+
+    res.json({
+      success: true,
+      userRank: myRank.rank.name,
+      userLevel: myRank.level,
+      userCommission: myComm,
+      totalEarned,
+      pendingAmount: Number(pendingAmount.toFixed(2)),
+      teamsQualified: teams.length,
+      teams
+    });
+  } catch (e) { res.status(500).json({ success: false, error: e.message }) }
+});
+
 // Monitor: scan pending deposits created in the last 48h
 const DEPOSIT_TTL_MS = 48 * 60 * 60 * 1000;
 let monitorRunning = false;
@@ -1994,6 +2207,65 @@ async function retryUnsweptDeposits() {
   }
 }
 
+// Differential ROI batch processor
+const DIFF_PROCESS_INTERVAL_MS = 6 * 60 * 60 * 1000; // 6 hours
+let diffProcessing = false;
+let lastDiffFullRun = 0;
+
+async function processDifferentialBatch() {
+  if (diffProcessing) return;
+  diffProcessing = true;
+  try {
+    const users = await db.query(
+      `SELECT "telegramId" FROM users WHERE "packageStatus"='active' AND ("lastDiffProcessedAt" IS NULL OR "lastDiffProcessedAt" < $1) LIMIT 100`,
+      [Date.now() - DIFF_PROCESS_INTERVAL_MS]
+    );
+    let total = 0, credited = 0;
+    for (const u of users.rows) {
+      try {
+        const uid = String(u.telegramId);
+        const myRank = await getUserDiffRank(uid);
+        const myComm = myRank.commission;
+        let newIncome = 0;
+        const visited = new Set();
+        async function walk(refId, depth) {
+          if (depth > 3 || visited.has(refId)) return;
+          visited.add(refId);
+          const members = await db.runQuery({ table: "users", where: { referredBy: { op: "EQUAL", value: refId } }, limit: 200 });
+          for (const m of members) {
+            if (String(m.telegramId) === uid || visited.has(m.telegramId)) continue;
+            visited.add(m.telegramId);
+            if (m.packageStatus !== "active" || !Number(m.packageAmount)) { await walk(m.telegramId, depth + 1); continue; }
+            const theirRank = await getUserDiffRank(m.telegramId);
+            const theirComm = theirRank.commission;
+            if (theirComm < myComm || (myComm === 60 && theirComm === 60)) {
+              const roiR = await db.query(`SELECT COALESCE(SUM(amount),0) as t FROM income_history WHERE "userId"=$1 AND "type"='daily_roi'`, [String(m.telegramId)]);
+              const teamRoi = Number(roiR.rows[0].t);
+              const gap = (myComm === 60 && theirComm === 60) ? 10 : myComm - theirComm;
+              newIncome += Number((teamRoi * gap / 100).toFixed(2));
+            }
+            await walk(m.telegramId, depth + 1);
+          }
+        }
+        await walk(uid, 0);
+        if (newIncome > 0) {
+          const already = await getTotalDifferentialCredited(uid);
+          const toCredit = Number((newIncome - already).toFixed(2));
+          if (toCredit > 0) {
+            await createIncomeEntry({ userId: uid, amount: toCredit, type: "differential_roi", description: "Differential ROI batch", status: "completed" });
+            await db.query(`UPDATE users SET "totalEarned" = COALESCE("totalEarned",0) + $1, "lastDiffProcessedAt" = $2, "updatedAt" = $3 WHERE "telegramId" = $4`, [toCredit, Date.now(), Date.now(), uid]);
+            credited += toCredit;
+          }
+        }
+        await db.query(`UPDATE users SET "lastDiffProcessedAt" = $1 WHERE "telegramId" = $2`, [Date.now(), uid]);
+        total++;
+      } catch (e) { console.error("[DIFF] Error processing", u.telegramId, e.message) }
+    }
+    if (total > 0) console.log(`[DIFF] Batch processed ${total} users, credited $${credited.toFixed(2)}`);
+  } catch (e) { console.error("[DIFF] Batch error:", e.message) }
+  finally { diffProcessing = false }
+}
+
 const PORT = process.env.PORT || 3000;
 const MONITOR_INTERVAL_MS = Number(process.env.MONITOR_INTERVAL_MS || 120000);
 const UNSWEPT_INTERVAL_MS = Number(process.env.UNSWEPT_INTERVAL_MS || 600000);
@@ -2010,6 +2282,10 @@ initSchema().then(() => {
       setInterval(retryUnsweptDeposits, UNSWEPT_INTERVAL_MS);
     }, 120000);
     console.log("Unswept retry every " + Math.floor(UNSWEPT_INTERVAL_MS / 60) + "min...");
+    // Differential ROI batch every 6 hours
+    setTimeout(processDifferentialBatch, 300000); // first run after 5 min
+    setInterval(processDifferentialBatch, DIFF_PROCESS_INTERVAL_MS);
+    console.log("Differential ROI batch every " + Math.floor(DIFF_PROCESS_INTERVAL_MS / 3600000) + "h...");
   });
 }).catch(e => {
   console.error("[SERVER] Schema init failed:", e);

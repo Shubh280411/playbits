@@ -1016,7 +1016,8 @@ app.post("/api/claim-daily", async (req, res) => {
       updatedAt: now
     }, "telegramId");
 
-    createIncomeEntry({
+    const today = new Date().toISOString().split("T")[0];
+    await createIncomeEntry({
       userId,
       amount: claimable,
       type: "daily_roi",
@@ -1276,7 +1277,7 @@ app.post("/api/claim-package", async (req, res) => {
       updatedAt: now
     }, "telegramId");
 
-    createIncomeEntry({
+    await createIncomeEntry({
       userId: String(userId),
       amount: toClaim,
       type: "daily_roi",

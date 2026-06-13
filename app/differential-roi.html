@@ -157,37 +157,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="loader"><i class="fa-solid fa-spinner"></i><br><span style="font-size:12px;margin-top:8px;display:block">Loading your differential data...</span></div>
   </div>
 
-  <div class="section-card cyan">
-    <div class="sc-title"><i class="fa-solid fa-gear ic-cyan"></i> How It Works</div>
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-content">
-        <div class="step-title">Lower Rank Team Generates ROI</div>
-        <div class="step-desc">Every team member with an active package earns daily ROI on their investment.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-content">
-        <div class="step-title">Gap Calculation</div>
-        <div class="step-desc">Your rank commission % minus their rank commission % = the gap.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-content">
-        <div class="step-title">Differential Reward</div>
-        <div class="step-desc">Gap % × Team's total ROI = Your differential income from that team.</div>
-      </div>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-content">
-        <div class="step-title">Leader Income Added</div>
-        <div class="step-desc">Differential income is credited to you as additional earnings on top of your own ROI and commissions.</div>
-      </div>
-    </div>
-  </div>
+
 
   <div class="section-card purple">
     <div class="sc-title"><i class="fa-solid fa-table ic-purple"></i> Rank ROI Slabs</div>
@@ -208,25 +178,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     </table>
   </div>
 
-  <div class="section-card gold">
-    <div class="sc-title"><i class="fa-solid fa-calculator ic-gold"></i> Example Calculations</div>
-    <div class="example-box">
-      <div class="eg-label">Example 1</div>
-      <div class="eg-row"><span class="eg-key">Your Rank</span><span class="eg-val cyan">Rank 6 (40%)</span></div>
-      <div class="eg-row"><span class="eg-key">Team Rank</span><span class="eg-val">Rank 2 (20%)</span></div>
-      <div class="eg-gap">Gap: 20%</div>
-      <div class="eg-row"><span class="eg-key">Team ROI</span><span class="eg-val gold">$1,000</span></div>
-      <div class="eg-row" style="border-top:1px solid rgba(255,215,0,.15);padding-top:8px;margin-top:4px"><span class="eg-key" style="color:var(--green);font-weight:700">Your Income</span><span class="eg-val green">$200</span></div>
-    </div>
-    <div class="example-box">
-      <div class="eg-label">Example 2</div>
-      <div class="eg-row"><span class="eg-key">Your Rank</span><span class="eg-val cyan">Rank 6 (40%)</span></div>
-      <div class="eg-row"><span class="eg-key">Team Rank</span><span class="eg-val">Rank 3 (25%)</span></div>
-      <div class="eg-gap">Gap: 15%</div>
-      <div class="eg-row"><span class="eg-key">Team ROI</span><span class="eg-val gold">$2,000</span></div>
-      <div class="eg-row" style="border-top:1px solid rgba(255,215,0,.15);padding-top:8px;margin-top:4px"><span class="eg-key" style="color:var(--green);font-weight:700">Your Income</span><span class="eg-val green">$300</span></div>
-    </div>
-  </div>
+
 
   <div class="section-card pink" id="emperorSection" style="display:none">
     <div class="sc-title"><i class="fa-solid fa-crown ic-pink"></i> Emperor Benefit</div>
@@ -234,6 +186,27 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="emperor-highlight">
       <div class="eg-row"><span class="eg-key"><i class="fa-solid fa-crown" style="color:var(--gold);margin-right:6px"></i>Emperor 10% Flat Override</span><span class="eg-val gold">10%</span></div>
       <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.5">Standard gap income becomes zero when both are Rank 10. Emperor Benefit provides an additional <b style="color:var(--gold)">10% leadership differential reward</b> from qualified Rank 10 organizations.</div>
+    </div>
+  </div>
+
+    <div class="section-card" style="border-color:rgba(255,255,255,.06)">
+    <div class="sc-title"><i class="fa-solid fa-sliders"></i> Settings</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <button id="diffThemeBtn" onclick="toggleDiffTheme()" style="flex:1;padding:12px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text);cursor:pointer;font:700 12px 'Orbitron',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:all .3s">
+        <i class="fa-solid" id="diffThemeIcon">&#xf185;</i> <span id="diffThemeLabel">Light</span>
+      </button>
+      <select id="diffLangSelect" onchange="setDiffLang(this.value)" style="flex:2;padding:12px;border-radius:var(--rs);border:1px solid var(--card-border);background:rgba(255,255,255,.03);color:var(--text);font:700 11px 'Rajdhani',sans-serif;cursor:pointer;letter-spacing:.5px;outline:none;appearance:none;-webkit-appearance:none">
+        <option value="en">🇬🇧 English</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="pt">🇵🇹 Português</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="zh">🇨🇳 中文</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="ja">🇯🇵 日本語</option>
+        <option value="de">🇩🇪 Deutsch</option>
+      </select>
     </div>
   </div>
 
@@ -248,7 +221,8 @@ const __=(key,l)=>{const lang=localStorage.getItem("pb_lang")||"en";const t={en:
 function applyLang(){document.querySelectorAll("[data-lang]").forEach(el=>{const k=el.getAttribute("data-lang");if(k)el.textContent=__(k)})}
 const savedTheme=localStorage.getItem("pb_theme");
 if(savedTheme==="light")document.body.classList.add("light");
-const uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
+let uid=localStorage.getItem("pb_uid")||sessionStorage.getItem("pb_uid")||"";
+if(!uid||uid==="guest"){const p=new URLSearchParams(location.search);uid=p.get("uid")||""}
 try{
   const tg=window.Telegram?.WebApp;
   const tu=tg?.initDataUnsafe?.user;
@@ -329,6 +303,28 @@ function renderData(d){
   ls.innerHTML=html;
 }
 
+function toggleDiffTheme(){
+  const b=document.body.classList.toggle("light");
+  localStorage.setItem("pb_theme",b?"light":"dark");
+  const ic=document.getElementById("diffThemeIcon");
+  const lb=document.getElementById("diffThemeLabel");
+  if(ic)ic.className="fa-solid "+(b?"fa-moon":"fa-sun");
+  if(lb)lb.textContent=b?"Dark":"Light";
+}
+function setDiffLang(v){
+  localStorage.setItem("pb_lang",v);
+  document.getElementById("diffLangSelect").value=v;
+  location.reload();
+}
+(function(){
+  const curLang=localStorage.getItem("pb_lang")||"en";
+  document.getElementById("diffLangSelect").value=curLang;
+  const isLight=document.body.classList.contains("light");
+  const ic=document.getElementById("diffThemeIcon");
+  const lb=document.getElementById("diffThemeLabel");
+  if(ic)ic.className="fa-solid "+(isLight?"fa-moon":"fa-sun");
+  if(lb)lb.textContent=isLight?"Dark":"Light";
+})();
 loadDifferential();
 </script>
 </body>

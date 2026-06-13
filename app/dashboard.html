@@ -720,7 +720,8 @@ async function loadFeed(){
 }
 function timeAgo(ts){
   if(!ts)return"now";
-  const t=typeof ts==="number"?ts:Date.now();
+  const t=typeof ts==="number"?ts:Number(ts);
+  if(!t||t<1)return"now";
   const s=Math.floor((Date.now()-t)/1000);
   if(s<5)return"just now";
   if(s<60)return s+"s ago";
@@ -1132,7 +1133,7 @@ async function doClaim(){
 
 document.getElementById("claimBtn").addEventListener("click",doClaim);
 
-const initTimer=setTimeout(()=>showBlocked("Taking too long","Server might be sleeping. Please refresh."),8000);
+const initTimer=setTimeout(()=>showBlocked("Taking too long","Server might be sleeping. Please refresh."),20000);
 (async function(){
   try{
     // Restore cached session for instant UI (back-navigation)

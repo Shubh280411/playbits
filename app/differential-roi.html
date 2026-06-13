@@ -230,8 +230,6 @@ try{
 }catch(e){}
 (function(){const pl=document.getElementById("profileLink");if(pl)pl.onclick=function(e){e.stopPropagation();if(uid)window.location.href='profile.html?uid='+uid;else window.location.href='profile.html'}})();
 
-const API_BASE = "https://playbits-backend-132h.onrender.com";
-
 function showToast(m){
   const e=document.createElement("div");e.className="toast";e.textContent=m;
   document.body.appendChild(e);setTimeout(()=>e.remove(),2500);

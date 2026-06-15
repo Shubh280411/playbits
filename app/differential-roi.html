@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PLAYBITS — Differential ROI</title>
+<title>PLAYBITS &mdash; Differential ROI</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -164,16 +164,16 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <table class="rank-table">
       <thead><tr><th>Rank</th><th>Commission %</th></tr></thead>
       <tbody>
-        <tr><td>Rank 1 — Titan</td><td>15%</td></tr>
-        <tr><td>Rank 2 — Overlord</td><td>20%</td></tr>
-        <tr><td>Rank 3 — Warlord</td><td>25%</td></tr>
-        <tr><td>Rank 4 — Sentinel</td><td>30%</td></tr>
-        <tr><td>Rank 5 — Paladin</td><td>35%</td></tr>
-        <tr><td>Rank 6 — Champion</td><td>40%</td></tr>
-        <tr><td>Rank 7 — Destroyer</td><td>45%</td></tr>
-        <tr><td>Rank 8 — Legend</td><td>50%</td></tr>
-        <tr><td>Rank 9 — Mythic</td><td>55%</td></tr>
-        <tr><td>Rank 10 — Emperor</td><td>60%</td></tr>
+        <tr><td>Rank 1 &mdash; Titan</td><td>15%</td></tr>
+        <tr><td>Rank 2 &mdash; Overlord</td><td>20%</td></tr>
+        <tr><td>Rank 3 &mdash; Warlord</td><td>25%</td></tr>
+        <tr><td>Rank 4 &mdash; Sentinel</td><td>30%</td></tr>
+        <tr><td>Rank 5 &mdash; Paladin</td><td>35%</td></tr>
+        <tr><td>Rank 6 &mdash; Champion</td><td>40%</td></tr>
+        <tr><td>Rank 7 &mdash; Destroyer</td><td>45%</td></tr>
+        <tr><td>Rank 8 &mdash; Legend</td><td>50%</td></tr>
+        <tr><td>Rank 9 &mdash; Mythic</td><td>55%</td></tr>
+        <tr><td>Rank 10 &mdash; Emperor</td><td>60%</td></tr>
       </tbody>
     </table>
   </div>
@@ -182,7 +182,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 
   <div class="section-card pink" id="emperorSection" style="display:none">
     <div class="sc-title"><i class="fa-solid fa-crown ic-pink"></i> Emperor Benefit</div>
-    <div class="sc-text">Rank 10 — Emperor users receive an exclusive additional benefit when another Rank 10 leader exists below their network.</div>
+    <div class="sc-text">Rank 10 &mdash; Emperor users receive an exclusive additional benefit when another Rank 10 leader exists below their network.</div>
     <div class="emperor-highlight">
       <div class="eg-row"><span class="eg-key"><i class="fa-solid fa-crown" style="color:var(--gold);margin-right:6px"></i>Emperor 10% Flat Override</span><span class="eg-val gold">10%</span></div>
       <div style="margin-top:8px;font-size:12px;color:var(--text2);line-height:1.5">Standard gap income becomes zero when both are Rank 10. Emperor Benefit provides an additional <b style="color:var(--gold)">10% leadership differential reward</b> from qualified Rank 10 organizations.</div>
@@ -211,7 +211,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   </div>
 
   <div style="margin-top:14px;text-align:center">
-    <p style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-weight:600">Power — Play — Evolve</p>
+    <p style="font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-weight:600">Power &mdash; Play &mdash; Evolve</p>
   </div>
 </div>
 
@@ -261,7 +261,7 @@ function renderData(d){
 
   // Stats row
   html+='<div class="stats-row">'+
-    '<div class="stat-card purple"><div class="num">'+d.userRank.split(' — ')[0]+'</div><div class="lbl">Your Rank</div></div>'+
+    '<div class="stat-card purple"><div class="num">'+d.userRank.split(' &mdash; ')[0]+'</div><div class="lbl">Your Rank</div></div>'+
     '<div class="stat-card gold"><div class="num">'+d.userCommission+'%</div><div class="lbl">Your Rate</div></div>'+
     '<div class="stat-card cyan"><div class="num">'+d.teamsQualified+'</div><div class="lbl">Teams</div></div>'+
     '</div>';
@@ -279,7 +279,7 @@ function renderData(d){
     d.teams.forEach(t=>{
       totalInc+=t.income;
       html+='<tr><td><div class="tt-name">'+(t.name||'Player')+'</div><div class="tt-rank">#'+t.userId.slice(-4)+'</div></td>'+
-        '<td><span class="'+rankBadgeClass(t.theirLevel)+'">'+t.theirRank.split(' — ')[0]+'</span><br><span style="font-size:10px;color:var(--text3)">'+t.theirComm+'%</span></td>'+
+        '<td><span class="'+rankBadgeClass(t.theirLevel)+'">'+t.theirRank.split(' &mdash; ')[0]+'</span><br><span style="font-size:10px;color:var(--text3)">'+t.theirComm+'%</span></td>'+
         '<td class="tt-num">$'+t.teamRoi.toFixed(2)+'</td>'+
         '<td class="tt-gap">'+(t.isEmperor?'<i class="fa-solid fa-crown" style="font-size:10px;color:var(--gold)"></i>':'')+t.gap+'%</td>'+
         '<td class="tt-inc">$'+t.income.toFixed(2)+'</td></tr>';

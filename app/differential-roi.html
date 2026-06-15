@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PLAYBITS — Differential ROI</title>
+<title>PLAYBITS &mdash; Differential ROI</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -259,7 +259,7 @@ function renderData(d){
 
   // Stats row
   html+='<div class="stats-row">'+
-    '<div class="stat-card purple"><div class="num">'+d.userRank.split(' — ')[0]+'</div><div class="lbl">Your Rank</div></div>'+
+    '<div class="stat-card purple"><div class="num">'+d.userRank.split(' &mdash; ')[0]+'</div><div class="lbl">Your Rank</div></div>'+
     '<div class="stat-card gold"><div class="num">'+d.userCommission+'%</div><div class="lbl">Your Rate</div></div>'+
     '<div class="stat-card cyan"><div class="num">'+d.teamsQualified+'</div><div class="lbl">Teams</div></div>'+
     '</div>';
@@ -277,7 +277,7 @@ function renderData(d){
     d.teams.forEach(t=>{
       totalInc+=t.income;
       html+='<tr><td><div class="tt-name">'+(t.name||'Player')+'</div><div class="tt-rank">#'+t.userId.slice(-4)+'</div></td>'+
-        '<td><span class="'+rankBadgeClass(t.theirLevel)+'">'+t.theirRank.split(' — ')[0]+'</span><br><span style="font-size:10px;color:var(--text3)">'+t.theirComm+'%</span></td>'+
+        '<td><span class="'+rankBadgeClass(t.theirLevel)+'">'+t.theirRank.split(' &mdash; ')[0]+'</span><br><span style="font-size:10px;color:var(--text3)">'+t.theirComm+'%</span></td>'+
         '<td class="tt-num">$'+t.teamRoi.toFixed(2)+'</td>'+
         '<td class="tt-gap">'+(t.isEmperor?'<i class="fa-solid fa-crown" style="font-size:10px;color:var(--gold)"></i>':'')+t.gap+'%</td>'+
         '<td class="tt-inc">$'+t.income.toFixed(2)+'</td></tr>';

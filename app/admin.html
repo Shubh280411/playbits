@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PLAYBITS — Admin Panel</title>
+<title>PLAYBITS &mdash; Admin Panel</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -316,7 +316,7 @@ async function viewUser(id){
     '<div class="field"><label>Username</label><div class="ro">'+(u.username||'-')+'</div></div>'+
     '<div class="field"><label>Referred By</label><div class="ro">'+(u.referredBy||'-')+'</div></div>'+
     '<div class="field"><label>Status</label><div class="ro">'+(u.isActive?'<span class="badge green">Active</span>':'<span class="badge red">Suspended</span>')+'</div></div>'+
-    '<div class="field"><label>Package</label><div class="ro">$'+(u.packageAmount||0).toFixed(2)+' — '+((u.packageStatus||'none'))+' — ROI '+(u.packageROI||0)+'%</div></div>'+
+    '<div class="field"><label>Package</label><div class="ro">$'+(u.packageAmount||0).toFixed(2)+' &mdash; '+((u.packageStatus||'none'))+' &mdash; ROI '+(u.packageROI||0)+'%</div></div>'+
     '<div class="field"><label>Deposit Balance</label><div class="ro">$'+(u.depositBalance||0).toFixed(2)+'</div></div>'+
     '<div class="field"><label>Activation USDT</label><div class="ro">$'+(u.activationUSDT||0).toFixed(2)+'</div></div>'+
     '<div class="field"><label>Bits / Withdrawable</label><div class="ro">'+(u.bits||0).toFixed(2)+' / '+(u.withdrawableBits||0).toFixed(2)+'</div></div>'+
@@ -389,7 +389,7 @@ async function viewUserIncome(id){
   const rows=d.entries||[];
   let html='<div class="modal-overlay open" id="uiModal" onclick="if(event.target===this)closeModal(\'uiModal\')"><div class="modal-box" style="max-width:600px">'+
     '<button class="modal-close" onclick="closeModal(\'uiModal\')"><i class="fa-solid fa-xmark"></i></button>'+
-    '<h2><i class="fa-solid fa-chart-line"></i> Income — User #'+id+'</h2>'+
+    '<h2><i class="fa-solid fa-chart-line"></i> Income &mdash; User #'+id+'</h2>'+
     '<table><thead><tr><th>Amount</th><th>Type</th><th>Description</th><th>Date</th></tr></thead><tbody>';
   if(rows.length===0)html+='<tr><td colspan="4" class="empty">No income entries</td></tr>';
   else rows.forEach(e=>{

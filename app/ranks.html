@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PLAYBITS — Rank Hub & Rewards</title>
+<title>PLAYBITS &mdash; Rank Hub & Rewards</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -423,7 +423,7 @@ function renderAll(rank, user, allUsers) {
     badge.textContent = "PlayBits Emperor Achieved";
     badge.className = "audit-badge completed";
   } else {
-    badge.textContent = overallPass ? "Qualifications Met — Next Rank Unlocked!" : "Qualifications Incomplete";
+    badge.textContent = overallPass ? "Qualifications Met &mdash; Next Rank Unlocked!" : "Qualifications Incomplete";
     badge.className = overallPass ? "audit-badge completed" : "audit-badge pending";
   }
 
@@ -583,7 +583,7 @@ function renderDaily(rank, user) {
   const rate = rank.dailyRate;
   const pct = rank.r.dailyDays > 0 ? Math.min(100, (day / rank.r.dailyDays) * 100) : 0;
   document.getElementById("dailyValue").textContent = fmt$(rate) + " / day";
-  document.getElementById("dailySub").textContent = "Day " + day + " of " + rank.r.dailyDays + " — " + fmt$(rank.r.dailyTotal) + " total";
+  document.getElementById("dailySub").textContent = "Day " + day + " of " + rank.r.dailyDays + " &mdash; " + fmt$(rank.r.dailyTotal) + " total";
   document.getElementById("dailyPct").textContent = Math.round(pct) + "%";
   document.getElementById("dailyFill").style.width = pct + "%";
   if (day >= rank.r.dailyDays) {
@@ -609,7 +609,7 @@ function startDailyTimer(rank, user) {
     if (u.dailyRewardTier !== undefined && (u.dailyRewardDay || 0) < RANK_DATA[u.dailyRewardTier].dailyDays) {
       if (rem <= 0) {
         st.className = "daily-status ready";
-        stt.textContent = "Payout ready — auto-crediting...";
+        stt.textContent = "Payout ready &mdash; auto-crediting...";
         await autoClaimDaily(u);
       } else {
         st.className = "daily-status waiting";

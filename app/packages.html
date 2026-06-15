@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PLAYBITS — Packages</title>
+<title>PLAYBITS &mdash; Packages</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -133,7 +133,7 @@ body.light .app-container{background:var(--bg)}
       <div class="modal-info-item"><div class="mil">Cap</div><div class="miv" id="modalCap">0X</div></div>
     </div>
     <div class="modal-input-group">
-      <label>Enter Amount (USDT) — Balance: $<span id="modalBalance">0</span></label>
+      <label>Enter Amount (USDT) &mdash; Balance: $<span id="modalBalance">0</span></label>
       <input type="number" id="modalAmount" placeholder="Enter amount..." min="0" step="any" oninput="updatePreview()">
     </div>
     <div class="modal-preview">
@@ -177,7 +177,7 @@ function updatePreview() {
   if (!val || val < modalTier.min) {
     document.getElementById("previewDaily").textContent = "0 Bits";
     document.getElementById("previewCap").textContent = "0 Bits";
-    err.textContent = "Enter $" + modalTier.min + " – $" + modalTier.max;
+    err.textContent = "Enter $" + modalTier.min + " - $" + modalTier.max;
     btn.disabled = true; return
   }
   if (val > modalTier.max) {
@@ -240,7 +240,7 @@ async function confirmBuy() {
     closeModal();
     location.reload();
   } catch(e) {
-    document.getElementById("modalError").textContent = "Backend unavailable — " + e.message;
+    document.getElementById("modalError").textContent = "Backend unavailable &mdash; " + e.message;
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-cart-plus"></i> Confirm Purchase';
   }
@@ -314,9 +314,9 @@ async function confirmBuy() {
     document.getElementById("activePkgBar").style.width = pct + "%";
     if (ex || pkgStatus === "exhausted") {
       document.getElementById("activePkgCard").classList.add("exhausted");
-      document.getElementById("activePkgStatus").innerHTML = '<div class="pkg-exhausted"><i class="fa-regular fa-circle-xmark"></i> Cap Reached — Renew Required</div>';
+      document.getElementById("activePkgStatus").innerHTML = '<div class="pkg-exhausted"><i class="fa-regular fa-circle-xmark"></i> Cap Reached &mdash; Renew Required</div>';
     } else {
-      document.getElementById("activePkgStatus").innerHTML = '<div class="pkg-active"><i class="fa-regular fa-circle-check"></i> Active — Earning Daily</div>';
+      document.getElementById("activePkgStatus").innerHTML = '<div class="pkg-active"><i class="fa-regular fa-circle-check"></i> Active &mdash; Earning Daily</div>';
     }
   }
 
@@ -329,7 +329,7 @@ async function confirmBuy() {
     html += '<div class="pkg-card' + (isOwned ? ' owned' : '') + '" style="border-color:' + tier.color + '33">';
     html += '<div class="pkg-name" style="color:' + tier.color + '">' + tier.svg + ' ' + tier.label + '</div>';
     html += '<div class="pkg-details">';
-    html += '<div class="pkg-detail">Range: <b>$' + tier.min + ' – $' + tier.max + '</b></div>';
+    html += '<div class="pkg-detail">Range: <b>$' + tier.min + ' - $' + tier.max + '</b></div>';
     html += '<div class="pkg-detail">Cap: <b style="color:' + tier.color + '">' + tier.cap + 'X</b></div>';
     html += '</div>';
 

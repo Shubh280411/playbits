@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>PLAYBITS — Deposit</title>
+<title>PLAYBITS &mdash; Deposit</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -239,7 +239,7 @@ function updateDepositList(deposits){
   let html="";
   top.forEach(d=>{
     if(d.status!=="confirmed")return;
-    const amt=d.amount>0?d.amount+" USDT":"—";
+    const amt=d.amount>0?d.amount+" USDT":"&mdash;";
     const addrShort=d.address?d.address.slice(0,8)+"...":"";
     const dateText=formatDepositDate(d);
     html+='<div class="history-item"><div class="hi-left"><span class="hi-amount">'+amt+'</span><span class="hi-date">'+dateText+'</span><span class="hi-address">'+addrShort+'</span></div><span class="hi-status confirmed">Completed</span></div>';
